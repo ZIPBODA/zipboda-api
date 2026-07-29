@@ -7,7 +7,7 @@
 | 문서명 | 스테이지 완료 검토 규칙 |
 | 버전 | v2.0.0 |
 | 작성일 | 2026-07-27 |
-| 기반 문서 | /docs/ZIPBODA_개발계획서_v0.1.md (각 저장소; xlsx 3종은 zipboda-web/docs 대표 관리) |
+| 기반 문서 | /docs/ZIPBODA_development-plan_v0.1.md (각 저장소; xlsx 3종은 zipboda-web/docs 대표 관리) |
 
 ### 변경 이력
 

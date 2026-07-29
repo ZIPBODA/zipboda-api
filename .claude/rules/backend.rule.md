@@ -7,7 +7,7 @@
 | 문서명 | 백엔드 코딩 규칙 (Core + Project Profile) |
 | 버전 | v2.0.0 |
 | 작성일 | 2026-07-27 |
-| 기반 문서 | .claude/rules/backend-architecture.md, .claude/rules/code-organization.md |
+| 기반 문서 | .claude/rules/backend-architecture.rule.md, .claude/rules/code-organization.rule.md |
 
 ### 변경 이력
 
@@ -20,7 +20,7 @@
 
 ## 2. 목적 & 사용 모델
 
-zipboda-api 백엔드 코드를 작성·수정할 때 따르는 규칙이다. FE의 `frontend-rule.md`와 동일하게 두 부분으로 나뉜다.
+zipboda-api 백엔드 코드를 작성·수정할 때 따르는 규칙이다. FE의 `frontend.rule.md`와 동일하게 두 부분으로 나뉜다.
 
 - **Core (§3~§5)** — 스택 무관 원칙. 이식 시 수정하지 않는다.
 - **Project Profile (§6)** — 프로젝트별 가변값을 채우는 편집 구역. 값이 필요한 Core 규칙은 슬롯 ID(`BP1`~`BP15`)를 참조한다.
@@ -88,6 +88,6 @@ zipboda-api 백엔드 코드를 작성·수정할 때 따르는 규칙이다. FE
 | BP10 | 캐시/성능 | 목록 P95 ≤ 500ms, 필요 시 캐시·인덱스, N+1 방지 |
 | BP11 | 배치/스케줄 | 공공데이터 동기화 배치 + 수동 실행(API-114) |
 | BP12 | 로깅·감사·모니터링 | 구조적 로깅·메트릭·트레이싱, 관리자 변경/삭제 **감사 로그 append-only**(API-192) |
-| BP13 | 테스트 | 단위 Jest · 통합 Supertest · 부하 k6 (test-guide.md), 핵심 커버리지 ≥ 80% |
+| BP13 | 테스트 | 단위 Jest · 통합 Supertest · 부하 k6 (test-guide.rule.md), 핵심 커버리지 ≥ 80% |
 | BP14 | 시크릿 관리 | `.env`(gitignore) / 시크릿 매니저. 하드코딩 금지 |
 | BP15 | API 계약·갭 문서 | `../zipboda-web/docs/ZIPBODA_API 및 인터페이스 정의서_v0.1.xlsx` (zipboda-web 대표 관리) |

@@ -7,7 +7,7 @@
 | 문서명 | 코드 구조 전략 — 상수·enum·DTO·타입 관리 (백엔드) |
 | 버전 | v1.0.0 |
 | 작성일 | 2026-07-27 |
-| 기반 문서 | .claude/rules/backend-architecture.md |
+| 기반 문서 | .claude/rules/backend-architecture.rule.md |
 
 ### 변경 이력
 
@@ -19,7 +19,7 @@
 
 ## 2. 원칙
 
-`backend-architecture.md`의 모듈러 레이어드 구조를 단일 기준으로, 상수·enum·DTO·타입을 **모듈/공통 계층에 귀속**시킨다. 전역 잡동사니 `utils`·`types` 덤프 폴더를 만들지 않는다.
+`backend-architecture.rule.md`의 모듈러 레이어드 구조를 단일 기준으로, 상수·enum·DTO·타입을 **모듈/공통 계층에 귀속**시킨다. 전역 잡동사니 `utils`·`types` 덤프 폴더를 만들지 않는다.
 
 ---
 
