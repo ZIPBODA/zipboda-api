@@ -5,31 +5,33 @@
 | 항목 | 내용 |
 |------|------|
 | 문서명 | 집보다(Zipboda) ERD 및 스키마 정의서 |
-| 버전 | v0.1.0 |
+| 버전 | v0.2.1 |
 | 작성일 | 2026-10-22 |
-| 기반 문서 | /docs/ZIPBODA_development-plan_v0.1.md, /src/database/schema.prisma, ../zipboda-web/docs/ZIPBODA_API 및 인터페이스 정의서_v0.1.xlsx |
+| 기반 문서 | /docs/ZIPBODA_development-plan_v0.1.md, /src/database/schema.prisma, /docs/ZIPBODA_api-contract-delta.md, ../zipboda-web/docs/ZIPBODA_API 및 인터페이스 정의서_v0.1.xlsx |
 
 ### 변경 이력
 
 | 버전 | 날짜 | 작성자 | 변경 내용 |
 |------|------|--------|-----------|
 | v0.1.0 | 2026-10-22 | Claude | 신규 작성 — S0~S2 범위 테이블(subscriptions·subscription_units·floorplans) 정의, 코드값 저장 규칙(ITF 정수 + CHECK), 공고 상태 계산 규칙, 개발용 시드 출처·제거 시점, 다음 스테이지 테이블 목록 |
+| v0.2.0 | 2026-10-22 | Claude | v0.1 사용자 승인(S0 수용 기준 'ERD 승인' 충족) 반영. floorplans.exclusive_area를 decimal(7,2)→decimal(9,4)로 넓힘 — 매입임대 전용면적(14.6475㎡ 등)이 소수 넷째 자리까지 있어 반올림되던 문제(마이그레이션 widen_exclusive_area). §7 미결 4번(정의서에 없는 필드)을 계약 차이 문서로 옮기고, 미결 5번(목록 쿼리 SQL 이전 — 상태 거르기·필터 선택지는 이번에 옮기고 정렬만 남김) 추가 |
+| v0.2.1 | 2026-10-22 | Claude | §2 다음 스테이지 테이블 목록을 전체 ERD 초안(/docs/ZIPBODA_erd-draft_v0.1.md v0.2.0) §7 도입 순서와 맞춤 — 상태 '예정'→'초안', S1에 권한·OTP·휴대폰 인증·약관·미디어·감사 로그, S2에 알림함·푸시 기기, S3 테이블 이름(subscription_marks·subscription_follows·alert_filters), S4 원본 PDF·평면도 모델, S5에서 알림함·감사 로그를 빼고 알림 발송·통계를 넣음. §7 미결 1·3번에 초안 권장안(source_key, D9) 연결, 미결 5번의 필터 선택지 방식을 groupBy와 상태별 존재 확인으로 고침. 기반 문서에 계약 차이 문서 추가 |
 
 ---
 
 ## 2. 범위
 
-개발계획서 §3.1의 ERD 산출물 중 **S0~S2(청약 조회)에 필요한 테이블**을 먼저 확정한다. 나머지 도메인은 해당 스테이지 착수 시 이 문서에 이어 붙인다.
+개발계획서 §3.1의 ERD 산출물 중 **S0~S2(청약 조회)에 필요한 테이블**을 먼저 확정한다. 나머지 도메인의 초안은 /docs/ZIPBODA_erd-draft_v0.1.md에 있고, 초안의 결정(D1~D14)이 나면 해당 스테이지 착수 시 이 문서로 옮긴다. 아래 '초안' 행은 초안 §7 도입 순서와 같다.
 
 | 상태 | 도메인 | 테이블 | 스테이지 |
 |------|--------|--------|----------|
 | **정의** | 청약 공고·공급 주택형·평면도 | `subscriptions`, `subscription_units`, `floorplans` | S0~S2 |
-| 예정 | 회원·역할·인증 토큰 | users, social_accounts, refresh_tokens | S1 |
-| 예정 | 공공데이터 동기화 이력 | sync_runs, sync_failures | S2(API-114) |
-| 예정 | 관심·신청함·가점·구독 | interests, score_profiles, alert_subscriptions | S3 |
-| 예정 | 3D 자산 | floorplan_assets | S4 |
-| 예정 | 집구경·커뮤니티·알림·감사로그 | inspirations, posts, comments, notifications, audit_logs | S5 |
-| 예정 | (2차) 상품·장바구니·주문 | products, carts, orders, payments | S6 |
+| 초안 | 회원·역할·인증·약관·미디어·감사 로그 | users, user_roles, role_permissions, user_permissions, admin_mfa, social_accounts, refresh_tokens, phone_verifications, password_reset_tokens, terms_versions, user_agreements, media_files, audit_logs | S1 |
+| 초안 | 청약 연계·알림함 | subscriptions 추가 열, sync_runs, sync_failures, notifications, push_devices | S2(API-114·093) |
+| 초안 | 관심·신청함·구독·가점 | subscription_marks, subscription_follows, alert_filters, score_profiles | S3 |
+| 초안 | 평면도·3D 자산 | source_documents, floorplans 추가 열, floorplan_models, floorplan_assets | S4 |
+| 초안 | 집구경·커뮤니티·알림 발송·통계 | inspirations 외 3종, community 7종, notification_templates, notification_campaigns, daily_metrics | S5 |
+| 초안 | (2차) 커머스 | brands, products, product_images, product_variants, carts, cart_items, wishlists, orders, order_items, payments, payment_webhook_events, refunds, shipment_events, product_reviews, stock_movements | S6 |
 
 ---
 
@@ -80,7 +82,7 @@ erDiagram
     text floor
     text unit_number
     text unit_type
-    decimal exclusive_area "7,2"
+    decimal exclusive_area "9,4"
     text size_type "ITF-003"
     text image_2d_url
     bool has_3d
@@ -107,20 +109,20 @@ erDiagram
 | supply_type | text | Y | 공급 유형(행복주택·매입임대 등) | API-011 `supplyType` |
 | households | int | Y | 총 세대수 | `households` |
 | supply_units | int | Y | 공급 호수(경쟁률 분모) | `competition` 계산 |
-| recruit_count | int | Y | 모집 인원 | [TBD] 정의서 필드 없음 |
+| recruit_count | int | Y | 모집 인원 | API-011 `recruitCount`(정의서 미등록) |
 | application_count | int | Y | 신청 인원(경쟁률 분자) | `competition` 계산 |
 | post_date | date | Y | 공고일 | `postDate` |
 | apply_start_date | date | Y | 접수 시작 | `applyStartDate` |
 | apply_end_date | date | Y | 접수 마감 | `deadline` |
-| contract_date | date | Y | 계약일 | [TBD] 정의서 필드 없음 |
+| contract_date | date | Y | 계약일 | API-011 `contractDate`(정의서 미등록) |
 | move_in_month | text | Y | 입주 시기(YYYY-MM) | `moveIn` |
 | apply_url | text | Y | 공급기관 신청 페이지 | `applyUrl` |
-| image_url | text | Y | 대표 사진 | [TBD] 정의서 필드 없음 |
+| image_url | text | Y | 대표 사진 | API-010/011 `imageUrl`(정의서 미등록) |
 | cancelled_at | timestamp | Y | 취소 시각. 취소 공고만 값이 있다 | ITF-002 취소 |
 | created_at | timestamp | N | 생성 시각(기본값 now) | — |
 | updated_at | timestamp | N | 수정 시각(갱신 시 자동) | — |
 
-인덱스: `agency_code`, `region_code`, `apply_end_date`(목록 필터·마감순 정렬). CHECK: `agency_code` 1~4, `region_code` 1~3.
+인덱스: `agency_code`·`region_code`(목록 필터), `apply_end_date`(상태 거르기, 이후 마감순 정렬을 SQL로 내릴 때 — §7 미결 5). CHECK: `agency_code` 1~4, `region_code` 1~3.
 
 ### 4.2 subscription_units — 공급 주택형
 
@@ -144,7 +146,7 @@ erDiagram
 | floor | text | Y | 같은 도면을 쓰는 층 범위(예: "2-3") | — |
 | unit_number | text | Y | 호수 | — |
 | unit_type | text | Y | 타입 | `floorplans.type` |
-| exclusive_area | decimal(7,2) | Y | 전용면적(㎡) | — |
+| exclusive_area | decimal(9,4) | Y | 전용면적(㎡). 매입임대는 소수 넷째 자리까지 있다 | — |
 | size_type | text | Y | 주택형 | ITF-003, `floorplans.size` |
 | image_2d_url | text | Y | 2D 도면 이미지 | `has2d` |
 | has_3d | bool | N | 3D 집구경 제공 여부 | `has3d` |
@@ -182,7 +184,8 @@ erDiagram
 
 | # | 항목 | 내용 | 결정 시점 |
 |---|------|------|-----------|
-| 1 | 공고 식별자 체계 | 시드는 단지 이름 기반 id를 쓴다. 기관 공고번호와의 매핑 방식(그대로 쓸지, 내부 id + 원천 키를 둘지) | S2 연계 착수 |
+| 1 | 공고 식별자 체계 | 시드는 단지 이름 기반 id를 쓴다. 기관 공고번호와의 매핑 방식(그대로 쓸지, 내부 id + 원천 키를 둘지). 초안 §5.2는 내부 id를 유지하고 원천 키(source_key)를 더해 UNIQUE(agency_code, source_key)로 묶기를 권장한다 | S2 연계 착수 |
 | 2 | 공급 주택형 원천 | units의 가격·공급 세대를 어떤 원천에서 받을지 | S2 연계 착수 |
-| 3 | 3D 자산 형식 | 정의서(API-032)는 glTF/GLB URL, web은 평면도 JSON으로 3D를 생성한다. floorplan_assets 설계 전 결정 필요 | S4 착수 전 |
-| 4 | 정의서에 없는 필드 | recruit_count·contract_date·image_url은 web 화면이 쓰지만 API-011에 없다 | 정의서 갱신 시 |
+| 3 | 3D 자산 형식 | 정의서(API-032)는 glTF/GLB URL, web은 평면도 JSON으로 3D를 생성한다. floorplan_assets 설계 전 결정 필요. 초안 D9는 평면도 모델 JSON을 DB(jsonb, floorplan_models)에 두고 파일은 미디어로 관리하기를 권장한다 | S4 착수 전 |
+| 4 | 정의서에 없는 응답 필드 | recruit_count·contract_date·image_url 등은 web 기준으로 API 응답에 먼저 넣었다. 차이는 /docs/ZIPBODA_api-contract-delta.md에 모은다 | 정의서 일괄 갱신 시 |
+| 5 | 목록 정렬을 SQL로 | 상태 거르기(오늘 날짜를 파라미터로)와 필터 선택지(지역·기관·면적은 groupBy, 상태는 코드마다 한 건이 있는지)는 SQL로 옮겼고, 도면까지 담은 전체 행은 지금 페이지 몫만 읽는다. 정렬은 아직 조건에 맞는 공고의 가벼운 열(일정·경쟁률 재료·세대 수)만 읽어 서버에서 한다 — D-day·경쟁률이 계산 값이라서다. 공고가 수만 건을 넘으면 경쟁률 계산 열 등을 두어 정렬·LIMIT/OFFSET까지 SQL로 내린다 | 수만 건에 가까워질 때 |
