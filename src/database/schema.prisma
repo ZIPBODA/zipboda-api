@@ -1,0 +1,92 @@
+// 집보다 ERD v0.1 — S0~S2 범위(청약 공고·공급 주택형·평면도). 문서: docs/ZIPBODA_erd_v0.1.md
+// 코드성 값은 API 정의서의 공통 인터페이스(ITF-*) 정수·문자열을 그대로 저장한다
+
+generator client {
+  provider               = "prisma-client"
+  output                 = "./generated"
+  moduleFormat           = "esm"
+  generatedFileExtension = "ts"
+  importFileExtension    = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// 청약 공고 한 건. 공급기관 공고 단위로 쌓는다
+model Subscription {
+  id               String    @id
+  title            String
+  /// ITF-001 공급기관(1 LH · 2 SH · 3 GH · 4 IH)
+  agencyCode       Int       @map("agency_code")
+  /// ITF-004 지역(1 서울 · 2 인천 · 3 경기)
+  regionCode       Int       @map("region_code")
+  address          String
+  lat              Float?
+  lng              Float?
+  supplyType       String?   @map("supply_type")
+  households       Int?
+  supplyUnits      Int?      @map("supply_units")
+  recruitCount     Int?      @map("recruit_count")
+  applicationCount Int?      @map("application_count")
+  postDate         DateTime? @map("post_date") @db.Date
+  applyStartDate   DateTime? @map("apply_start_date") @db.Date
+  applyEndDate     DateTime? @map("apply_end_date") @db.Date
+  contractDate     DateTime? @map("contract_date") @db.Date
+  /// 공고가 입주 시기를 월 단위로만 밝힌다(YYYY-MM)
+  moveInMonth      String?   @map("move_in_month")
+  /// 공급기관 신청 페이지(외부). 신청은 기관 사이트에서 한다
+  applyUrl         String?   @map("apply_url")
+  imageUrl         String?   @map("image_url")
+  /// 취소된 공고만 값이 있다. 접수예정·접수중·마감은 일정으로 계산한다(ITF-002)
+  cancelledAt      DateTime? @map("cancelled_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  units      SubscriptionUnit[]
+  floorplans Floorplan[]
+
+  @@index([agencyCode])
+  @@index([regionCode])
+  @@index([applyEndDate])
+  @@map("subscriptions")
+}
+
+/// 공고의 공급 주택형(평형별 공급 세대·가격)
+model SubscriptionUnit {
+  id             String       @id @default(uuid()) @db.Uuid
+  subscriptionId String       @map("subscription_id")
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  /// ITF-003 주택형 — 전용면적의 정수부(59.98㎡ → "59")
+  sizeType       String       @map("size_type")
+  unitType       String?      @map("unit_type")
+  households     Int?
+  /// 기관마다 보증금·임대료 표기가 달라 공고 문구 그대로 둔다
+  price          String?
+
+  @@index([subscriptionId])
+  @@map("subscription_units")
+}
+
+/// 호별 평면도. 2D 도면과 3D 집구경 자산의 기준 단위
+model Floorplan {
+  id             String       @id
+  subscriptionId String       @map("subscription_id")
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  /// 같은 도면을 쓰는 층 범위(예: "2-3")
+  floor          String?
+  unitNumber     String?      @map("unit_number")
+  unitType       String?      @map("unit_type")
+  exclusiveArea  Decimal?     @map("exclusive_area") @db.Decimal(7, 2)
+  /// ITF-003 주택형
+  sizeType       String?      @map("size_type")
+  image2dUrl     String?      @map("image_2d_url")
+  has3d          Boolean      @default(false) @map("has_3d")
+  /// 공고 상세가 처음 보여 줄 도면은 이 순서의 첫째다
+  displayOrder   Int          @default(0) @map("display_order")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  @@index([subscriptionId, displayOrder])
+  @@map("floorplans")
+}

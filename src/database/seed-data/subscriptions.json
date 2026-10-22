@@ -1,0 +1,820 @@
+[
+  {
+    "id": "gangnam-gaepo",
+    "title": "강남개포동(T&K개포)",
+    "agency": "LH",
+    "region": "서울",
+    "address": "서울특별시 강남구 논현로12길 23-5(개포동,T&K개포) T&K개포",
+    "lat": 37.4754298465242,
+    "lng": 127.049254298033,
+    "supplyType": "도시형생활주택",
+    "households": 13,
+    "imageUrl": "/housing/gangnam-gaepo/exterior.png",
+    "notice": {
+      "postDate": "2026-09-14",
+      "applyStartDate": "2026-09-16",
+      "applyEndDate": "2026-10-13",
+      "contractDate": "2026-11-16",
+      "moveInMonth": "2027-02",
+      "supplyUnits": 1,
+      "recruitCount": 3,
+      "applicationCount": 223,
+      "applyUrl": "https://apply.lh.or.kr"
+    },
+    "floorplans": [
+      {
+        "id": "gangnam-gaepo-2-3-01",
+        "floor": "2-3",
+        "unitNumber": "01",
+        "unitType": null,
+        "exclusiveArea": 28.81,
+        "image2dUrl": "/housing/gangnam-gaepo/gangnam-gaepo-2-3-01.png",
+        "has3d": true
+      },
+      {
+        "id": "gangnam-gaepo-2-3-02",
+        "floor": "2-3",
+        "unitNumber": "02",
+        "unitType": null,
+        "exclusiveArea": 31.99,
+        "image2dUrl": "/housing/gangnam-gaepo/gangnam-gaepo-2-3-02.png",
+        "has3d": true
+      },
+      {
+        "id": "gangnam-gaepo-2-3-03",
+        "floor": "2-3",
+        "unitNumber": "03",
+        "unitType": null,
+        "exclusiveArea": 31.99,
+        "image2dUrl": "/housing/gangnam-gaepo/gangnam-gaepo-2-3-03.png",
+        "has3d": true
+      },
+      {
+        "id": "gangnam-gaepo-2-3-04",
+        "floor": "2-3",
+        "unitNumber": "04",
+        "unitType": null,
+        "exclusiveArea": 28.81,
+        "image2dUrl": "/housing/gangnam-gaepo/gangnam-gaepo-2-3-04.png",
+        "has3d": true
+      },
+      {
+        "id": "gangnam-gaepo-4-401",
+        "floor": "4",
+        "unitNumber": "401",
+        "unitType": null,
+        "exclusiveArea": 30.76,
+        "image2dUrl": "/housing/gangnam-gaepo/gangnam-gaepo-4-401.png",
+        "has3d": false
+      },
+      {
+        "id": "gangnam-gaepo-4-402",
+        "floor": "4",
+        "unitNumber": "402",
+        "unitType": null,
+        "exclusiveArea": 26.99,
+        "image2dUrl": "/housing/gangnam-gaepo/gangnam-gaepo-4-402.png",
+        "has3d": true
+      },
+      {
+        "id": "gangnam-gaepo-4-403",
+        "floor": "4",
+        "unitNumber": "403",
+        "unitType": null,
+        "exclusiveArea": 30.76,
+        "image2dUrl": "/housing/gangnam-gaepo/gangnam-gaepo-4-403.png",
+        "has3d": false
+      },
+      {
+        "id": "gangnam-gaepo-5-501",
+        "floor": "5",
+        "unitNumber": "501",
+        "unitType": null,
+        "exclusiveArea": 31.64,
+        "image2dUrl": "/housing/gangnam-gaepo/gangnam-gaepo-5-501.png",
+        "has3d": false
+      },
+      {
+        "id": "gangnam-gaepo-5-502-drawing",
+        "floor": "5",
+        "unitNumber": "502-drawing",
+        "unitType": null,
+        "exclusiveArea": null,
+        "image2dUrl": "/housing/gangnam-gaepo/gangnam-gaepo-5-502-drawing.png",
+        "has3d": false
+      }
+    ]
+  },
+  {
+    "id": "gangseo-hwagok",
+    "title": "강서화곡동",
+    "agency": "LH",
+    "region": "서울",
+    "address": "서울특별시 강서구 초록마을로12길 20(화곡동)",
+    "lat": 37.5416904904971,
+    "lng": 126.849063127802,
+    "supplyType": "다가구주택",
+    "households": 9,
+    "imageUrl": "/housing/gangseo-hwagok/exterior.png",
+    "notice": {
+      "postDate": "2026-09-16",
+      "applyStartDate": "2026-09-18",
+      "applyEndDate": "2026-10-16",
+      "contractDate": "2026-11-23",
+      "moveInMonth": "2027-02",
+      "supplyUnits": 3,
+      "recruitCount": 9,
+      "applicationCount": 227,
+      "applyUrl": "https://apply.lh.or.kr"
+    },
+    "floorplans": [
+      {
+        "id": "gangseo-hwagok-2-201",
+        "floor": "2",
+        "unitNumber": "201",
+        "unitType": "A",
+        "exclusiveArea": 14.69,
+        "image2dUrl": "/housing/gangseo-hwagok/gangseo-hwagok-2-201.png",
+        "has3d": true
+      },
+      {
+        "id": "gangseo-hwagok-2-202",
+        "floor": "2",
+        "unitNumber": "202",
+        "unitType": "A",
+        "exclusiveArea": 14.69,
+        "image2dUrl": "/housing/gangseo-hwagok/gangseo-hwagok-2-202.png",
+        "has3d": false
+      },
+      {
+        "id": "gangseo-hwagok-2-203",
+        "floor": "2",
+        "unitNumber": "203",
+        "unitType": "B",
+        "exclusiveArea": 15.68,
+        "image2dUrl": "/housing/gangseo-hwagok/gangseo-hwagok-2-203.png",
+        "has3d": true
+      },
+      {
+        "id": "gangseo-hwagok-2-204",
+        "floor": "2",
+        "unitNumber": "204",
+        "unitType": "B",
+        "exclusiveArea": 15.68,
+        "image2dUrl": "/housing/gangseo-hwagok/gangseo-hwagok-2-204.png",
+        "has3d": false
+      },
+      {
+        "id": "gangseo-hwagok-2-205",
+        "floor": "2",
+        "unitNumber": "205",
+        "unitType": "B",
+        "exclusiveArea": 15.68,
+        "image2dUrl": "/housing/gangseo-hwagok/gangseo-hwagok-2-205.png",
+        "has3d": false
+      },
+      {
+        "id": "gangseo-hwagok-3-301",
+        "floor": "3",
+        "unitNumber": "301",
+        "unitType": "A",
+        "exclusiveArea": 14.69,
+        "image2dUrl": "/housing/gangseo-hwagok/gangseo-hwagok-3-301.png",
+        "has3d": false
+      },
+      {
+        "id": "gangseo-hwagok-3-302",
+        "floor": "3",
+        "unitNumber": "302",
+        "unitType": "A",
+        "exclusiveArea": 14.69,
+        "image2dUrl": "/housing/gangseo-hwagok/gangseo-hwagok-3-302.png",
+        "has3d": false
+      },
+      {
+        "id": "gangseo-hwagok-4-401",
+        "floor": "4",
+        "unitNumber": "401",
+        "unitType": "A",
+        "exclusiveArea": 14.69,
+        "image2dUrl": "/housing/gangseo-hwagok/gangseo-hwagok-4-401.png",
+        "has3d": false
+      },
+      {
+        "id": "gangseo-hwagok-4-402",
+        "floor": "4",
+        "unitNumber": "402",
+        "unitType": "A",
+        "exclusiveArea": 14.69,
+        "image2dUrl": "/housing/gangseo-hwagok/gangseo-hwagok-4-402.png",
+        "has3d": false
+      }
+    ]
+  },
+  {
+    "id": "gwanak-sillim",
+    "title": "관악신림동2",
+    "agency": "LH",
+    "region": "서울",
+    "address": "서울특별시 관악구 대학2길 6(신림동)",
+    "lat": 37.4699500819801,
+    "lng": 126.937586869025,
+    "supplyType": "다가구주택",
+    "households": 13,
+    "imageUrl": "/housing/gwanak-sillim/exterior.png",
+    "notice": {
+      "postDate": "2026-09-11",
+      "applyStartDate": "2026-09-14",
+      "applyEndDate": "2026-10-07",
+      "contractDate": "2026-11-09",
+      "moveInMonth": "2027-01",
+      "supplyUnits": 18,
+      "recruitCount": 54,
+      "applicationCount": 850,
+      "applyUrl": "https://apply.lh.or.kr"
+    },
+    "floorplans": [
+      {
+        "id": "gwanak-sillim-2-3-01",
+        "floor": "2-3",
+        "unitNumber": "01",
+        "unitType": "가",
+        "exclusiveArea": 15.3,
+        "image2dUrl": "/housing/gwanak-sillim/gwanak-sillim-2-3-01.png",
+        "has3d": true
+      },
+      {
+        "id": "gwanak-sillim-2-3-02",
+        "floor": "2-3",
+        "unitNumber": "02",
+        "unitType": "다",
+        "exclusiveArea": 17.16,
+        "image2dUrl": "/housing/gwanak-sillim/gwanak-sillim-2-3-02.png",
+        "has3d": false
+      },
+      {
+        "id": "gwanak-sillim-2-3-03",
+        "floor": "2-3",
+        "unitNumber": "03",
+        "unitType": "나",
+        "exclusiveArea": 14.85,
+        "image2dUrl": "/housing/gwanak-sillim/gwanak-sillim-2-3-03.png",
+        "has3d": true
+      },
+      {
+        "id": "gwanak-sillim-2-3-04",
+        "floor": "2-3",
+        "unitNumber": "04",
+        "unitType": "나",
+        "exclusiveArea": 14.85,
+        "image2dUrl": "/housing/gwanak-sillim/gwanak-sillim-2-3-04.png",
+        "has3d": false
+      },
+      {
+        "id": "gwanak-sillim-2-3-05",
+        "floor": "2-3",
+        "unitNumber": "05",
+        "unitType": "다",
+        "exclusiveArea": 17.16,
+        "image2dUrl": "/housing/gwanak-sillim/gwanak-sillim-2-3-05.png",
+        "has3d": false
+      },
+      {
+        "id": "gwanak-sillim-4-401",
+        "floor": "4",
+        "unitNumber": "401",
+        "unitType": "라",
+        "exclusiveArea": 17.64,
+        "image2dUrl": "/housing/gwanak-sillim/gwanak-sillim-4-401.png",
+        "has3d": false
+      },
+      {
+        "id": "gwanak-sillim-4-402",
+        "floor": "4",
+        "unitNumber": "402",
+        "unitType": "나",
+        "exclusiveArea": 14.85,
+        "image2dUrl": "/housing/gwanak-sillim/gwanak-sillim-4-402.png",
+        "has3d": false
+      },
+      {
+        "id": "gwanak-sillim-4-403",
+        "floor": "4",
+        "unitNumber": "403",
+        "unitType": "마",
+        "exclusiveArea": 17.06,
+        "image2dUrl": "/housing/gwanak-sillim/gwanak-sillim-4-403.png",
+        "has3d": false
+      }
+    ]
+  },
+  {
+    "id": "dobong-banghak",
+    "title": "도봉방학동",
+    "agency": "LH",
+    "region": "서울",
+    "address": "서울특별시 도봉구 도당로13다길 15-7(방학동)",
+    "lat": 37.6657372755985,
+    "lng": 127.033834324116,
+    "supplyType": "다가구주택",
+    "households": 10,
+    "imageUrl": "/housing/dobong-banghak/exterior.png",
+    "notice": {
+      "postDate": "2026-09-08",
+      "applyStartDate": "2026-09-18",
+      "applyEndDate": "2026-09-30",
+      "contractDate": "2026-11-02",
+      "moveInMonth": "2027-01",
+      "supplyUnits": 5,
+      "recruitCount": 15,
+      "applicationCount": 234,
+      "applyUrl": "https://apply.lh.or.kr"
+    },
+    "floorplans": [
+      {
+        "id": "dobong-banghak-2-3-01",
+        "floor": "2-3",
+        "unitNumber": "01",
+        "unitType": "A",
+        "exclusiveArea": 13.66,
+        "image2dUrl": "/housing/dobong-banghak/dobong-banghak-2-3-01.png",
+        "has3d": true
+      },
+      {
+        "id": "dobong-banghak-2-3-02",
+        "floor": "2-3",
+        "unitNumber": "02",
+        "unitType": "B",
+        "exclusiveArea": 13.86,
+        "image2dUrl": "/housing/dobong-banghak/dobong-banghak-2-3-02.png",
+        "has3d": true
+      },
+      {
+        "id": "dobong-banghak-2-3-03",
+        "floor": "2-3",
+        "unitNumber": "03",
+        "unitType": "B",
+        "exclusiveArea": 13.86,
+        "image2dUrl": "/housing/dobong-banghak/dobong-banghak-2-3-03.png",
+        "has3d": false
+      },
+      {
+        "id": "dobong-banghak-2-3-04",
+        "floor": "2-3",
+        "unitNumber": "04",
+        "unitType": "B",
+        "exclusiveArea": 13.86,
+        "image2dUrl": "/housing/dobong-banghak/dobong-banghak-2-3-04.png",
+        "has3d": false
+      },
+      {
+        "id": "dobong-banghak-4-401",
+        "floor": "4",
+        "unitNumber": "401",
+        "unitType": "A",
+        "exclusiveArea": 13.66,
+        "image2dUrl": "/housing/dobong-banghak/dobong-banghak-4-401.png",
+        "has3d": false
+      },
+      {
+        "id": "dobong-banghak-4-402",
+        "floor": "4",
+        "unitNumber": "402",
+        "unitType": "A",
+        "exclusiveArea": 13.66,
+        "image2dUrl": "/housing/dobong-banghak/dobong-banghak-4-402.png",
+        "has3d": false
+      }
+    ]
+  },
+  {
+    "id": "seocho-iris",
+    "title": "서초서초동(아이리스예당)",
+    "agency": "LH",
+    "region": "서울",
+    "address": "서울특별시 서초구 남부순환로315길 34-9(서초동)",
+    "lat": 37.4803212126271,
+    "lng": 127.008403181331,
+    "supplyType": "도시형생활주택(원룸형)",
+    "households": 20,
+    "imageUrl": "/housing/seocho-iris/exterior.png",
+    "notice": {
+      "postDate": "2026-08-27",
+      "applyStartDate": "2026-09-08",
+      "applyEndDate": "2026-09-14",
+      "contractDate": "2026-10-12",
+      "moveInMonth": "2026-11",
+      "supplyUnits": 3,
+      "recruitCount": 9,
+      "applicationCount": 272,
+      "applyUrl": "https://apply.lh.or.kr"
+    },
+    "floorplans": [
+      {
+        "id": "seocho-iris-2-3-01",
+        "floor": "2-3",
+        "unitNumber": "01",
+        "unitType": null,
+        "exclusiveArea": null,
+        "image2dUrl": "/housing/seocho-iris/seocho-iris-2-3-01.png",
+        "has3d": false
+      },
+      {
+        "id": "seocho-iris-2-3-02",
+        "floor": "2-3",
+        "unitNumber": "02",
+        "unitType": null,
+        "exclusiveArea": null,
+        "image2dUrl": "/housing/seocho-iris/seocho-iris-2-3-02.png",
+        "has3d": false
+      },
+      {
+        "id": "seocho-iris-2-3-03",
+        "floor": "2-3",
+        "unitNumber": "03",
+        "unitType": null,
+        "exclusiveArea": null,
+        "image2dUrl": "/housing/seocho-iris/seocho-iris-2-3-03.png",
+        "has3d": false
+      },
+      {
+        "id": "seocho-iris-2-3-04",
+        "floor": "2-3",
+        "unitNumber": "04",
+        "unitType": null,
+        "exclusiveArea": null,
+        "image2dUrl": "/housing/seocho-iris/seocho-iris-2-3-04.png",
+        "has3d": false
+      },
+      {
+        "id": "seocho-iris-2-3-05",
+        "floor": "2-3",
+        "unitNumber": "05",
+        "unitType": null,
+        "exclusiveArea": null,
+        "image2dUrl": "/housing/seocho-iris/seocho-iris-2-3-05.png",
+        "has3d": false
+      },
+      {
+        "id": "seocho-iris-2-3-06",
+        "floor": "2-3",
+        "unitNumber": "06",
+        "unitType": null,
+        "exclusiveArea": null,
+        "image2dUrl": "/housing/seocho-iris/seocho-iris-2-3-06.png",
+        "has3d": false
+      },
+      {
+        "id": "seocho-iris-4-01",
+        "floor": "4",
+        "unitNumber": "01",
+        "unitType": null,
+        "exclusiveArea": null,
+        "image2dUrl": "/housing/seocho-iris/seocho-iris-4-01.png",
+        "has3d": false
+      },
+      {
+        "id": "seocho-iris-4-02",
+        "floor": "4",
+        "unitNumber": "02",
+        "unitType": null,
+        "exclusiveArea": null,
+        "image2dUrl": "/housing/seocho-iris/seocho-iris-4-02.png",
+        "has3d": false
+      },
+      {
+        "id": "seocho-iris-4-03",
+        "floor": "4",
+        "unitNumber": "03",
+        "unitType": null,
+        "exclusiveArea": null,
+        "image2dUrl": "/housing/seocho-iris/seocho-iris-4-03.png",
+        "has3d": false
+      },
+      {
+        "id": "seocho-iris-4-04",
+        "floor": "4",
+        "unitNumber": "04",
+        "unitType": null,
+        "exclusiveArea": null,
+        "image2dUrl": "/housing/seocho-iris/seocho-iris-4-04.png",
+        "has3d": false
+      },
+      {
+        "id": "seocho-iris-5-01",
+        "floor": "5",
+        "unitNumber": "01",
+        "unitType": null,
+        "exclusiveArea": null,
+        "image2dUrl": "/housing/seocho-iris/seocho-iris-5-01.png",
+        "has3d": false
+      },
+      {
+        "id": "seocho-iris-5-02",
+        "floor": "5",
+        "unitNumber": "02",
+        "unitType": null,
+        "exclusiveArea": null,
+        "image2dUrl": "/housing/seocho-iris/seocho-iris-5-02.png",
+        "has3d": false
+      },
+      {
+        "id": "seocho-iris-5-03",
+        "floor": "5",
+        "unitNumber": "03",
+        "unitType": null,
+        "exclusiveArea": null,
+        "image2dUrl": "/housing/seocho-iris/seocho-iris-5-03.png",
+        "has3d": false
+      },
+      {
+        "id": "seocho-iris-5-04",
+        "floor": "5",
+        "unitNumber": "04",
+        "unitType": null,
+        "exclusiveArea": null,
+        "image2dUrl": "/housing/seocho-iris/seocho-iris-5-04.png",
+        "has3d": false
+      }
+    ]
+  },
+  {
+    "id": "seongdong-yongdap",
+    "title": "성동용답동(더위일스카이70)",
+    "agency": "LH",
+    "region": "서울",
+    "address": "서울특별시 성동구 자동차시장1길 31(용답동) THE WEAL SKY70",
+    "lat": 37.5613433361586,
+    "lng": 127.061121935071,
+    "supplyType": null,
+    "households": null,
+    "imageUrl": null,
+    "notice": {
+      "postDate": "2026-08-24",
+      "applyStartDate": "2026-09-07",
+      "applyEndDate": "2026-09-11",
+      "contractDate": "2026-10-05",
+      "moveInMonth": "2026-11",
+      "supplyUnits": 1,
+      "recruitCount": 3,
+      "applicationCount": 691,
+      "applyUrl": "https://apply.lh.or.kr"
+    },
+    "floorplans": [
+      {
+        "id": "seongdong-yongdap-3-15-1",
+        "floor": "3-15",
+        "unitNumber": "1",
+        "unitType": "A",
+        "exclusiveArea": 34.98,
+        "image2dUrl": "/housing/seongdong-yongdap/seongdong-yongdap-3-15-1.png",
+        "has3d": false
+      },
+      {
+        "id": "seongdong-yongdap-3-15-2",
+        "floor": "3-15",
+        "unitNumber": "2",
+        "unitType": "B",
+        "exclusiveArea": 34.78,
+        "image2dUrl": "/housing/seongdong-yongdap/seongdong-yongdap-3-15-2.png",
+        "has3d": false
+      },
+      {
+        "id": "seongdong-yongdap-3-15-4",
+        "floor": "3-15",
+        "unitNumber": "4",
+        "unitType": "A",
+        "exclusiveArea": 34.98,
+        "image2dUrl": "/housing/seongdong-yongdap/seongdong-yongdap-3-15-4.png",
+        "has3d": false
+      }
+    ]
+  },
+  {
+    "id": "songpa-ogeum",
+    "title": "송파오금동(더트라이앵글)",
+    "agency": "LH",
+    "region": "서울",
+    "address": "서울특별시 송파구 마천로8길 19-12(오금동) 더트라이앵글",
+    "lat": 37.5071632770913,
+    "lng": 127.128399606278,
+    "supplyType": null,
+    "households": 14,
+    "imageUrl": "/housing/songpa-ogeum/exterior.png",
+    "notice": {
+      "postDate": "2026-09-01",
+      "applyStartDate": "2026-09-10",
+      "applyEndDate": "2026-09-16",
+      "contractDate": "2026-10-19",
+      "moveInMonth": "2026-12",
+      "supplyUnits": 1,
+      "recruitCount": 3,
+      "applicationCount": 193,
+      "applyUrl": "https://apply.lh.or.kr"
+    },
+    "floorplans": [
+      {
+        "id": "songpa-ogeum-2-3-01",
+        "floor": "2-3",
+        "unitNumber": "01",
+        "unitType": null,
+        "exclusiveArea": 24.43,
+        "image2dUrl": "/housing/songpa-ogeum/songpa-ogeum-2-3-01.png",
+        "has3d": true
+      },
+      {
+        "id": "songpa-ogeum-2-3-02",
+        "floor": "2-3",
+        "unitNumber": "02",
+        "unitType": null,
+        "exclusiveArea": 23.265,
+        "image2dUrl": "/housing/songpa-ogeum/songpa-ogeum-2-3-02.png",
+        "has3d": true
+      },
+      {
+        "id": "songpa-ogeum-2-3-03",
+        "floor": "2-3",
+        "unitNumber": "03",
+        "unitType": null,
+        "exclusiveArea": 23.225,
+        "image2dUrl": "/housing/songpa-ogeum/songpa-ogeum-2-3-03.png",
+        "has3d": true
+      },
+      {
+        "id": "songpa-ogeum-2-3-04",
+        "floor": "2-3",
+        "unitNumber": "04",
+        "unitType": null,
+        "exclusiveArea": 22.86,
+        "image2dUrl": "/housing/songpa-ogeum/songpa-ogeum-2-3-04.png",
+        "has3d": false
+      },
+      {
+        "id": "songpa-ogeum-4-401",
+        "floor": "4",
+        "unitNumber": "401",
+        "unitType": null,
+        "exclusiveArea": 23.43,
+        "image2dUrl": "/housing/songpa-ogeum/songpa-ogeum-4-401.png",
+        "has3d": true
+      },
+      {
+        "id": "songpa-ogeum-4-402",
+        "floor": "4",
+        "unitNumber": "402",
+        "unitType": null,
+        "exclusiveArea": 23.265,
+        "image2dUrl": "/housing/songpa-ogeum/songpa-ogeum-4-402.png",
+        "has3d": true
+      },
+      {
+        "id": "songpa-ogeum-4-403",
+        "floor": "4",
+        "unitNumber": "403",
+        "unitType": null,
+        "exclusiveArea": 24.585,
+        "image2dUrl": "/housing/songpa-ogeum/songpa-ogeum-4-403.png",
+        "has3d": false
+      },
+      {
+        "id": "songpa-ogeum-5-501",
+        "floor": "5",
+        "unitNumber": "501",
+        "unitType": null,
+        "exclusiveArea": 23.43,
+        "image2dUrl": "/housing/songpa-ogeum/songpa-ogeum-5-501.png",
+        "has3d": true
+      },
+      {
+        "id": "songpa-ogeum-5-502",
+        "floor": "5",
+        "unitNumber": "502",
+        "unitType": null,
+        "exclusiveArea": 23.265,
+        "image2dUrl": "/housing/songpa-ogeum/songpa-ogeum-5-502.png",
+        "has3d": true
+      },
+      {
+        "id": "songpa-ogeum-5-503",
+        "floor": "5",
+        "unitNumber": "503",
+        "unitType": null,
+        "exclusiveArea": 23.445,
+        "image2dUrl": "/housing/songpa-ogeum/songpa-ogeum-5-503.png",
+        "has3d": false
+      }
+    ]
+  },
+  {
+    "id": "jungnang-myeonmok",
+    "title": "중랑면목동",
+    "agency": "LH",
+    "region": "서울",
+    "address": "서울특별시 중랑구 면목천로23길 52(면목동)",
+    "lat": 37.5902226562583,
+    "lng": 127.08217183363,
+    "supplyType": "다가구주택",
+    "households": 12,
+    "imageUrl": "/housing/jungnang-myeonmok/exterior.png",
+    "notice": {
+      "postDate": "2026-09-04",
+      "applyStartDate": "2026-09-16",
+      "applyEndDate": "2026-09-25",
+      "contractDate": "2026-10-26",
+      "moveInMonth": "2026-12",
+      "supplyUnits": 3,
+      "recruitCount": 9,
+      "applicationCount": 178,
+      "applyUrl": "https://apply.lh.or.kr"
+    },
+    "floorplans": [
+      {
+        "id": "jungnang-myeonmok-2-3-01",
+        "floor": "2-3",
+        "unitNumber": "01",
+        "unitType": null,
+        "exclusiveArea": 14.6475,
+        "image2dUrl": "/housing/jungnang-myeonmok/jungnang-myeonmok-2-3-01.png",
+        "has3d": true
+      },
+      {
+        "id": "jungnang-myeonmok-2-3-02",
+        "floor": "2-3",
+        "unitNumber": "02",
+        "unitType": null,
+        "exclusiveArea": 14.6475,
+        "image2dUrl": "/housing/jungnang-myeonmok/jungnang-myeonmok-2-3-02.png",
+        "has3d": false
+      },
+      {
+        "id": "jungnang-myeonmok-2-3-03",
+        "floor": "2-3",
+        "unitNumber": "03",
+        "unitType": null,
+        "exclusiveArea": 14.64,
+        "image2dUrl": "/housing/jungnang-myeonmok/jungnang-myeonmok-2-3-03.png",
+        "has3d": true
+      },
+      {
+        "id": "jungnang-myeonmok-2-3-04",
+        "floor": "2-3",
+        "unitNumber": "04",
+        "unitType": null,
+        "exclusiveArea": 14.64,
+        "image2dUrl": "/housing/jungnang-myeonmok/jungnang-myeonmok-2-3-04.png",
+        "has3d": false
+      },
+      {
+        "id": "jungnang-myeonmok-2-3-05",
+        "floor": "2-3",
+        "unitNumber": "05",
+        "unitType": null,
+        "exclusiveArea": 14.64,
+        "image2dUrl": "/housing/jungnang-myeonmok/jungnang-myeonmok-2-3-05.png",
+        "has3d": false
+      },
+      {
+        "id": "jungnang-myeonmok-4-01-drawing",
+        "floor": "4",
+        "unitNumber": "01-drawing",
+        "unitType": null,
+        "exclusiveArea": null,
+        "image2dUrl": "/housing/jungnang-myeonmok/jungnang-myeonmok-4-01-drawing.png",
+        "has3d": false
+      },
+      {
+        "id": "jungnang-myeonmok-4-02-drawing",
+        "floor": "4",
+        "unitNumber": "02-drawing",
+        "unitType": null,
+        "exclusiveArea": null,
+        "image2dUrl": "/housing/jungnang-myeonmok/jungnang-myeonmok-4-02-drawing.png",
+        "has3d": false
+      }
+    ]
+  },
+  {
+    "id": "jungnang-muk",
+    "title": "중랑묵동",
+    "agency": "LH",
+    "region": "서울",
+    "address": "서울특별시 중랑구 동일로149가길 21(묵동) 묵동 245-39",
+    "lat": 37.6075604459923,
+    "lng": 127.077198178165,
+    "supplyType": null,
+    "households": null,
+    "imageUrl": null,
+    "notice": {
+      "postDate": "2026-09-01",
+      "applyStartDate": "2026-09-14",
+      "applyEndDate": "2026-09-22",
+      "contractDate": "2026-10-19",
+      "moveInMonth": "2026-12",
+      "supplyUnits": 2,
+      "recruitCount": 6,
+      "applicationCount": 133,
+      "applyUrl": "https://apply.lh.or.kr"
+    },
+    "floorplans": []
+  }
+]
