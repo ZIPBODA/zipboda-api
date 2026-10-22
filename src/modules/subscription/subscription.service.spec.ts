@@ -79,7 +79,18 @@ describe('청약 공고 상세', () => {
     };
     const { service } = serviceWith(record({ floorplans: [plan] }), '2026-09-08T03:00:00Z');
     const detail = await service.getDetail('gangnam-gaepo');
-    expect(detail.floorplans).toEqual([{ id: 'p1', size: '28', type: null, has2d: false, has3d: true }]);
+    expect(detail.floorplans).toEqual([
+      {
+        id: 'p1',
+        size: '28',
+        type: null,
+        floor: '2-3',
+        unitNumber: '01',
+        exclusiveArea: null,
+        has2d: false,
+        has3d: true,
+      },
+    ]);
   });
 
   it('정의서에 없는 기관 코드가 저장돼 있으면 응답을 지어내지 않고 실패한다', async () => {

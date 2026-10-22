@@ -1,26 +1,9 @@
-import {
-  AGENCY_NAME,
-  isStoredAgencyCode,
-  isStoredRegionCode,
-  type StoredAgencyCode,
-  type StoredRegionCode,
-} from '@/common/constants/interface-codes.js';
+import { AGENCY_NAME } from '@/common/constants/interface-codes.js';
+import { competitionOf } from '../competition.js';
 import type { SubscriptionDetailResponse } from '../dto/subscription-detail.response.js';
-import { competitionOf, statusCodeOf, toIsoDate, type ApplySchedule } from '../schedule.js';
+import { ddayOf, statusCodeOf } from '../schedule.js';
 import type { SubscriptionDetailRecord } from '../subscription.repository.js';
-
-const isoDateOrNull = (date: Date | null): string | null => (date ? toIsoDate(date) : null);
-
-// 정의서에 없는 코드가 저장돼 있으면 적재 쪽 결함이다 — 응답을 지어내지 않고 서버 오류로 드러낸다
-const agencyCodeOf = (value: number): StoredAgencyCode => {
-  if (!isStoredAgencyCode(value)) throw new Error(`정의되지 않은 공급기관 코드: ${value}`);
-  return value;
-};
-
-const regionCodeOf = (value: number): StoredRegionCode => {
-  if (!isStoredRegionCode(value)) throw new Error(`정의되지 않은 지역 코드: ${value}`);
-  return value;
-};
+import { agencyCodeOf, isoDateOrNull, regionCodeOf, scheduleOf } from './subscription-fields.js';
 
 type UnitRecord = SubscriptionDetailRecord['units'][number];
 
@@ -29,14 +12,6 @@ const bySizeThenType = (a: UnitRecord, b: UnitRecord): number =>
   Number(a.sizeType) - Number(b.sizeType) ||
   (a.unitType ?? '').localeCompare(b.unitType ?? '') ||
   a.id.localeCompare(b.id);
-
-export const scheduleOf = (
-  record: Pick<SubscriptionDetailRecord, 'applyStartDate' | 'applyEndDate' | 'cancelledAt'>,
-): ApplySchedule => ({
-  applyStartDate: isoDateOrNull(record.applyStartDate),
-  applyEndDate: isoDateOrNull(record.applyEndDate),
-  cancelled: record.cancelledAt !== null,
-});
 
 export const toSubscriptionDetailResponse = (
   record: SubscriptionDetailRecord,
@@ -50,6 +25,7 @@ export const toSubscriptionDetailResponse = (
     agencyCode,
     agencyName: AGENCY_NAME[agencyCode],
     statusCode: statusCodeOf(schedule, today),
+    dday: ddayOf(schedule, today),
     region: regionCodeOf(record.regionCode),
     address: record.address,
     lat: record.lat,
@@ -57,10 +33,15 @@ export const toSubscriptionDetailResponse = (
     postDate: isoDateOrNull(record.postDate),
     applyStartDate: schedule.applyStartDate,
     deadline: schedule.applyEndDate,
+    contractDate: isoDateOrNull(record.contractDate),
     supplyType: record.supplyType,
     households: record.households,
+    supplyUnits: record.supplyUnits,
+    recruitCount: record.recruitCount,
+    applicationCount: record.applicationCount,
     moveIn: record.moveInMonth,
     competition: competitionOf(record.applicationCount, record.supplyUnits),
+    imageUrl: record.imageUrl,
     units: [...record.units].sort(bySizeThenType).map((unit) => ({
       size: unit.sizeType,
       type: unit.unitType,
@@ -72,6 +53,9 @@ export const toSubscriptionDetailResponse = (
       id: plan.id,
       size: plan.sizeType,
       type: plan.unitType,
+      floor: plan.floor,
+      unitNumber: plan.unitNumber,
+      exclusiveArea: plan.exclusiveArea === null ? null : plan.exclusiveArea.toNumber(),
       has2d: plan.image2dUrl !== null,
       has3d: plan.has3d,
     })),
