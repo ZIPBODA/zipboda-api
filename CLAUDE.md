@@ -7,6 +7,14 @@
 - 인증: JWT(access/refresh) + **RBAC**(ITF-012). 응답 엔벌로프 `{success, data, error}` + 오류코드 ERR-001~016
 - 파일/자산: 오브젝트 스토리지(S3 호환) + CDN + 서명 URL. 결제(2차): 국내 PG(멱등키·웹훅)
 
+## 로컬 실행
+- 버전: Node 24 · pnpm 10 · NestJS 12 · Prisma 7 · TypeScript 6. Nest 12·Prisma 7이 ESM 전용이라 프로젝트도 ESM이다(상대 import에 `.js` 확장자).
+- 준비: `.env.example`을 `.env`로 복사 → `pnpm install`(Prisma 클라이언트 자동 생성)
+- DB: `pnpm db:up`(Docker Postgres 17, 호스트 5433 — 5432는 다른 프로젝트가 사용) → `pnpm db:deploy` → `pnpm db:seed`
+- 서버: `pnpm start:dev` → `http://localhost:4000/api`
+- 검증: `pnpm typecheck` · `pnpm lint` · `pnpm test`(Jest ESM) · `pnpm test:e2e`(`TEST_DATABASE_URL`의 DB를 쓴다)
+- 스키마·ERD: `src/database/schema.prisma` ↔ `docs/ZIPBODA_erd_v0.1.md`를 함께 고친다. 적용된 마이그레이션은 고치지 말고 새 마이그레이션을 추가한다.
+
 ## 산출물 단일 진실원
 API/요구사항/화면 xlsx 3종은 **zipboda-web/docs에서 대표 관리**. 본 저장소는 개발계획서(md)만 보유. 스펙 참조 시 `../zipboda-web/docs/` 사용. (프론트엔드 코딩 규칙은 본 저장소에 두지 않음)
 
