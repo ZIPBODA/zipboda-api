@@ -11,6 +11,12 @@ export const emptyAsUndefined = ({ value }: TransformFnParams): unknown => {
   return raw === '' ? undefined : raw;
 };
 
+/** 공백만 보낸 필수 값이 IsNotEmpty를 통과하지 않도록 앞뒤 공백을 먼저 버린다 */
+export const trimText = ({ value }: TransformFnParams): unknown => {
+  const raw: unknown = value;
+  return typeof raw === 'string' ? raw.trim() : raw;
+};
+
 export const emptyAs =
   (fallback: unknown) =>
   ({ value }: TransformFnParams): unknown => {

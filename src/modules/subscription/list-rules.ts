@@ -9,6 +9,7 @@ import {
 } from '@/common/constants/interface-codes.js';
 import {
   BOUNDS_PATTERN,
+  DEFAULT_SUBSCRIPTION_SORT,
   MAX_LATITUDE,
   MAX_LONGITUDE,
   SIZE_RANGES,
@@ -108,3 +109,24 @@ const COMPARATORS: Record<SubscriptionSort, (a: SortableSubscription, b: Sortabl
 
 export const sortSubscriptions = <T extends SortableSubscription>(items: readonly T[], sort: SubscriptionSort): T[] =>
   [...items].sort(COMPARATORS[sort]);
+
+/** web 통합 검색과 같은 순위 — 제목이 검색어와 같은 공고, 검색어로 시작하는 공고, 검색어를 품은 공고, 다른 필드로만 맞은 공고 순 */
+const SEARCH_RANK = { SAME_TITLE: 0, TITLE_PREFIX: 1, IN_TITLE: 2, OTHER_FIELD: 3 } as const;
+
+const searchRankOf = (title: string, keyword: string): number => {
+  const name = normalizeKeyword(title) ?? '';
+  if (name === keyword) return SEARCH_RANK.SAME_TITLE;
+  if (name.startsWith(keyword)) return SEARCH_RANK.TITLE_PREFIX;
+  if (name.includes(keyword)) return SEARCH_RANK.IN_TITLE;
+  return SEARCH_RANK.OTHER_FIELD;
+};
+
+/** keyword는 normalizeKeyword를 거친 값이다. 같은 순위 안에서는 web 검색처럼 목록 기본 정렬(마감 임박순)을 따른다 */
+export const sortSearchResults = <T extends SortableSubscription & { title: string }>(
+  items: readonly T[],
+  keyword: string,
+): T[] =>
+  items
+    .map((item) => ({ item, rank: searchRankOf(item.title, keyword) }))
+    .sort((a, b) => a.rank - b.rank || COMPARATORS[DEFAULT_SUBSCRIPTION_SORT](a.item, b.item))
+    .map(({ item }) => item);

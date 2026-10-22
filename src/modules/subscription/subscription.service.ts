@@ -3,6 +3,8 @@ import { AgencyCode, RegionCode, SubscriptionStatusCode } from '@/common/constan
 import { AppException } from '@/common/errors/app.exception.js';
 import { Clock } from '@/common/time/clock.js';
 import { SIZE_RANGES } from './constants.js';
+import type { SearchQuery } from './dto/search.request.js';
+import type { SearchResponse } from './dto/search.response.js';
 import type { SubscriptionDetailResponse } from './dto/subscription-detail.response.js';
 import type {
   SubscriptionFilterQuery,
@@ -11,6 +13,7 @@ import type {
 } from './dto/subscription-filter.request.js';
 import type {
   SubscriptionFilterOptionsResponse,
+  SubscriptionListItemResponse,
   SubscriptionListResponse,
   SubscriptionMapResponse,
 } from './dto/subscription-list.response.js';
@@ -20,6 +23,7 @@ import {
   normalizeKeyword,
   parseBounds,
   sizeRangeOf,
+  sortSearchResults,
   sortSubscriptions,
   type GeoBounds,
 } from './list-rules.js';
@@ -58,17 +62,32 @@ export class SubscriptionService {
     );
     const start = (query.page - 1) * query.pageSize;
     const pageIds = sorted.slice(start, start + query.pageSize).map((entry) => entry.id);
-    const records = pageIds.length === 0 ? [] : await this.repository.findListedByIds(pageIds, filter);
-    const recordById = new Map(records.map((record) => [record.id, record]));
     return {
-      // 두 번 읽는 사이에 지워지거나 조건에서 벗어난 공고는 건너뛴다
-      items: pageIds.flatMap((id) => {
-        const record = recordById.get(id);
-        return record ? [toListItemResponse(record, today)] : [];
-      }),
+      items: await this.listItemsInOrder(pageIds, filter, today),
       page: query.page,
       pageSize: query.pageSize,
       totalCount: sorted.length,
+    };
+  }
+
+  /** 주택은 목록 검색어와 같은 필드에서 찾는다 — web 헤더 검색과 목록 검색이 같은 공고를 찾아야 해서다 */
+  async search(query: SearchQuery): Promise<SearchResponse> {
+    const keyword = normalizeKeyword(query.q);
+    if (!keyword) throw new AppException('VALIDATION_ERROR');
+    const today = this.today();
+    const filter: SubscriptionListFilter = { keyword: { text: keyword, ...codesMatchingKeyword(keyword) } };
+    const rows = await this.repository.findSearchRows(filter);
+    const ranked = sortSearchResults(
+      rows.map((row) => ({ ...toSortable(row, today), title: row.title })),
+      keyword,
+    );
+    const start = (query.page - 1) * query.pageSize;
+    const pageIds = ranked.slice(start, start + query.pageSize).map((entry) => entry.id);
+    return {
+      page: query.page,
+      pageSize: query.pageSize,
+      subscriptions: { items: await this.listItemsInOrder(pageIds, filter, today), totalCount: ranked.length },
+      products: { items: [], totalCount: 0 },
     };
   }
 
@@ -99,6 +118,20 @@ export class SubscriptionService {
 
   private today(): string {
     return serviceDateOf(this.clock.now());
+  }
+
+  /** DB는 id 목록의 순서를 지키지 않아 정렬 순서대로 다시 세운다. 두 번 읽는 사이에 지워지거나 조건에서 벗어난 공고는 건너뛴다 */
+  private async listItemsInOrder(
+    ids: string[],
+    filter: SubscriptionListFilter,
+    today: string,
+  ): Promise<SubscriptionListItemResponse[]> {
+    const records = ids.length === 0 ? [] : await this.repository.findListedByIds(ids, filter);
+    const recordById = new Map(records.map((record) => [record.id, record]));
+    return ids.flatMap((id) => {
+      const record = recordById.get(id);
+      return record ? [toListItemResponse(record, today)] : [];
+    });
   }
 
   private filterOf(filter: SubscriptionFilterQuery, today: string, bounds?: GeoBounds): SubscriptionListFilter {

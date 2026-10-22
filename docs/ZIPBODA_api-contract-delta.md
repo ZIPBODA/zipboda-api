@@ -5,9 +5,9 @@
 | 항목 | 내용 |
 |------|------|
 | 문서명 | 집보다(Zipboda) API 계약 차이 기록 (구현 ↔ API 및 인터페이스 정의서) |
-| 버전 | v0.1.1 |
+| 버전 | v0.2.0 |
 | 작성일 | 2026-10-22 |
-| 기반 문서 | ../zipboda-web/docs/ZIPBODA_API 및 인터페이스 정의서_v0.1.xlsx, ../zipboda-web/src/entities/subscription/model/types.ts, ../zipboda-web/src/entities/subscription/config/constants.ts, /src/modules/subscription/dto/subscription-filter.request.ts, /src/modules/subscription/dto/subscription-list.response.ts, /src/modules/subscription/dto/subscription-detail.response.ts |
+| 기반 문서 | ../zipboda-web/docs/ZIPBODA_API 및 인터페이스 정의서_v0.1.xlsx, ../zipboda-web/src/entities/subscription/model/types.ts, ../zipboda-web/src/entities/subscription/config/constants.ts, /src/modules/subscription/dto/subscription-filter.request.ts, /src/modules/subscription/dto/subscription-list.response.ts, /src/modules/subscription/dto/subscription-detail.response.ts, /src/modules/subscription/dto/search.request.ts, /src/modules/subscription/dto/search.response.ts, ../zipboda-web/src/features/search/lib/search.ts, ../zipboda-web/src/features/search/lib/createSearchIndex.ts, ../zipboda-web/src/shared/lib/searchQuery.ts |
 
 ### 변경 이력
 
@@ -15,6 +15,7 @@
 |------|------|--------|-----------|
 | v0.1.0 | 2026-10-22 | Claude | 신규 작성 — 청약 조회 API(010·011·012)와 신규 필터 선택지 API의 정의서 대비 차이, ITF-003·ITF-010 변경 필요 사항, 정의서 갱신 체크리스트 |
 | v0.1.1 | 2026-10-22 | Claude | 기반 문서의 요청 DTO 경로를 실제 파일명(subscription-filter.request.ts)으로 고침 |
+| v0.2.0 | 2026-10-22 | Claude | §4.5 API-095 통합 검색 추가 — q 필수(중복 시 422)·type 미지원·page/pageSize 추가(목록과 같은 페이지 규칙), 응답을 page·pageSize + 종류별 {items, totalCount}로(floorplans 없음, products는 S6 전까지 비어 있음), 주택 검색 필드·순위를 web searchAll 기준으로 기록하고 동순위 id 정렬을 예외로 명시, S6 남은 일(종류를 섞는 순위) 기록. §6 체크리스트에 API-095 항목 추가. 기반 문서에 web 검색(features/search, shared/lib/searchQuery)과 검색 DTO 추가 |
 
 ---
 
@@ -81,6 +82,19 @@
 | 의미 | 걸린 조건과 상관없이 목록 전체에 실제로 있는 값만 준다(눌러도 늘 0건인 선택지를 없앤다). 표시 문구는 web이 정한다 |
 | 권한 | 비회원·사용자·운영자·관리자 모두 |
 
+### 4.5 API-095 `GET /api/search` — 통합 검색
+
+| 구분 | 정의서 | 구현(web 기준) |
+|------|--------|----------------|
+| `q` | string | 필수. 앞뒤 공백을 버린 뒤 비어 있거나 100자를 넘으면 ERR-005. 정규화(연속 공백 하나로·대소문자 무시)는 목록 `keyword`와 같다. 두 번 보내면(`?q=a&q=b`) ERR-005 — web은 첫 값을 쓴다 |
+| `type` | string(결과 종류) | **받지 않는다**(422) — web은 종류를 거르지 않고 주택·가구를 한 번에 보여 준다 |
+| `page`·`pageSize` | 없음 | **추가** 목록(API-010)과 같다 — page 1부터, pageSize 기본 20·최대 100. 종류마다 같은 페이지로 자른다. web 헤더 추천은 pageSize=8, 결과 화면은 맞은 공고를 모두 보여 주므로 totalCount까지 페이지를 이어 받는다 |
+| 응답 | `{ subscriptions:[], floorplans:[], products:[] }` | `{ page, pageSize, subscriptions: { items, totalCount }, products: { items, totalCount } }` — 결과 화면이 종류별 건수를 보여 줘 배열 대신 건수를 함께 준다. **floorplans 없음**(web은 평면도를 따로 찾지 않고 공고로 들어간다). products는 커머스(S6) 전이라 늘 비어 있다 |
+| 주택 찾는 필드 | 미정 | 목록 `keyword`와 같다 — 공고명·주소·공급 유형·기관 약칭·지역 이름. 도면이 있는 공고만. web은 저장된 글자의 연속 공백도 정리하지만 API는 검색어만 정리한다(§4.1과 같음) |
+| 주택 순위 | 미정 | web `searchAll`과 같다 — 공고명이 검색어와 같음 → 검색어로 시작 → 포함 → 다른 필드만 맞음, 같은 순위는 마감 임박순. **예외**: 그다음 동순위를 web은 카탈로그 순서로, API는 id 순으로 둔다(페이지 경계가 매번 같도록) |
+| 주택 항목 | 미정 | 목록(API-010) 항목과 같은 모양 |
+| 남은 일(S6) | — | web 헤더 추천은 주택·가구를 순위로 섞은 상위 8건이다. 가구가 들어오면 종류를 넘어 섞을 수 있게 항목마다 순위를 줄지 정하고, 검색을 조합하는 쪽을 subscription 모듈 밖으로 뺀다 |
+
 ---
 
 ## 5. 공통 인터페이스 변경 필요
@@ -98,5 +112,6 @@
 - [ ] API-011 Response 필드 추가(§4.2)
 - [ ] API-012 bounds 형식·조건·핀 필드 갱신(§4.3)
 - [ ] 필터 선택지 API 신규 행 추가(§4.4)
+- [ ] API-095 Request(`type` 삭제·`page`·`pageSize` 추가)·Response 모양 갱신(§4.5)
 - [ ] ITF-003·ITF-010 갱신(§5)
 - [ ] 오류 응답 `{code, message}` 규칙을 공통 인터페이스에 명시(§3)

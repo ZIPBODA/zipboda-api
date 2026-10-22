@@ -1,5 +1,5 @@
 import type { TransformFnParams } from 'class-transformer';
-import { emptyAs, emptyAsUndefined, toIntegerOr, toOptionalInteger } from './request-input.js';
+import { emptyAs, emptyAsUndefined, toIntegerOr, toOptionalInteger, trimText } from './request-input.js';
 
 const params = (value: unknown) => ({ value }) as TransformFnParams;
 
@@ -23,5 +23,11 @@ describe('쿼리 값 변환', () => {
     expect(emptyAs('DEADLINE')(params('HOUSEHOLDS'))).toBe('HOUSEHOLDS');
     expect(emptyAsUndefined(params(''))).toBeUndefined();
     expect(emptyAsUndefined(params('20-25'))).toBe('20-25');
+  });
+
+  it('검색어는 앞뒤 공백만 버리고, 글자가 아닌 값은 그대로 두어 문자열 검사에서 막힌다', () => {
+    expect(trimText(params('  행복 주택 '))).toBe('행복 주택');
+    expect(trimText(params(' \n '))).toBe('');
+    expect(trimText(params(['a', 'b']))).toEqual(['a', 'b']);
   });
 });
