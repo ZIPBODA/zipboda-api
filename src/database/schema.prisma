@@ -1,4 +1,4 @@
-// 집보다 ERD v0.1 — S0~S2 범위(청약 공고·공급 주택형·평면도). 문서: docs/ZIPBODA_erd_v0.1.md
+// 집보다 ERD — S0~S2 범위(청약 공고·공급 주택형·평면도). 문서: docs/ZIPBODA_erd_v0.1.md
 // 코드성 값은 API 정의서의 공통 인터페이스(ITF-*) 정수·문자열을 그대로 저장한다
 
 generator client {
@@ -77,7 +77,7 @@ model Floorplan {
   floor          String?
   unitNumber     String?      @map("unit_number")
   unitType       String?      @map("unit_type")
-  exclusiveArea  Decimal?     @map("exclusive_area") @db.Decimal(7, 2)
+  exclusiveArea  Decimal?     @map("exclusive_area") @db.Decimal(9, 4)
   /// ITF-003 주택형
   sizeType       String?      @map("size_type")
   image2dUrl     String?      @map("image_2d_url")

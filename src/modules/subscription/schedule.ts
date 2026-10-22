@@ -45,9 +45,8 @@ export const statusCodeOf = (schedule: ApplySchedule, today: string): Subscripti
   return daysBetween(today, schedule.applyEndDate) < 0 ? SubscriptionStatusCode.CLOSED : SubscriptionStatusCode.OPEN;
 };
 
-/** 공급 호수 한 자리를 몇 명이 겨뤘는지. 나누어떨어지면 소수점을 붙이지 않는다(691.0:1 → 691:1) */
-export const competitionOf = (applicationCount: number | null, supplyUnits: number | null): string | null => {
-  if (applicationCount === null || supplyUnits === null || supplyUnits <= 0) return null;
-  const rate = applicationCount / supplyUnits;
-  return `${Number.isInteger(rate) ? rate : rate.toFixed(1)}:1`;
-};
+/** 접수 중일 때만 마감까지 남은 날을 준다. 아직 열리지 않았거나 끝난 공고에는 D-day가 없다 */
+export const ddayOf = (schedule: ApplySchedule, today: string): number | null =>
+  statusCodeOf(schedule, today) === SubscriptionStatusCode.OPEN && schedule.applyEndDate
+    ? daysBetween(today, schedule.applyEndDate)
+    : null;

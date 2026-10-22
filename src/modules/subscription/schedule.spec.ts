@@ -1,5 +1,5 @@
 import { SubscriptionStatusCode } from '@/common/constants/interface-codes.js';
-import { competitionOf, daysBetween, serviceDateOf, statusCodeOf } from './schedule.js';
+import { daysBetween, ddayOf, serviceDateOf, statusCodeOf } from './schedule.js';
 import { sizeTypeOf } from './size-type.js';
 
 const schedule = { applyStartDate: '2026-09-07', applyEndDate: '2026-09-11', cancelled: false };
@@ -33,16 +33,17 @@ describe('공고 일정 계산', () => {
     ).toBeNull();
   });
 
+  it('D-day는 접수 중일 때만 마감까지 남은 날이다', () => {
+    expect(ddayOf(schedule, '2026-09-08')).toBe(3);
+    expect(ddayOf(schedule, '2026-09-11')).toBe(0);
+    expect(ddayOf(schedule, '2026-09-06')).toBeNull();
+    expect(ddayOf(schedule, '2026-09-12')).toBeNull();
+    expect(ddayOf({ ...schedule, cancelled: true }, '2026-09-08')).toBeNull();
+  });
+
   it('주택형은 전용면적의 정수부다', () => {
     expect(sizeTypeOf(59.98)).toBe('59');
     expect(sizeTypeOf(84)).toBe('84');
     expect(sizeTypeOf(13.66)).toBe('13');
-  });
-
-  it('경쟁률은 나누어떨어지면 소수점 없이, 아니면 한 자리로 쓰고, 공급 호수가 없으면 비운다', () => {
-    expect(competitionOf(691, 1)).toBe('691:1');
-    expect(competitionOf(691, 3)).toBe('230.3:1');
-    expect(competitionOf(10, 0)).toBeNull();
-    expect(competitionOf(null, 3)).toBeNull();
   });
 });
