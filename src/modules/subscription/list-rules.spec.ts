@@ -6,6 +6,7 @@ import {
   normalizeKeyword,
   parseBounds,
   sizeRangeOf,
+  sortSearchResults,
   sortSubscriptions,
   type SortableSubscription,
 } from './list-rules.js';
@@ -89,5 +90,32 @@ describe('목록 정렬', () => {
   it('원래 배열은 건드리지 않는다', () => {
     sortSubscriptions(items, 'DEADLINE');
     expect(ids(items)).toEqual(['c', 'b', 'a', 'd']);
+  });
+});
+
+describe('통합 검색 순위', () => {
+  const titled = (id: string, title: string, dday: number | null = null) => ({ ...entry(id, { dday }), title });
+
+  it('제목 일치 → 제목 앞부분 → 제목 포함 → 다른 필드 순이고, 같은 순위는 마감 임박순이다', () => {
+    const results = sortSearchResults(
+      [
+        titled('field', '청년 주택'),
+        titled('inside-late', '서울 매입임대'),
+        titled('prefix', '매입임대 2차'),
+        titled('inside-soon', '경기 매입임대', 2),
+        titled('same', '매입임대'),
+      ],
+      '매입임대',
+    );
+    expect(results.map((item) => item.id)).toEqual(['same', 'prefix', 'inside-soon', 'inside-late', 'field']);
+  });
+
+  // DB 검색(ILIKE)이 돌려줄 수 있는 차이는 대소문자와 앞뒤 공백이다 — 순위도 이 차이를 무시해야 web과 같다
+  it('제목의 앞뒤 공백·대소문자는 무시하고 순위를 매긴다', () => {
+    const results = sortSearchResults(
+      [titled('field', '다른 공고'), titled('prefix', 'Lh 행복주택 2차'), titled('same', '  LH 행복주택 ')],
+      'lh 행복주택',
+    );
+    expect(results.map((item) => item.id)).toEqual(['same', 'prefix', 'field']);
   });
 });

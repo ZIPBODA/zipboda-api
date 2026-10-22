@@ -27,6 +27,9 @@ const SORT_SELECT = {
   households: true,
 } satisfies Prisma.SubscriptionSelect;
 
+/** 검색 순위는 제목으로 매기므로 정렬 열에 제목만 더한다 */
+const SEARCH_SELECT = { ...SORT_SELECT, title: true } satisfies Prisma.SubscriptionSelect;
+
 const MARKER_SELECT = {
   id: true,
   title: true,
@@ -41,6 +44,7 @@ const MARKER_SELECT = {
 export type SubscriptionDetailRecord = Prisma.SubscriptionGetPayload<{ include: typeof DETAIL_INCLUDE }>;
 export type SubscriptionListRecord = Prisma.SubscriptionGetPayload<{ include: typeof LIST_INCLUDE }>;
 export type SubscriptionSortRow = Prisma.SubscriptionGetPayload<{ select: typeof SORT_SELECT }>;
+export type SubscriptionSearchRow = Prisma.SubscriptionGetPayload<{ select: typeof SEARCH_SELECT }>;
 export type SubscriptionMarkerRow = Prisma.SubscriptionGetPayload<{ select: typeof MARKER_SELECT }>;
 
 export interface SubscriptionListFilter {
@@ -125,6 +129,10 @@ export class SubscriptionRepository {
 
   findSortRows(filter: SubscriptionListFilter): Promise<SubscriptionSortRow[]> {
     return this.prisma.subscription.findMany({ where: whereOf(filter), select: SORT_SELECT });
+  }
+
+  findSearchRows(filter: SubscriptionListFilter): Promise<SubscriptionSearchRow[]> {
+    return this.prisma.subscription.findMany({ where: whereOf(filter), select: SEARCH_SELECT });
   }
 
   /** 두 번 읽는 사이에 공고가 바뀌어 조건에서 벗어났으면 빠지도록 같은 조건을 다시 건다 */

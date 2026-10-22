@@ -19,10 +19,17 @@ interface MapBody {
 interface ErrorBody {
   error: { code: string; message: string };
 }
+interface SearchBody {
+  data: {
+    subscriptions: { items: { id: string }[]; totalCount: number };
+    products: { items: unknown[]; totalCount: number };
+  };
+}
 // supertest는 본문을 any로 준다. 단언 전에 응답 모양을 이름 붙여 읽는다
 const listOf = (response: { body: unknown }) => (response.body as ListBody).data;
 const markersOf = (response: { body: unknown }) => (response.body as MapBody).data.markers;
 const dataOf = (response: { body: unknown }) => (response.body as { data: unknown }).data;
+const searchOf = (response: { body: unknown }) => (response.body as SearchBody).data;
 
 describe('청약 공고 API (e2e)', () => {
   let app: NestExpressApplication;
@@ -317,6 +324,92 @@ describe('청약 공고 API (e2e)', () => {
           { value: '20-25', min: 20, max: 25 },
           { value: '30-', min: 30, max: null },
         ],
+      });
+    });
+  });
+
+  describe('API-095 통합 검색', () => {
+    const searchIds = async (query: string) => {
+      const response = await get(`/api/search${query}`).expect(200);
+      return searchOf(response).subscriptions.items.map((item) => item.id);
+    };
+
+    it('목록과 같은 필드에서 찾고, 가구는 커머스 전이라 비어 있다', async () => {
+      const response = await get(`/api/search?q=${encodeURIComponent('서울')}`).expect(200);
+      expect(searchOf(response)).toEqual({
+        page: 1,
+        pageSize: 20,
+        subscriptions: {
+          items: [expect.objectContaining({ id: 'e2e-open', dday: 3 }), expect.anything()],
+          totalCount: 2,
+        },
+        products: { items: [], totalCount: 0 },
+      });
+      expect(await searchIds('?q=lh')).toEqual(['e2e-nocoord', 'e2e-upcoming']);
+      expect(await searchIds(`?q=${encodeURIComponent('도면 없는')}`)).toEqual([]);
+    });
+
+    it('제목 일치 → 앞부분 → 포함 → 다른 필드 순으로 세우고, 페이지를 나눠도 전체 건수는 따로 센다', async () => {
+      const fixtures = [
+        { id: 'e2e-rank-same', title: '매입임대' },
+        { id: 'e2e-rank-prefix', title: '매입임대 2차' },
+        { id: 'e2e-rank-field', title: '청년 주택', supplyType: '매입임대' },
+      ];
+      for (const fixture of fixtures) {
+        await prisma.subscription.create({
+          data: {
+            ...fixture,
+            agencyCode: 3,
+            regionCode: 3,
+            address: '경기도 성남시',
+            floorplans: { create: [{ id: `${fixture.id}-a`, exclusiveArea: 20 }] },
+          },
+        });
+      }
+      try {
+        const keyword = encodeURIComponent('  매입임대 ');
+        expect(await searchIds(`?q=${keyword}`)).toEqual([
+          'e2e-rank-same',
+          'e2e-rank-prefix',
+          'e2e-upcoming',
+          'e2e-rank-field',
+        ]);
+        expect(await searchIds(`?q=${keyword}&pageSize=2`)).toEqual(['e2e-rank-same', 'e2e-rank-prefix']);
+        const second = await get(`/api/search?q=${keyword}&page=2&pageSize=2`).expect(200);
+        expect(searchOf(second)).toMatchObject({ page: 2, pageSize: 2 });
+        expect(searchOf(second).subscriptions.items.map((item) => item.id)).toEqual(['e2e-upcoming', 'e2e-rank-field']);
+        expect(searchOf(second).subscriptions.totalCount).toBe(4);
+        expect(await searchIds(`?q=${keyword}&page=3&pageSize=2`)).toEqual([]);
+      } finally {
+        await prisma.subscription.deleteMany({ where: { id: { startsWith: 'e2e-rank-' } } });
+      }
+    });
+
+    it.each([
+      '',
+      '?q=',
+      '?q=%20%20',
+      '?q=%00',
+      '?q=a&q=b',
+      `?q=${encodeURIComponent('가'.repeat(101))}`,
+      '?q=a&page=0',
+      '?q=a&pageSize=0',
+      '?q=a&pageSize=101',
+      '?q=a&pageSize=1.5',
+      '?q=a&pageSize=-1',
+      '?q=a&limit=10',
+      '?q=a&type=x',
+    ])('검색어가 없거나 형식이 틀린 %s는 ERR-005다', async (query) => {
+      const response = await get(`/api/search${query}`).expect(422);
+      expect((response.body as ErrorBody).error).toEqual({ code: 'E006', message: 'VALIDATION_ERROR' });
+    });
+
+    it('검색어는 앞뒤 공백을 버린 뒤 100자까지, 빈 페이지 값은 기본값으로 받는다', async () => {
+      const longest = encodeURIComponent(` ${'가'.repeat(100)} `);
+      expect(searchOf(await get(`/api/search?q=${longest}`).expect(200)).subscriptions.totalCount).toBe(0);
+      expect(searchOf(await get('/api/search?q=lh&page=&pageSize=').expect(200))).toMatchObject({
+        page: 1,
+        pageSize: 20,
       });
     });
   });

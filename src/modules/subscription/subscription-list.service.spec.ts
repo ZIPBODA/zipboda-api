@@ -2,12 +2,15 @@ import { jest } from '@jest/globals';
 import { AgencyCode, RegionCode, SubscriptionStatusCode } from '@/common/constants/interface-codes.js';
 import type { Clock } from '@/common/time/clock.js';
 import { Prisma } from '@/database/generated/client.js';
+import { AppException } from '@/common/errors/app.exception.js';
+import { SearchQuery } from './dto/search.request.js';
 import { SubscriptionListQuery, SubscriptionMapQuery } from './dto/subscription-filter.request.js';
 import type {
   SubscriptionListFilter,
   SubscriptionListRecord,
   SubscriptionMarkerRow,
   SubscriptionRepository,
+  SubscriptionSearchRow,
   SubscriptionSortRow,
 } from './subscription.repository.js';
 import { SubscriptionService } from './subscription.service.js';
@@ -65,6 +68,9 @@ const serviceWith = (rows: SubscriptionSortRow[] = []) => {
     findListedByIds: jest
       .fn<(ids: string[], filter: SubscriptionListFilter) => Promise<SubscriptionListRecord[]>>()
       .mockImplementation((ids) => Promise.resolve([...ids].reverse().filter(isFixtureId).map(listRecord))),
+    findSearchRows: jest
+      .fn<(filter: SubscriptionListFilter) => Promise<SubscriptionSearchRow[]>>()
+      .mockResolvedValue([]),
     findMarkerRows: jest.fn<(filter: SubscriptionListFilter) => Promise<SubscriptionMarkerRow[]>>(),
     findFilterOptionSources: jest.fn<SubscriptionRepository['findFilterOptionSources']>(),
   };
@@ -134,6 +140,47 @@ describe('청약 공고 목록(API-010)', () => {
     });
     await service.list(listQuery({ status: SubscriptionStatusCode.ALL }));
     expect(repository.findSortRows).toHaveBeenLastCalledWith(expect.objectContaining({ status: undefined }));
+  });
+});
+
+describe('통합 검색(API-095)', () => {
+  const searchRow = (id: FixtureId, title: string): SubscriptionSearchRow => ({ ...sortRow(id), title });
+  const searchQuery = (values: Partial<SearchQuery>) => Object.assign(new SearchQuery(), values);
+
+  it('정규화한 검색어로 목록과 같은 조건을 걸고, 순위를 매긴 뒤에 페이지를 나눈다', async () => {
+    const { service, repository } = serviceWith();
+    repository.findSearchRows.mockResolvedValue([
+      searchRow('closed', '행복주택 2차'),
+      searchRow('open', '서울 공고'),
+      searchRow('upcoming', '행복주택'),
+    ]);
+    const first = await service.search(searchQuery({ q: '  행복주택 ', pageSize: 2 }));
+    expect(repository.findSearchRows).toHaveBeenCalledWith({
+      keyword: { text: '행복주택', agencyCodes: [], regionCodes: [] },
+    });
+    expect(repository.findListedByIds).toHaveBeenCalledWith(
+      ['upcoming', 'closed'],
+      repository.findSearchRows.mock.calls[0][0],
+    );
+    expect(first).toMatchObject({ page: 1, pageSize: 2, products: { items: [], totalCount: 0 } });
+    expect(first.subscriptions.items.map((item) => item.id)).toEqual(['upcoming', 'closed']);
+    expect(first.subscriptions.totalCount).toBe(3);
+    const second = await service.search(searchQuery({ q: '행복주택', page: 2, pageSize: 2 }));
+    expect(second.subscriptions.items.map((item) => item.id)).toEqual(['open']);
+    expect(second.subscriptions.totalCount).toBe(3);
+  });
+
+  it('맞는 공고가 없으면 다시 읽지 않는다', async () => {
+    const { service, repository } = serviceWith();
+    const result = await service.search(searchQuery({ q: '없는 공고' }));
+    expect(result.subscriptions).toEqual({ items: [], totalCount: 0 });
+    expect(repository.findListedByIds).not.toHaveBeenCalled();
+  });
+
+  it('공백뿐인 검색어는 검증 오류다', async () => {
+    const { service, repository } = serviceWith();
+    await expect(service.search(searchQuery({ q: '   ' }))).rejects.toEqual(new AppException('VALIDATION_ERROR'));
+    expect(repository.findSearchRows).not.toHaveBeenCalled();
   });
 });
 
