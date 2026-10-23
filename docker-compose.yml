@@ -8,6 +8,11 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-zipboda}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-zipboda}
       POSTGRES_DB: ${POSTGRES_DB:-zipboda}
+      # CI와 같은 로캘 정렬(ICU) — alpine 기본 정렬은 바이트 순이라 문자열 순서 버그가 로컬에서 안 보인다.
+      # 볼륨을 처음 만들 때만 적용된다(기존 볼륨은 그대로)
+      POSTGRES_INITDB_ARGS: --locale-provider=icu --icu-locale=en-US
+    # 기본 64MB면 수만 건에서 동시 요청이 몰릴 때 병렬 쿼리가 공유 메모리를 못 얻어 실패한다(test/perf 측정에서 확인)
+    shm_size: 256mb
     ports:
       - "127.0.0.1:${POSTGRES_PORT:-5433}:5432"
     volumes:

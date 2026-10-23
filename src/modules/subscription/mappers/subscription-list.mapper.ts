@@ -1,16 +1,18 @@
-import { competitionOf, competitionRatioOf } from '../competition.js';
+import { competitionOf } from '../competition.js';
 import type { SubscriptionListItemResponse, SubscriptionMapMarkerResponse } from '../dto/subscription-list.response.js';
-import type { SortableSubscription } from '../list-rules.js';
+import type { SearchCandidate } from '../list-rules.js';
 import { ddayOf, statusCodeOf } from '../schedule.js';
-import type { SubscriptionListRecord, SubscriptionMarkerRow, SubscriptionSortRow } from '../subscription.repository.js';
+import type {
+  SubscriptionListRecord,
+  SubscriptionMarkerRow,
+  SubscriptionSearchRow,
+} from '../subscription.repository.js';
 import { agencyCodeOf, regionCodeOf, scheduleOf } from './subscription-fields.js';
 
-/** D-day·경쟁률은 날마다 또는 두 열로 계산하는 값이라 DB에서 바로 정렬하지 못한다 — 가벼운 열만 읽어 여기서 붙인다 */
-export const toSortable = (row: SubscriptionSortRow, today: string): SortableSubscription => ({
+export const toSearchCandidate = (row: SubscriptionSearchRow, today: string): SearchCandidate => ({
   id: row.id,
+  title: row.title,
   dday: ddayOf(scheduleOf(row), today),
-  competitionRatio: competitionRatioOf(row.applicationCount, row.supplyUnits),
-  households: row.households,
 });
 
 export const sizesOf = (record: SubscriptionListRecord): number[] =>

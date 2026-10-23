@@ -18,6 +18,9 @@ jobs:
           POSTGRES_USER: zipboda
           POSTGRES_PASSWORD: zipboda
           POSTGRES_DB: zipboda_test
+          # alpine(musl)의 기본 정렬은 바이트 순이라 운영 DB(glibc·ICU)와 문자열 순서가 다르다 —
+          # 운영과 같은 로캘 정렬로 띄워 목록의 id 동순위 규칙(COLLATE "C")이 빠지면 e2e가 잡게 한다
+          POSTGRES_INITDB_ARGS: --locale-provider=icu --icu-locale=en-US
         ports:
           - 5432:5432
         options: >-

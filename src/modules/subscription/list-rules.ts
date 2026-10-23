@@ -7,21 +7,10 @@ import {
   type StoredAgencyCode,
   type StoredRegionCode,
 } from '@/common/constants/interface-codes.js';
-import {
-  BOUNDS_PATTERN,
-  DEFAULT_SUBSCRIPTION_SORT,
-  MAX_LATITUDE,
-  MAX_LONGITUDE,
-  SIZE_RANGES,
-  type SizeRange,
-  type SubscriptionSort,
-} from './constants.js';
+import { BOUNDS_PATTERN, MAX_LATITUDE, MAX_LONGITUDE, SIZE_RANGES, type SizeRange } from './constants.js';
 
 export const sizeRangeOf = (value: string | undefined): SizeRange | undefined =>
   SIZE_RANGES.find((range) => range.value === value);
-
-export const isInSizeRange = (exclusiveArea: number, range: SizeRange): boolean =>
-  range.min <= exclusiveArea && (range.max === null || exclusiveArea < range.max);
 
 /** 검색어는 앞뒤 공백을 버리고 연속 공백을 하나로 줄인 뒤 대소문자 없이 찾는다(web 검색과 같은 규칙) */
 export const normalizeKeyword = (raw: string | undefined): string | null => {
@@ -72,43 +61,36 @@ export const parseBounds = (text: string): GeoBounds => {
   return { south, west, north, east };
 };
 
-export interface SortableSubscription {
+export interface SearchCandidate {
   id: string;
+  title: string;
   dday: number | null;
-  competitionRatio: number | null;
-  households: number | null;
 }
 
-/** 값이 없는 공고는 어느 정렬에서나 뒤로 보낸다 */
-const nullsLast = (a: number | null, b: number | null, direction: 1 | -1): number => {
-  if (a === b) return 0;
-  if (a === null) return 1;
-  if (b === null) return -1;
-  return (a - b) * direction;
-};
-
-const ASCENDING = 1;
-const DESCENDING = -1;
-
 /**
- * 문자 코드 그대로 비교한다. localeCompare는 로캘이 무시하는 문자만 다른 두 id를 같다고 볼 수 있어
- * 정렬이 매번 같다는 보장이 깨진다
+ * 코드 포인트 순으로 비교한다 — 목록 SQL의 COLLATE "C"(UTF-8 바이트 순)와 같은 순서다.
+ * localeCompare는 로캘이 무시하는 문자만 다른 두 id를 같다고 볼 수 있고, 문자열 < 비교는 UTF-16 코드 단위라
+ * 보조 평면 문자(이모지 등)에서 SQL과 순서가 갈린다
  */
-const compareCodeUnits = (a: string, b: string): number => {
-  if (a < b) return -1;
-  if (a > b) return 1;
-  return 0;
+const compareCodePoints = (a: string, b: string): number => {
+  const left = [...a];
+  const right = [...b];
+  for (let index = 0; index < Math.min(left.length, right.length); index++) {
+    const difference = (left[index].codePointAt(0) ?? 0) - (right[index].codePointAt(0) ?? 0);
+    if (difference !== 0) return difference;
+  }
+  return left.length - right.length;
 };
 
-// 값이 같으면 id로 순서를 고정한다 — 같은 조건으로 다시 불러도 페이지 경계가 흔들리지 않게
-const COMPARATORS: Record<SubscriptionSort, (a: SortableSubscription, b: SortableSubscription) => number> = {
-  DEADLINE: (a, b) => nullsLast(a.dday, b.dday, ASCENDING) || compareCodeUnits(a.id, b.id),
-  COMPETITION: (a, b) => nullsLast(a.competitionRatio, b.competitionRatio, ASCENDING) || compareCodeUnits(a.id, b.id),
-  HOUSEHOLDS: (a, b) => nullsLast(a.households, b.households, DESCENDING) || compareCodeUnits(a.id, b.id),
+/** 목록 기본 정렬(마감 임박순)의 JS 판 — 목록 SQL(ORDER_BY.DEADLINE, id COLLATE "C")과 같은 순서다 */
+const compareDeadline = (a: SearchCandidate, b: SearchCandidate): number => {
+  if (a.dday !== b.dday) {
+    if (a.dday === null) return 1;
+    if (b.dday === null) return -1;
+    return a.dday - b.dday;
+  }
+  return compareCodePoints(a.id, b.id);
 };
-
-export const sortSubscriptions = <T extends SortableSubscription>(items: readonly T[], sort: SubscriptionSort): T[] =>
-  [...items].sort(COMPARATORS[sort]);
 
 /** web 통합 검색과 같은 순위 — 제목이 검색어와 같은 공고, 검색어로 시작하는 공고, 검색어를 품은 공고, 다른 필드로만 맞은 공고 순 */
 const SEARCH_RANK = { SAME_TITLE: 0, TITLE_PREFIX: 1, IN_TITLE: 2, OTHER_FIELD: 3 } as const;
@@ -122,11 +104,8 @@ const searchRankOf = (title: string, keyword: string): number => {
 };
 
 /** keyword는 normalizeKeyword를 거친 값이다. 같은 순위 안에서는 web 검색처럼 목록 기본 정렬(마감 임박순)을 따른다 */
-export const sortSearchResults = <T extends SortableSubscription & { title: string }>(
-  items: readonly T[],
-  keyword: string,
-): T[] =>
+export const sortSearchResults = <T extends SearchCandidate>(items: readonly T[], keyword: string): T[] =>
   items
     .map((item) => ({ item, rank: searchRankOf(item.title, keyword) }))
-    .sort((a, b) => a.rank - b.rank || COMPARATORS[DEFAULT_SUBSCRIPTION_SORT](a.item, b.item))
+    .sort((a, b) => a.rank - b.rank || compareDeadline(a.item, b.item))
     .map(({ item }) => item);

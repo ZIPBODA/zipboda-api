@@ -11,6 +11,7 @@
 - 버전: Node 24 · pnpm 10 · NestJS 12 · Prisma 7 · TypeScript 6. Nest 12·Prisma 7이 ESM 전용이라 프로젝트도 ESM이다(상대 import에 `.js` 확장자).
 - 준비: `.env.example`을 `.env`로 복사 → `pnpm install`(Prisma 클라이언트 자동 생성)
 - DB: `pnpm db:up`(Docker Postgres 17, 호스트 5433 — 5432는 다른 프로젝트가 사용) → `pnpm db:deploy` → `pnpm db:seed`
+  - 정렬 규칙은 CI와 같은 ICU(en-US)다. 2026-10-23 이전에 만든 볼륨은 바이트 순 정렬이 남아 있어 id 정렬 회귀를 로컬에서 못 잡는다 — 맞추려면 볼륨을 지우고(`docker compose down -v`, 로컬 데이터 삭제) 다시 올린 뒤 deploy·seed 한다
 - 서버: `pnpm start:dev` → `http://localhost:4000/api`
 - 검증: `pnpm typecheck` · `pnpm lint` · `pnpm test`(Jest ESM) · `pnpm test:e2e`(`TEST_DATABASE_URL`의 DB를 쓴다)
 - 스키마·ERD: `src/database/schema.prisma` ↔ `docs/ZIPBODA_erd_v0.1.md`를 함께 고친다. 적용된 마이그레이션은 고치지 말고 새 마이그레이션을 추가한다.

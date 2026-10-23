@@ -3,6 +3,7 @@ import { AgencyCode, RegionCode, SubscriptionStatusCode } from '@/common/constan
 import type { Clock } from '@/common/time/clock.js';
 import { Prisma } from '@/database/generated/client.js';
 import { AppException } from '@/common/errors/app.exception.js';
+import { SIZE_RANGES } from './constants.js';
 import { SearchQuery } from './dto/search.request.js';
 import { SubscriptionListQuery, SubscriptionMapQuery } from './dto/subscription-filter.request.js';
 import type {
@@ -11,7 +12,6 @@ import type {
   SubscriptionMarkerRow,
   SubscriptionRepository,
   SubscriptionSearchRow,
-  SubscriptionSortRow,
 } from './subscription.repository.js';
 import { SubscriptionService } from './subscription.service.js';
 
@@ -25,16 +25,6 @@ const SCHEDULES = {
 } as const;
 type FixtureId = keyof typeof SCHEDULES;
 const isFixtureId = (id: string): id is FixtureId => id in SCHEDULES;
-
-const sortRow = (id: FixtureId, values: Partial<SubscriptionSortRow> = {}): SubscriptionSortRow => ({
-  id,
-  ...SCHEDULES[id],
-  cancelledAt: null,
-  applicationCount: null,
-  supplyUnits: null,
-  households: null,
-  ...values,
-});
 
 const listRecord = (id: FixtureId): SubscriptionListRecord => ({
   id,
@@ -61,9 +51,9 @@ const listRecord = (id: FixtureId): SubscriptionListRecord => ({
   floorplans: [{ exclusiveArea: new Prisma.Decimal(31.99) }, { exclusiveArea: new Prisma.Decimal(28.81) }],
 });
 
-const serviceWith = (rows: SubscriptionSortRow[] = []) => {
+const serviceWith = (page: { ids: string[]; totalCount: number } = { ids: [], totalCount: 0 }) => {
   const repository = {
-    findSortRows: jest.fn<(filter: SubscriptionListFilter) => Promise<SubscriptionSortRow[]>>().mockResolvedValue(rows),
+    findPage: jest.fn<SubscriptionRepository['findPage']>().mockResolvedValue(page),
     // DB는 id 목록 순서를 지키지 않는다 — 뒤집어 돌려줘도 정렬 순서가 유지되는지 본다
     findListedByIds: jest
       .fn<(ids: string[], filter: SubscriptionListFilter) => Promise<SubscriptionListRecord[]>>()
@@ -79,40 +69,38 @@ const serviceWith = (rows: SubscriptionSortRow[] = []) => {
 };
 
 const listQuery = (values: Partial<SubscriptionListQuery> = {}) => Object.assign(new SubscriptionListQuery(), values);
-const ROWS = [sortRow('upcoming'), sortRow('open', { households: 40 }), sortRow('closed')];
+const PAGE = { ids: ['open', 'closed', 'upcoming'], totalCount: 3 };
 
 describe('청약 공고 목록(API-010)', () => {
-  it('가벼운 열로 정렬한 뒤 지금 페이지의 공고만 다시 읽고, DB가 돌려준 순서와 상관없이 정렬 순서를 지킨다', async () => {
-    const { service, repository } = serviceWith(ROWS);
-    const result = await service.list(listQuery());
+  it('정렬·페이지는 DB에 맡기고, DB가 정한 id 순서대로 공고를 다시 읽어 그 순서를 지킨다', async () => {
+    const { service, repository } = serviceWith(PAGE);
+    const result = await service.list(listQuery({ sort: 'COMPETITION', page: 2, pageSize: 3 }));
+    expect(repository.findPage).toHaveBeenCalledWith(expect.any(Object), {
+      sort: 'COMPETITION',
+      today: TODAY,
+      offset: 3,
+      limit: 3,
+    });
     // 다시 읽을 때도 같은 조건을 건다 — 사이에 조건에서 벗어난 공고가 섞이지 않게
-    expect(repository.findListedByIds).toHaveBeenCalledWith(
-      ['open', 'closed', 'upcoming'],
-      repository.findSortRows.mock.calls[0][0],
-    );
+    expect(repository.findListedByIds).toHaveBeenCalledWith(PAGE.ids, repository.findPage.mock.calls[0][0]);
     expect(result.items.map((item) => [item.id, item.dday, item.statusCode])).toEqual([
       ['open', 3, SubscriptionStatusCode.OPEN],
       ['closed', null, SubscriptionStatusCode.CLOSED],
       ['upcoming', null, SubscriptionStatusCode.UPCOMING],
     ]);
-    expect(result).toMatchObject({ page: 1, pageSize: 20, totalCount: 3 });
+    expect(result).toMatchObject({ page: 2, pageSize: 3, totalCount: 3 });
     expect(result.items[0].sizes).toEqual([28.81, 31.99]);
   });
 
-  it('페이지는 정렬한 뒤에 나누고, 범위를 넘은 페이지는 다시 읽지 않는다', async () => {
-    const { service, repository } = serviceWith(ROWS);
-    const secondPage = await service.list(listQuery({ page: 2, pageSize: 1 }));
-    expect(repository.findListedByIds).toHaveBeenLastCalledWith(['closed'], expect.anything());
-    expect(secondPage.items.map((item) => item.id)).toEqual(['closed']);
-    expect(secondPage.totalCount).toBe(3);
-    repository.findListedByIds.mockClear();
+  it('범위를 넘은 페이지는 다시 읽지 않고 전체 건수만 준다', async () => {
+    const { service, repository } = serviceWith({ ids: [], totalCount: 3 });
     const beyond = await service.list(listQuery({ page: 9, pageSize: 1 }));
-    expect(beyond.items).toEqual([]);
+    expect(beyond).toMatchObject({ items: [], totalCount: 3 });
     expect(repository.findListedByIds).not.toHaveBeenCalled();
   });
 
   it('두 번 읽는 사이에 사라진 공고는 건너뛴다', async () => {
-    const { service, repository } = serviceWith(ROWS);
+    const { service, repository } = serviceWith(PAGE);
     repository.findListedByIds.mockResolvedValueOnce([listRecord('open')]);
     const result = await service.list(listQuery());
     expect(result.items.map((item) => item.id)).toEqual(['open']);
@@ -130,21 +118,32 @@ describe('청약 공고 목록(API-010)', () => {
         keyword: '  LH ',
       }),
     );
-    expect(repository.findSortRows).toHaveBeenCalledWith({
-      regionCode: undefined,
-      agencyCode: AgencyCode.LH,
-      sizeRange: { value: '20-25', min: 20, max: 25 },
-      keyword: { text: 'lh', agencyCodes: [AgencyCode.LH], regionCodes: [] },
-      bounds: undefined,
-      status: { code: SubscriptionStatusCode.OPEN, today: TODAY },
-    });
+    expect(repository.findPage).toHaveBeenCalledWith(
+      {
+        regionCode: undefined,
+        agencyCode: AgencyCode.LH,
+        sizeRange: { value: '20-25', min: 20, max: 25 },
+        keyword: { text: 'lh', agencyCodes: [AgencyCode.LH], regionCodes: [] },
+        bounds: undefined,
+        status: { code: SubscriptionStatusCode.OPEN, today: TODAY },
+      },
+      expect.objectContaining({ sort: 'DEADLINE', offset: 0, limit: 20 }),
+    );
     await service.list(listQuery({ status: SubscriptionStatusCode.ALL }));
-    expect(repository.findSortRows).toHaveBeenLastCalledWith(expect.objectContaining({ status: undefined }));
+    expect(repository.findPage).toHaveBeenLastCalledWith(
+      expect.objectContaining({ status: undefined }),
+      expect.anything(),
+    );
   });
 });
 
 describe('통합 검색(API-095)', () => {
-  const searchRow = (id: FixtureId, title: string): SubscriptionSearchRow => ({ ...sortRow(id), title });
+  const searchRow = (id: FixtureId, title: string): SubscriptionSearchRow => ({
+    id,
+    title,
+    ...SCHEDULES[id],
+    cancelledAt: null,
+  });
   const searchQuery = (values: Partial<SearchQuery>) => Object.assign(new SearchQuery(), values);
 
   it('정규화한 검색어로 목록과 같은 조건을 걸고, 순위를 매긴 뒤에 페이지를 나눈다', async () => {
@@ -218,13 +217,13 @@ describe('지도 핀(API-012)', () => {
 });
 
 describe('필터 선택지', () => {
-  it('DB가 묶어 준 지역·기관·상태에, 면적 값을 구간으로 바꿔 준다 — 상태는 오늘 날짜로 묻는다', async () => {
+  it('DB가 확인한 지역·기관·상태·면적 구간을 응답 모양으로 바꾼다 — 상태는 오늘 날짜로 묻는다', async () => {
     const { service, repository } = serviceWith();
     repository.findFilterOptionSources.mockResolvedValue({
       regionCodes: [RegionCode.GYEONGGI, RegionCode.SEOUL],
       agencyCodes: [AgencyCode.LH],
       statusCodes: [SubscriptionStatusCode.OPEN, SubscriptionStatusCode.CLOSED],
-      exclusiveAreas: [14.6475, 31.99],
+      sizeRanges: [SIZE_RANGES[0], SIZE_RANGES[4]],
     });
     await expect(service.filterOptions()).resolves.toEqual({
       regions: [RegionCode.SEOUL, RegionCode.GYEONGGI],
