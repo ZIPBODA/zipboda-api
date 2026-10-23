@@ -35,9 +35,13 @@ describe('청약 공고 API (e2e)', () => {
   let app: NestExpressApplication;
   let prisma: PrismaService;
   const get = (path: string) => request(app.getHttpServer()).get(path);
+  // 항목은 다시 읽을 때 Prisma 조건으로 한 번 더 걸러져, id만 보면 SQL 조건이 너무 넓어도 드러나지 않는다.
+  // 건수는 SQL만으로 세므로 한 페이지에 다 들어오는 조회에서 건수와 항목 수가 같은지 함께 본다
   const listIds = async (query: string) => {
     const response = await get(`/api/subscriptions${query}`).expect(200);
-    return listOf(response).items.map((item) => item.id);
+    const { items, totalCount } = listOf(response);
+    expect(totalCount).toBe(items.length);
+    return items.map((item) => item.id);
   };
 
   beforeAll(async () => {
@@ -287,6 +291,118 @@ describe('청약 공고 API (e2e)', () => {
         expect((response.body as ErrorBody).error).toEqual({ code: 'E006', message: 'VALIDATION_ERROR' });
       },
     );
+  });
+
+  // 정렬·페이지는 DB가 SQL로 한다 — 값이 없을 때, 같을 때, 경계에서 web 정렬 규칙과 같은지 본다.
+  // 다른 공고와 섞이지 않게 인천(region=2)에만 둔다(오늘 9/8)
+  describe('정렬·면적 경계', () => {
+    const SORT_FIXTURES = [
+      // 접수 중 D-2, 경쟁률 1, 50세대, 면적 25(20-25가 아니라 25-30)
+      {
+        id: 'e2e-sort-a',
+        applyStartDate: day('2026-09-01'),
+        applyEndDate: day('2026-09-10'),
+        supplyUnits: 4,
+        applicationCount: 4,
+        households: 50,
+        area: 25,
+      },
+      // a와 D-day가 같다 — id를 문자 코드 순으로 가르면 대문자 B가 a보다 앞이다. 공급 호수 0이라 경쟁률 없음
+      {
+        id: 'e2e-sort-B',
+        applyStartDate: day('2026-09-01'),
+        applyEndDate: day('2026-09-10'),
+        supplyUnits: 0,
+        applicationCount: 10,
+        households: null,
+        area: 24.9999,
+      },
+      // 오늘 마감(D-0), 경쟁률 0.5, a와 세대 수가 같다, 면적 30(30- 구간)
+      {
+        id: 'e2e-sort-c',
+        applyStartDate: day('2026-09-01'),
+        applyEndDate: day('2026-09-08'),
+        supplyUnits: 2,
+        applicationCount: 1,
+        households: 50,
+        area: 30,
+      },
+      // 일정상 접수 중이지만 취소 — D-day가 없다. 경쟁률은 a와 같은 1
+      {
+        id: 'e2e-sort-d',
+        applyStartDate: day('2026-09-01'),
+        applyEndDate: day('2026-09-10'),
+        supplyUnits: 3,
+        applicationCount: 3,
+        households: 10,
+        cancelledAt: new Date('2026-09-02T00:00:00Z'),
+        area: 15,
+      },
+      // 일정·신청 인원 없음, 세대 수 가장 많음, 면적 14.9999(0-15)
+      { id: 'e2e-sort-e', supplyUnits: 5, applicationCount: null, households: 200, area: 14.9999 },
+    ];
+    const inIncheon = (query = '') => listIds(`?region=2${query}`);
+
+    beforeAll(async () => {
+      for (const { area, ...fixture } of SORT_FIXTURES) {
+        await prisma.subscription.create({
+          data: {
+            ...fixture,
+            title: `정렬 ${fixture.id}`,
+            agencyCode: 4,
+            regionCode: 2,
+            address: '인천광역시',
+            floorplans: { create: [{ id: `${fixture.id}-plan`, exclusiveArea: area }] },
+          },
+        });
+      }
+    });
+
+    afterAll(async () => {
+      await prisma.subscription.deleteMany({ where: { id: { startsWith: 'e2e-sort-' } } });
+    });
+
+    it('마감 임박순: D-day 작은 순, 같으면 id 문자 코드 순, 접수 중이 아니면(취소 포함) 뒤', async () => {
+      expect(await inIncheon()).toEqual(['e2e-sort-c', 'e2e-sort-B', 'e2e-sort-a', 'e2e-sort-d', 'e2e-sort-e']);
+      const response = await get('/api/subscriptions?region=2').expect(200);
+      expect(listOf(response).items.find((item) => item.id === 'e2e-sort-d')?.statusCode).toBe(4);
+    });
+
+    it('경쟁률순: 낮은 순, 공급 호수가 0이거나 신청 인원을 모르면 뒤', async () => {
+      expect(await inIncheon('&sort=COMPETITION')).toEqual([
+        'e2e-sort-c',
+        'e2e-sort-a',
+        'e2e-sort-d',
+        'e2e-sort-B',
+        'e2e-sort-e',
+      ]);
+    });
+
+    it('세대수순: 많은 순, 같으면 id 순, 모르면 뒤', async () => {
+      expect(await inIncheon('&sort=HOUSEHOLDS')).toEqual([
+        'e2e-sort-e',
+        'e2e-sort-a',
+        'e2e-sort-c',
+        'e2e-sort-d',
+        'e2e-sort-B',
+      ]);
+    });
+
+    it('페이지는 정렬한 순서로 나누고 전체 건수는 따로 센다', async () => {
+      const response = await get('/api/subscriptions?region=2&page=2&pageSize=2').expect(200);
+      expect(listOf(response).items.map((item) => item.id)).toEqual(['e2e-sort-a', 'e2e-sort-d']);
+      expect(listOf(response).totalCount).toBe(5);
+    });
+
+    it.each([
+      ['0-15', ['e2e-sort-e']],
+      ['15-20', ['e2e-sort-d']],
+      ['20-25', ['e2e-sort-B']],
+      ['25-30', ['e2e-sort-a']],
+      ['30-', ['e2e-sort-c']],
+    ])('면적 구간 %s는 왼쪽 경계만 포함한다 → %j', async (size, expected) => {
+      expect(await inIncheon(`&size=${size}`)).toEqual(expected);
+    });
   });
 
   describe('API-012 지도', () => {

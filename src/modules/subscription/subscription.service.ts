@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { AgencyCode, RegionCode, SubscriptionStatusCode } from '@/common/constants/interface-codes.js';
 import { AppException } from '@/common/errors/app.exception.js';
 import { Clock } from '@/common/time/clock.js';
-import { SIZE_RANGES } from './constants.js';
 import type { SearchQuery } from './dto/search.request.js';
 import type { SearchResponse } from './dto/search.response.js';
 import type { SubscriptionDetailResponse } from './dto/subscription-detail.response.js';
@@ -19,17 +18,15 @@ import type {
 } from './dto/subscription-list.response.js';
 import {
   codesMatchingKeyword,
-  isInSizeRange,
   normalizeKeyword,
   parseBounds,
   sizeRangeOf,
   sortSearchResults,
-  sortSubscriptions,
   type GeoBounds,
 } from './list-rules.js';
 import { toSubscriptionDetailResponse } from './mappers/subscription-detail.mapper.js';
 import { agencyCodeOf, regionCodeOf } from './mappers/subscription-fields.js';
-import { toListItemResponse, toMapMarkerResponse, toSortable } from './mappers/subscription-list.mapper.js';
+import { toListItemResponse, toMapMarkerResponse, toSearchCandidate } from './mappers/subscription-list.mapper.js';
 import { serviceDateOf } from './schedule.js';
 import { SubscriptionRepository, type SubscriptionListFilter } from './subscription.repository.js';
 
@@ -48,25 +45,21 @@ export class SubscriptionService {
     return toSubscriptionDetailResponse(record, this.today());
   }
 
-  /**
-   * 조건(상태 포함)은 DB가 걸고, 정렬은 조건에 맞는 공고의 가벼운 열만 읽어 여기서 한다.
-   * 도면까지 담은 전체 행은 지금 페이지 몫만 다시 읽는다
-   */
+  /** 도면까지 담은 행은 무거워서, DB가 정렬·페이지로 고른 id 몫만 다시 읽는다 */
   async list(query: SubscriptionListQuery): Promise<SubscriptionListResponse> {
     const today = this.today();
     const filter = this.filterOf(query, today);
-    const rows = await this.repository.findSortRows(filter);
-    const sorted = sortSubscriptions(
-      rows.map((row) => toSortable(row, today)),
-      query.sort,
-    );
-    const start = (query.page - 1) * query.pageSize;
-    const pageIds = sorted.slice(start, start + query.pageSize).map((entry) => entry.id);
+    const { ids, totalCount } = await this.repository.findPage(filter, {
+      sort: query.sort,
+      today,
+      offset: (query.page - 1) * query.pageSize,
+      limit: query.pageSize,
+    });
     return {
-      items: await this.listItemsInOrder(pageIds, filter, today),
+      items: await this.listItemsInOrder(ids, filter, today),
       page: query.page,
       pageSize: query.pageSize,
-      totalCount: sorted.length,
+      totalCount,
     };
   }
 
@@ -78,7 +71,7 @@ export class SubscriptionService {
     const filter: SubscriptionListFilter = { keyword: { text: keyword, ...codesMatchingKeyword(keyword) } };
     const rows = await this.repository.findSearchRows(filter);
     const ranked = sortSearchResults(
-      rows.map((row) => ({ ...toSortable(row, today), title: row.title })),
+      rows.map((row) => toSearchCandidate(row, today)),
       keyword,
     );
     const start = (query.page - 1) * query.pageSize;
@@ -110,9 +103,7 @@ export class SubscriptionService {
       regions: uniqueSorted(sources.regionCodes.map(regionCodeOf)),
       agencies: uniqueSorted(sources.agencyCodes.map(agencyCodeOf)),
       statuses: sources.statusCodes,
-      sizeRanges: SIZE_RANGES.filter((range) => sources.exclusiveAreas.some((area) => isInSizeRange(area, range))).map(
-        ({ value, min, max }) => ({ value, min, max }),
-      ),
+      sizeRanges: sources.sizeRanges.map(({ value, min, max }) => ({ value, min, max })),
     };
   }
 

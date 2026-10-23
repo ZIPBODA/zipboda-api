@@ -2,33 +2,18 @@ import { AgencyCode, RegionCode } from '@/common/constants/interface-codes.js';
 import {
   codesMatchingKeyword,
   isGeoBoundsText,
-  isInSizeRange,
   normalizeKeyword,
   parseBounds,
   sizeRangeOf,
   sortSearchResults,
-  sortSubscriptions,
-  type SortableSubscription,
+  type SearchCandidate,
 } from './list-rules.js';
 
-const entry = (id: string, values: Partial<SortableSubscription> = {}): SortableSubscription => ({
-  id,
-  dday: null,
-  competitionRatio: null,
-  households: null,
-  ...values,
-});
-
 describe('목록 조건', () => {
-  it('면적 구간은 왼쪽 경계만 포함하고, 마지막 구간은 위가 열려 있다', () => {
-    const range = sizeRangeOf('20-25');
-    expect(range).toBeDefined();
-    if (!range) return;
-    expect(isInSizeRange(20, range)).toBe(true);
-    expect(isInSizeRange(24.99, range)).toBe(true);
-    expect(isInSizeRange(25, range)).toBe(false);
-    const open = sizeRangeOf('30-');
-    expect(open && isInSizeRange(120, open)).toBe(true);
+  // 경계(min ≤ 면적 < max)는 SQL 조건이 정한다 — e2e '정렬·면적 경계'가 본다
+  it('면적 구간 값을 구간으로 풀고, 마지막 구간은 위가 열려 있으며, 없는 값은 조건이 아니다', () => {
+    expect(sizeRangeOf('20-25')).toEqual({ value: '20-25', min: 20, max: 25 });
+    expect(sizeRangeOf('30-')).toEqual({ value: '30-', min: 30, max: null });
     expect(sizeRangeOf('39')).toBeUndefined();
   });
 
@@ -66,35 +51,8 @@ describe('목록 조건', () => {
   });
 });
 
-describe('목록 정렬', () => {
-  const items = [
-    entry('c', { dday: null, competitionRatio: 5, households: 40 }),
-    entry('b', { dday: 3, competitionRatio: null, households: null }),
-    entry('a', { dday: 3, competitionRatio: 230, households: 13 }),
-    entry('d', { dday: 0, competitionRatio: 1.5, households: 40 }),
-  ];
-  const ids = (sorted: SortableSubscription[]) => sorted.map((item) => item.id);
-
-  it('마감 임박은 D-day가 작은 순, D-day가 없는 공고는 뒤, 같으면 id 순이다', () => {
-    expect(ids(sortSubscriptions(items, 'DEADLINE'))).toEqual(['d', 'a', 'b', 'c']);
-  });
-
-  it('경쟁률은 낮은 순이고 경쟁률을 모르는 공고는 뒤다', () => {
-    expect(ids(sortSubscriptions(items, 'COMPETITION'))).toEqual(['d', 'c', 'a', 'b']);
-  });
-
-  it('세대 수는 많은 순이고 모르는 공고는 뒤다', () => {
-    expect(ids(sortSubscriptions(items, 'HOUSEHOLDS'))).toEqual(['c', 'd', 'a', 'b']);
-  });
-
-  it('원래 배열은 건드리지 않는다', () => {
-    sortSubscriptions(items, 'DEADLINE');
-    expect(ids(items)).toEqual(['c', 'b', 'a', 'd']);
-  });
-});
-
 describe('통합 검색 순위', () => {
-  const titled = (id: string, title: string, dday: number | null = null) => ({ ...entry(id, { dday }), title });
+  const titled = (id: string, title: string, dday: number | null = null): SearchCandidate => ({ id, title, dday });
 
   it('제목 일치 → 제목 앞부분 → 제목 포함 → 다른 필드 순이고, 같은 순위는 마감 임박순이다', () => {
     const results = sortSearchResults(
@@ -117,5 +75,17 @@ describe('통합 검색 순위', () => {
       'lh 행복주택',
     );
     expect(results.map((item) => item.id)).toEqual(['same', 'prefix', 'field']);
+  });
+
+  // 목록 SQL이 id를 COLLATE "C"로 가르는 것과 같은 순서 — 대문자(0x42)가 소문자(0x61)보다 앞이다
+  it('순위와 D-day가 같으면 id를 문자 코드 순으로 가른다', () => {
+    const results = sortSearchResults([titled('e2e-a', '행복주택 1'), titled('e2e-B', '행복주택 2')], '행복');
+    expect(results.map((item) => item.id)).toEqual(['e2e-B', 'e2e-a']);
+  });
+
+  // 문자열 < 비교(UTF-16)로는 이모지(U+1F600)가 전각 느낌표(U+FF01)보다 앞이지만, SQL "C"는 코드 포인트 순이라 뒤다
+  it('보조 평면 문자가 섞인 id도 SQL과 같은 코드 포인트 순으로 가른다', () => {
+    const results = sortSearchResults([titled('a😀', '행복주택'), titled('a！', '행복주택')], '행복');
+    expect(results.map((item) => item.id)).toEqual(['a！', 'a😀']);
   });
 });
