@@ -5,7 +5,7 @@
 | 항목 | 내용 |
 |------|------|
 | 문서명 | 집보다(Zipboda) 전체 ERD 초안 — 회원·관심·가점·알림·3D 자산·집구경·커뮤니티·감사·커머스 |
-| 버전 | v0.2.0 |
+| 버전 | v0.2.2 |
 | 작성일 | 2026-10-22 |
 | 기반 문서 | /docs/ZIPBODA_erd_v0.1.md, /docs/ZIPBODA_development-plan_v0.1.md, /docs/ZIPBODA_api-contract-delta.md, /.claude/rules/backend.rule.md, /src/database/schema.prisma, ../zipboda-web/docs/ZIPBODA_API 및 인터페이스 정의서_v0.1.xlsx, ../zipboda-web/docs/ZIPBODA_요구사항정의서_v0.1.xlsx, ../zipboda-web/docs/ZIPBODA_화면설계서_v0.1.xlsx, ../zipboda-web/src/widgets/my-page/model/types.ts, ../zipboda-web/src/entities/community/model/types.ts, ../zipboda-web/src/entities/inspiration/model/types.ts, ../zipboda-web/src/entities/floorplan/model/types.ts, ../zipboda-web/src/entities/floorplan/api/models/reviewed.json, ../zipboda-web/src/entities/product/model/types.ts, ../zipboda-web/src/widgets/subscription-detail/ui/DetailInfoPanel.tsx, ../zipboda-web/src/widgets/header/config/notifications.ts, ../zipboda-web/src/features/score/config/constants.ts, ../zipboda-web/src/features/cart/model/types.ts |
 
@@ -15,12 +15,14 @@
 |------|------|--------|-----------|
 | v0.1.0 | 2026-10-22 | Claude | 신규 작성 — S1~S6 도메인 테이블 초안(회원·인증 11, 청약 확장 2, 관심·구독 3, 가점 1, 알림 4, 3D 자산 3, 미디어 1, 집구경 4, 커뮤니티 7, 관리·감사 2, 커머스 15), 결정 필요 13건과 권장안, 공통 규칙(키·암호화·soft delete·append-only), 스테이지별 도입 순서 |
 | v0.2.0 | 2026-10-22 | Claude | 검토 반영 — 도입 순서상 없는 테이블을 가리키던 FK 정리(media_files를 S1로, notifications·push_devices를 S2로, notifications.campaign_id는 S5에 추가), append-only 예외(payment_webhook_events)와 보존 기간 파기 경로, FK 삭제 동작·FK 인덱스 원칙과 API별 인덱스(신고 큐·주문 목록·인기순·검색 pg_trgm), 승인 결제 부분 UNIQUE·환불 멱등 키, 암호화 대상·휴대폰 정규화·HMAC 키 교체·관리자 회원 검색 범위(D14 신설), 평면도 치수·방 목록·검수 겹치기 좌표·검수자 표기, 2D 이미지 중복 정리, 탈퇴 시 handle 처리·재동기화가 삭제 공고를 되살리지 않는 규칙·커뮤니티 상태 이중 표현 정리, timestamptz 전환·Prisma로 못 쓰는 항목 목록, §4 관계도에 빠진 12개 테이블 추가, §8 계약 영향 보강(API-032·122·073·076·150·152·062·063·079·094, 탈퇴·동의 철회), D2·D5·D6·D10 근거 보완 |
+| v0.2.1 | 2026-10-27 | Claude | ERD v0.3.1(공고·원천 참조·단지·공고×단지 칸 구조)과 맞춤 — §2 확정 테이블 목록 갱신. §5.2 'subscriptions 추가 열'을 정리: source_key·origin은 ERD의 notice_sources·notices로, 지오코딩 열은 complexes.geocode_status로 옮겨 정의됨. S2에 남는 것은 notices.locked_fields·deleted_at(D8, 관리자 공고 관리)과 sync_runs.triggered_by. sync_runs·sync_failures 행은 ERD §4.9·4.10 정의로 대체. D8·§6 규칙 7(soft delete)의 대상을 subscriptions→notices로. §4 관계도의 subscriptions→floorplans를 complexes→floorplans로, subscriptions→source_documents를 notices→source_documents로. §5.3 관심·구독이 가리키는 단위(공고×단지 칸)와 ERD 미결 11 연결. §5.6 source_documents.subscription_id→notice_id. §6 규칙 1(단지 id 유지)·4(CASCADE 예시를 notices→notice_sources·subscriptions→subscription_units로, 공고·단지·평면도는 RESTRICT)·10(검색 색인 대상 열을 complexes·notices로). §7 S2 행 갱신 |
+| v0.2.2 | 2026-11-02 | Claude | §2의 ERD v0.3 상태를 '사용자 승인 대기'에서 'v0.3.1 사용자 승인(2026-11-02)'으로 고침. 초안 테이블·결정(D1~D14) 내용 변경 없음 |
 
 ---
 
 ## 2. 목적·범위
 
-- 개발계획서 §3.1은 S0~S1에 전체 도메인 ERD를 내도록 한다. 지금 확정·구현된 것은 청약 공고·공급 주택형·평면도 3개 테이블뿐이다(/docs/ZIPBODA_erd_v0.1.md).
+- 개발계획서 §3.1은 S0~S1에 전체 도메인 ERD를 내도록 한다. 지금 구현된 것은 청약 공고·공급 주택형·평면도 3개 테이블이다. 공공데이터 연계(API-114)에 맞춰 ERD v0.3(/docs/ZIPBODA_erd_v0.1.md)이 공고(notices)·원천 참조(notice_sources)·단지(complexes)·단지 별칭(complex_aliases)·목록 한 칸(subscriptions, 공고×단지)·일정·주택형·평면도·동기화 이력으로 구조를 바꾸었다(v0.3.1 사용자 승인 2026-11-02). 이 초안의 '공고'는 notices를, 관심·알림이 가리키는 '청약 공고'는 목록 한 칸(subscriptions)을 뜻한다.
 - 이 문서는 나머지 도메인의 **초안**이다. §3의 결정이 나면 해당 스테이지 착수 때 테이블을 ERD 문서로 옮기고 마이그레이션을 낸다. 초안 단계에서는 DB를 바꾸지 않는다.
 - 근거: API 정의서(81건)·요구사항정의서·화면설계서와 **web 화면이 실제로 쓰는 필드**. 2026-10-22 결정에 따라 정의서와 web이 다르면 web을 기준으로 잡고, 계약 차이는 /docs/ZIPBODA_api-contract-delta.md에 모은다. web 기준을 따르지 않은 곳은 §3에 이유를 적는다.
 - 범위 밖: 내부 청약 신청·신청현황(API-013·016·115·116), 쇼룸·예약(API-050~052·140~143) — 정의서에서 제거되어 테이블을 두지 않는다.
@@ -38,7 +40,7 @@
 | D5 | 관심·신청함 저장 단위 | **종류별 1행**(user, 공고, 종류). 상세의 버튼은 '찜하기'=INTEREST(관심등록), '신청함 표시'=APPLIED, '구독(알림)'=공고 단위 알림 구독(subscription_follows, REQ-US-004 '관심 공고 구독')으로 잇는다. SAVED(저장됨)는 지금 누르는 화면이 없어 값만 정의서에 남긴다 | 상세 화면에 세 버튼이 따로 있고(DetailInfoPanel), 마이페이지가 상태와 신청 여부를 함께 보여 준다. API-015 DELETE에 종류 파라미터가 필요해진다 | subscription_marks, subscription_follows | S3 |
 | D6 | 가점 저장 | **최신 1건(1:1)**, 입력은 개월·명 단위로 저장하고 암호화, 총점만 평문. web 기준의 예외 — web은 단계 번호를 브라우저에만 두고 서버 계약이 없어, 정의서(API-020/021)의 개월 단위를 쓴다. web은 단계값을 대표 개월로 바꿔 보낸다 | API-021 inputs 형식을 {housinglessMonths, dependents, accountMonths}로 확정한다 | score_profiles | S3 |
 | D7 | 알림 설정 저장 | **users.notification_preferences(jsonb)**, 읽음 처리·푸시 토큰 등록 API 추가 | API-090 응답이 notifications{} 객체다 | users, notifications, push_devices | S2 |
-| D8 | 공고 삭제·상태 관리 | **soft delete**(deleted_at), 상태는 계속 일정으로 계산하고 관리자는 '취소'만 지정. 재동기화는 지운 공고를 되살리지 않는다 | 관심·알림이 공고를 참조한다. 상태를 손으로 바꾸면 일정과 어긋난다 | subscriptions | S2 |
+| D8 | 공고 삭제·상태 관리 | **soft delete**(deleted_at), 상태는 계속 일정으로 계산하고 관리자는 '취소'만 지정. 재동기화는 지운 공고를 되살리지 않는다 | 관심·알림이 공고를 참조한다. 상태를 손으로 바꾸면 일정과 어긋난다 | notices(deleted_at·cancelled_at) | S2 |
 | D9 | 3D 자산 형식 | **web이 쓰는 평면도 모델 JSON을 DB(jsonb)에 저장**하고, 파일(2D 이미지·향후 GLB)은 미디어로 관리 | web이 model2d JSON으로 3D를 만든다(20건, 평균 약 5KB). glTF는 지금 쓰는 곳이 없다. 개발계획서 §3.3(glTF·Draco)도 함께 고친다 | floorplan_models, floorplan_assets | S4 착수 전 |
 | D10 | 집구경 작성 주체 | **관리자 큐레이션**(작성자 핸들은 출처 표기), 이미지 1장, 상태에 승인 대기(PENDING_REVIEW)를 둔다. 사용자 업로드는 나중에 같은 테이블로 받을 수 있게 author_user_id를 비워 둔다 | 사용자 업로드 API가 없다. 다만 화면설계서 TOUR-01은 '실제 유저 홈 사진', A-TOUR-01은 '승인·전시'라 사용자 업로드로 넓어질 여지가 있다 | inspirations | S5 |
 | D11 | 커뮤니티 본문·신고 | 본문은 **평문(문단은 빈 줄로 구분)** + 이미지 순서 테이블, 댓글은 한 단계, **신고 생성 API 추가** | 작성 화면이 textarea 하나에 이미지 10장, 상세는 문단 사이에 이미지를 끼운다. 신고 테이블은 있는데 신고 생성 API가 없다 | community_* | S5 |
@@ -73,9 +75,11 @@ erDiagram
   users ||--o{ push_devices : "푸시 기기"
   notification_templates ||--o{ notification_campaigns : "템플릿"
   notification_campaigns ||--o{ notifications : "발송"
-  sync_runs ||--o{ sync_failures : "실패 건"
-  subscriptions ||--o{ source_documents : "현황도 PDF"
-  subscriptions ||--o{ floorplans : "평면도"
+  sync_runs ||--o{ sync_failures : "실패·경고"
+  notices ||--o{ subscriptions : "공고 × 단지"
+  complexes |o--o{ subscriptions : "단지"
+  notices ||--o{ source_documents : "현황도 PDF"
+  complexes ||--o{ floorplans : "평면도"
   source_documents ||--o{ floorplans : "출처"
   floorplans ||--o{ floorplan_models : "3D 모델 버전"
   floorplans ||--o{ floorplan_assets : "파일"
@@ -111,7 +115,7 @@ erDiagram
   order_items ||--o| product_reviews : "구매 후기"
 ```
 
-daily_metrics(집계)·payment_webhook_events(웹훅 수신함)는 다른 테이블을 FK로 가리키지 않아 그림에서 뺐다.
+daily_metrics(집계)·payment_webhook_events(웹훅 수신함)는 다른 테이블을 FK로 가리키지 않아 그림에서 뺐다. 공고·원천 참조·단지 별칭·일정·주택형의 관계는 ERD v0.3 §3에 있다.
 
 ---
 
@@ -140,9 +144,8 @@ daily_metrics(집계)·payment_webhook_events(웹훅 수신함)는 다른 테이
 
 | 테이블 | 컬럼 | 제약·비고 |
 |--------|------|-----------|
-| subscriptions (추가 열) | source_key text null, origin text, locked_fields text[], deleted_at, geocode_method text null, geocoded_at null | UNIQUE(agency_code, source_key) — 기관 공고번호(ERD 미결 1), origin CHECK(SYNC·MANUAL), locked_fields는 관리자가 고친 열을 동기화가 덮지 않게 한다. deleted_at이 있으면 목록·상세에서 빼고 재동기화도 되살리지 않는다(D8) |
-| sync_runs | **id** uuid(= API-114 jobId), agency_code int, trigger text, triggered_by → users null, status text, started_at, finished_at, fetched_count, upserted_count, failed_count, error_message | trigger CHECK(SCHEDULE·MANUAL), status CHECK(RUNNING·SUCCEEDED·PARTIAL·FAILED), 인덱스(agency_code, started_at desc) |
-| sync_failures | **id** uuid, sync_run_id → sync_runs, source_key, payload jsonb, error_code, error_message, retry_count int, resolved_at | 재처리 대상 큐(REQ-AD-004), 미해결 부분 인덱스(resolved_at IS NULL) |
+| notices (추가 열) | locked_fields text[], deleted_at | 관리자 공고 관리(API-110~113)와 함께 더한다. locked_fields는 관리자가 고친 열을 동기화가 덮지 않게 한다. deleted_at이 있으면 그 공고의 모든 칸을 목록·상세에서 빼고 재동기화도 되살리지 않는다(D8). 원천 키(notice_sources)·origin·cancelled_at은 ERD v0.3 §4.1·4.2에 정의됨 |
+| sync_runs (추가 열) | triggered_by → users null | 관리자 실행자. 테이블 자체는 ERD v0.3 §4.9에 정의됨(원천별 source·trigger CLI 포함·created/updated 건수). sync_failures도 ERD §4.10에 정의됨(재처리 큐 REQ-AD-004, ERROR·WARNING 구분) |
 | notifications | **id** uuid, user_id → users, type text, title, body, link_type text null, link_id text null, dedupe_key text null, read_at | type CHECK(DEADLINE·NEW_MATCH·FOLLOW_UPDATE·BROADCAST·SHIPPING·PRICE_DROP), UNIQUE(user_id, dedupe_key) — 배치가 같은 알림을 두 번 보내지 않게, 인덱스(user_id, created_at desc), 읽지 않은 알림 부분 인덱스. API-093이 S2라 여기 둔다. campaign_id 열은 S5에 더한다. 보존 기간 뒤 정리 |
 | push_devices | **id** uuid, user_id → users, platform text, token text, last_seen_at | platform CHECK(IOS·ANDROID·WEB), token UNIQUE. app 개발계획서의 S2 푸시용 |
 
@@ -150,7 +153,7 @@ daily_metrics(집계)·payment_webhook_events(웹훅 수신함)는 다른 테이
 
 | 테이블 | 컬럼 | 제약·비고 |
 |--------|------|-----------|
-| subscription_marks | **user_id** → users, **subscription_id** → subscriptions, **type** text | type CHECK(ITF-005 INTEREST·SAVED·APPLIED), 인덱스(user_id, type, created_at desc)·(subscription_id). 신청함(APPLIED)은 사용자 자가표시(D5) |
+| subscription_marks | **user_id** → users, **subscription_id** → subscriptions, **type** text | type CHECK(ITF-005 INTEREST·SAVED·APPLIED), 인덱스(user_id, type, created_at desc)·(subscription_id). 신청함(APPLIED)은 사용자 자가표시(D5). subscription_id는 목록 한 칸(공고×단지)이다 — 단지 단위 구독을 따로 둘지는 ERD 미결 11 |
 | subscription_follows | **user_id** → users, **subscription_id** → subscriptions | 상세의 '구독(알림)' — 이 공고의 마감 임박·변경을 알린다. 인덱스(subscription_id) — 알림 배치가 공고별로 찾는다 |
 | alert_filters | **id** uuid, user_id → users, region_code int null, agency_code int null, size_range text null, active bool | API-094 조건 구독. null은 전체. size_range는 목록 필터와 같은 전용면적 구간. UNIQUE NULLS NOT DISTINCT(user_id, region_code, agency_code, size_range) |
 
@@ -173,7 +176,7 @@ daily_metrics(집계)·payment_webhook_events(웹훅 수신함)는 다른 테이
 | 테이블 | 컬럼 | 제약·비고 |
 |--------|------|-----------|
 | floorplans (추가 열) | source_document_id → source_documents null, source_page int null, calibration jsonb null, dimensions jsonb null, rooms jsonb null, issue text null | calibration = 현황도에서 잘라 낸 위치·축척(지금 web catalog의 cropPolygon·calibration·mmPerPx). dimensions·rooms = API-121 입력과 API-031 응답의 치수·방 목록 — 3D 모델이 없는 2D 전용 도면도 담아야 해서 모델과 따로 둔다. image_2d_url은 floorplan_assets(IMAGE_2D)로 옮기고 열을 지운다(값이 두 곳에 있지 않게) |
-| source_documents | **id** uuid, subscription_id → subscriptions, media_id → media_files, sha256 text, page_count int | sha256 UNIQUE — 같은 PDF를 두 번 올리지 않는다 |
+| source_documents | **id** uuid, notice_id → notices null, media_id → media_files, sha256 text, page_count int | sha256 UNIQUE — 같은 PDF를 두 번 올리지 않는다. 현황도 PDF는 공고 첨부라 공고를 가리키고, 한 PDF에서 여러 단지의 평면도가 나온다(평면도는 complexes에 붙는다). 공고 없이 올린 PDF는 notice_id를 비운다 |
 | floorplan_models | **id** uuid, floorplan_id → floorplans, version int, model jsonb, method text, status text, confidence numeric null, flags jsonb, origin_px jsonb null, reviewed_by → users null, reviewer_label text null, review_note text, reviewed_at | model = web의 FloorplanModel2D. method CHECK(EXTRACTION·TRACED), status CHECK(DRAFT·PENDING_REVIEW·APPROVED·REJECTED), UNIQUE(floorplan_id, version), 승인본은 하나: 부분 UNIQUE(floorplan_id) WHERE status='APPROVED'. origin_px = 검수 화면에서 원본 이미지와 겹쳐 보는 기준점. reviewer_label = 회원이 아닌 검수자·도구 이름(지금 reviewed.json의 reviewer). floorplans.has_3d는 승인본이 생기거나 사라질 때 같은 트랜잭션에서 맞춘다(D9). 3D 시점(ITF-013 1인칭·3인칭)은 모든 승인 모델이 둘 다 지원해 저장하지 않는다 |
 | floorplan_assets | **id** uuid, floorplan_id → floorplans, kind text, media_id → media_files | kind CHECK(IMAGE_2D·GLB·THUMBNAIL), UNIQUE(floorplan_id, kind). API-122 업로드 결과 |
 
@@ -229,16 +232,16 @@ daily_metrics(집계)·payment_webhook_events(웹훅 수신함)는 다른 테이
 
 ## 6. 공통 규칙
 
-1. **키**: 사용자에게 보이는 리소스는 uuid v7(Prisma `uuid(7)`로 앱에서 생성 — 시간 순 정렬이 되고 번호를 추측할 수 없다. 생성 시각이 드러나는 것은 받아들인다. PostgreSQL 17에는 v7 생성 함수가 없어 시드·직접 SQL도 앱에서 만든다). 로그·이력은 bigint identity. 조인 테이블은 복합 PK. 기존 공고·평면도의 text id는 유지한다.
-2. **시각**: 시각은 timestamptz(Prisma `@db.Timestamptz(3)`), 날짜만 의미가 있으면 date. 기존 subscriptions·floorplans의 created_at·updated_at(timestamp, 시간대 없음 — UTC로 저장됨)은 S1 마이그레이션에서 timestamptz로 바꾼다. 날짜 계산 기준은 한국 날짜(ERD §5).
+1. **키**: 사용자에게 보이는 리소스는 uuid v7(Prisma `uuid(7)`로 앱에서 생성 — 시간 순 정렬이 되고 번호를 추측할 수 없다. 생성 시각이 드러나는 것은 받아들인다. PostgreSQL 17에는 v7 생성 함수가 없어 시드·직접 SQL도 앱에서 만든다). 로그·이력은 bigint identity. 조인 테이블은 복합 PK. 기존 평면도의 text id와 시드 단지 id(옛 공고 id)는 유지한다.
+2. **시각**: 시각은 timestamptz(Prisma `@db.Timestamptz(3)`), 날짜만 의미가 있으면 date. 기존 floorplans의 created_at·updated_at(timestamp, 시간대 없음 — UTC로 저장됨)은 S1 마이그레이션에서 timestamptz로 바꾼다(ERD v0.3에서 새로 만드는 공고·단지·칸 테이블은 처음부터 timestamptz). 날짜 계산 기준은 한국 날짜(ERD §5).
 3. **코드값**: 정의서(ITF) 값을 그대로 저장하고 CHECK로 범위를 막는다. 코드가 바뀌면 마이그레이션을 함께 낸다.
-4. **FK 삭제 동작과 인덱스**: 기본은 RESTRICT. 부모와 생명주기가 같은 자식만 CASCADE(예: subscriptions→floorplans, community_posts→community_post_images, orders→order_items, carts→cart_items). 회원·공고·상품·게시글은 물리 삭제하지 않으므로(§6.7) 이들을 가리키는 FK가 갑자기 끊기지 않는다. PostgreSQL·Prisma는 FK 인덱스를 자동으로 만들지 않으므로 **모든 FK 열에 인덱스를 둔다**(복합 PK·UNIQUE의 첫 열이면 생략).
+4. **FK 삭제 동작과 인덱스**: 기본은 RESTRICT. 부모와 생명주기가 같은 자식만 CASCADE(예: notices→notice_sources, subscriptions→subscription_units·subscription_schedules, community_posts→community_post_images, orders→order_items, carts→cart_items). 공고→칸, 단지→칸, 단지→평면도는 RESTRICT다(ERD v0.3 §4). 회원·공고·상품·게시글은 물리 삭제하지 않으므로(§6.7) 이들을 가리키는 FK가 갑자기 끊기지 않는다. PostgreSQL·Prisma는 FK 인덱스를 자동으로 만들지 않으므로 **모든 FK 열에 인덱스를 둔다**(복합 PK·UNIQUE의 첫 열이면 생략).
 5. **개인정보 암호화**(B14·REQ-NF-006): 이름·휴대폰·가점 입력값·배송 수령인은 앱에서 AES-256-GCM으로 암호화한 `*_enc` 열에 담는다. 키는 시크릿 매니저에 두고 키 버전을 암호문에 함께 싣는다. 유일성·조회가 필요한 값은 HMAC-SHA256 블라인드 인덱스(`*_hash`)를 따로 둔다. 휴대폰은 숫자만 남겨 국가번호를 붙인 형식(E.164)으로 맞춘 뒤 해시한다. HMAC 키를 바꾸면 복호화한 원문으로 해시를 모두 다시 계산하는 배치를 돌린다. 관리자 화면은 가려서 보여 주고, 원문 조회는 audit_logs에 PII_VIEW로 남긴다. 이메일은 평문(D14).
 6. **append-only**: audit_logs·user_agreements·shipment_events·stock_movements는 앱 DB 계정의 UPDATE·DELETE 권한을 회수하고 막는 트리거를 둔다. 보존 기간이 지난 행은 앱이 아니라 별도 관리 계정이 지운다 — audit_logs는 월 파티션을 통째로 떼어 내(DROP) 지운다.
-7. **soft delete**: users(탈퇴)·subscriptions·inspirations·community_posts·community_comments·products·product_reviews는 deleted_at(또는 상태)으로 지우고 기본 조회에서 뺀다. 법정 보존 기간이 지나면 파기 배치가 개인정보를 지우거나 행을 지운다.
+7. **soft delete**: users(탈퇴)·notices·inspirations·community_posts·community_comments·products·product_reviews는 deleted_at(또는 상태)으로 지우고 기본 조회에서 뺀다. 법정 보존 기간이 지나면 파기 배치가 개인정보를 지우거나 행을 지운다.
 8. **카운터**(like_count 등): 좋아요 행을 넣고 빼는 같은 트랜잭션에서 증감한다.
 9. **탈퇴**: users 행은 남기고 개인정보 열을 비운 뒤 status=WITHDRAWN으로 바꾼다. handle은 자리표시 값으로 바꿔 UNIQUE를 지킨다. 글·댓글은 '탈퇴한 회원'으로 보이고, 주문은 법정 기간 동안 남는다.
-10. **검색 색인**: 목록 검색어(API-010 keyword)와 통합 검색(API-095, REQ-CO-006 색인·자동완성)은 pg_trgm GIN 인덱스(subscriptions의 title·address, products의 name)로 받친다. 인기 검색어가 필요해지면 search_logs를 따로 둔다.
+10. **검색 색인**: 목록 검색어(API-010 keyword)와 통합 검색(API-095, REQ-CO-006 색인·자동완성)은 pg_trgm GIN 인덱스(complexes의 name·address·sigungu, notices의 title·supply_type, products의 name — 검색 대상 열은 ERD v0.3 §4.11)로 받친다. 인기 검색어가 필요해지면 search_logs를 따로 둔다.
 11. **Prisma 스키마로 못 쓰는 것**: NULLS NOT DISTINCT UNIQUE, lower(email) UNIQUE, CHECK, 트리거, pg_trgm 인덱스, 파티션은 마이그레이션 SQL을 손으로 더한다(기존 add_code_checks와 같은 방식). 부분 UNIQUE는 Prisma 7.10의 `partialIndexes` 미리보기 기능을 쓰거나 SQL로 더한다.
 
 ---
@@ -248,7 +251,7 @@ daily_metrics(집계)·payment_webhook_events(웹훅 수신함)는 다른 테이
 | 스테이지 | 테이블 |
 |----------|--------|
 | S1 인증 | users, user_roles, role_permissions, user_permissions, admin_mfa, social_accounts, refresh_tokens, phone_verifications, password_reset_tokens, terms_versions, user_agreements, media_files, audit_logs + 기존 테이블 timestamptz 전환 |
-| S2 청약 연계·알림함 | subscriptions 추가 열, sync_runs, sync_failures, notifications(campaign_id 제외), push_devices |
+| S2 청약 연계·알림함 | (ERD v0.3에 정의: notices, notice_sources, complexes, complex_aliases, subscriptions 개편, subscription_schedules, sync_runs, sync_failures) + notices 추가 열(locked_fields·deleted_at — 관리자 공고 관리와 함께), sync_runs.triggered_by(S1 회원 테이블 뒤), notifications(campaign_id 제외), push_devices |
 | S3 관심·가점 | subscription_marks, subscription_follows, alert_filters, score_profiles |
 | S4 평면도·3D | source_documents, floorplans 추가 열(image_2d_url 이전 포함), floorplan_models, floorplan_assets |
 | S5 콘텐츠·운영 | inspirations·inspiration_likes·inspiration_scraps·inspiration_product_tags(상품 FK 제외), community 7종, notification_templates, notification_campaigns, notifications.campaign_id, daily_metrics |
