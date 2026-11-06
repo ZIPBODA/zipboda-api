@@ -1,26 +1,22 @@
 [
   {
     "id": "gangnam-gaepo",
-    "title": "강남개포동(T&K개포)",
+    "name": "강남개포동(T&K개포)",
     "agency": "LH",
     "region": "서울",
+    "sigungu": "강남구",
     "address": "서울특별시 강남구 논현로12길 23-5(개포동,T&K개포) T&K개포",
     "lat": 37.4754298465242,
     "lng": 127.049254298033,
-    "supplyType": "도시형생활주택",
     "households": 13,
+    "housingType": "도시형생활주택",
     "imageUrl": "/housing/gangnam-gaepo/exterior.png",
-    "notice": {
-      "postDate": "2026-09-14",
-      "applyStartDate": "2026-09-16",
-      "applyEndDate": "2026-10-13",
-      "contractDate": "2026-11-16",
-      "moveInMonth": "2027-02",
-      "supplyUnits": 1,
-      "recruitCount": 3,
-      "applicationCount": 223,
-      "applyUrl": "https://apply.lh.or.kr"
-    },
+    "aliases": [
+      {
+        "source": "LH",
+        "name": "강남개포동(T&K개포)"
+      }
+    ],
     "floorplans": [
       {
         "id": "gangnam-gaepo-2-3-01",
@@ -107,26 +103,22 @@
   },
   {
     "id": "gangseo-hwagok",
-    "title": "강서화곡동",
+    "name": "강서화곡동",
     "agency": "LH",
     "region": "서울",
+    "sigungu": "강서구",
     "address": "서울특별시 강서구 초록마을로12길 20(화곡동)",
     "lat": 37.5416904904971,
     "lng": 126.849063127802,
-    "supplyType": "다가구주택",
     "households": 9,
+    "housingType": "다가구주택",
     "imageUrl": "/housing/gangseo-hwagok/exterior.png",
-    "notice": {
-      "postDate": "2026-09-16",
-      "applyStartDate": "2026-09-18",
-      "applyEndDate": "2026-10-16",
-      "contractDate": "2026-11-23",
-      "moveInMonth": "2027-02",
-      "supplyUnits": 3,
-      "recruitCount": 9,
-      "applicationCount": 227,
-      "applyUrl": "https://apply.lh.or.kr"
-    },
+    "aliases": [
+      {
+        "source": "LH",
+        "name": "강서화곡동"
+      }
+    ],
     "floorplans": [
       {
         "id": "gangseo-hwagok-2-201",
@@ -213,26 +205,22 @@
   },
   {
     "id": "gwanak-sillim",
-    "title": "관악신림동2",
+    "name": "관악신림동2",
     "agency": "LH",
     "region": "서울",
+    "sigungu": "관악구",
     "address": "서울특별시 관악구 대학2길 6(신림동)",
     "lat": 37.4699500819801,
     "lng": 126.937586869025,
-    "supplyType": "다가구주택",
     "households": 13,
+    "housingType": "다가구주택",
     "imageUrl": "/housing/gwanak-sillim/exterior.png",
-    "notice": {
-      "postDate": "2026-09-11",
-      "applyStartDate": "2026-09-14",
-      "applyEndDate": "2026-10-07",
-      "contractDate": "2026-11-09",
-      "moveInMonth": "2027-01",
-      "supplyUnits": 18,
-      "recruitCount": 54,
-      "applicationCount": 850,
-      "applyUrl": "https://apply.lh.or.kr"
-    },
+    "aliases": [
+      {
+        "source": "LH",
+        "name": "관악신림동2"
+      }
+    ],
     "floorplans": [
       {
         "id": "gwanak-sillim-2-3-01",
@@ -310,26 +298,22 @@
   },
   {
     "id": "dobong-banghak",
-    "title": "도봉방학동",
+    "name": "도봉방학동",
     "agency": "LH",
     "region": "서울",
+    "sigungu": "도봉구",
     "address": "서울특별시 도봉구 도당로13다길 15-7(방학동)",
     "lat": 37.6657372755985,
     "lng": 127.033834324116,
-    "supplyType": "다가구주택",
     "households": 10,
+    "housingType": "다가구주택",
     "imageUrl": "/housing/dobong-banghak/exterior.png",
-    "notice": {
-      "postDate": "2026-09-08",
-      "applyStartDate": "2026-09-18",
-      "applyEndDate": "2026-09-30",
-      "contractDate": "2026-11-02",
-      "moveInMonth": "2027-01",
-      "supplyUnits": 5,
-      "recruitCount": 15,
-      "applicationCount": 234,
-      "applyUrl": "https://apply.lh.or.kr"
-    },
+    "aliases": [
+      {
+        "source": "LH",
+        "name": "도봉방학동"
+      }
+    ],
     "floorplans": [
       {
         "id": "dobong-banghak-2-3-01",
@@ -389,26 +373,22 @@
   },
   {
     "id": "seocho-iris",
-    "title": "서초서초동(아이리스예당)",
+    "name": "서초서초동(아이리스예당)",
     "agency": "LH",
     "region": "서울",
+    "sigungu": "서초구",
     "address": "서울특별시 서초구 남부순환로315길 34-9(서초동)",
     "lat": 37.4803212126271,
     "lng": 127.008403181331,
-    "supplyType": "도시형생활주택(원룸형)",
     "households": 20,
+    "housingType": "도시형생활주택(원룸형)",
     "imageUrl": "/housing/seocho-iris/exterior.png",
-    "notice": {
-      "postDate": "2026-08-27",
-      "applyStartDate": "2026-09-08",
-      "applyEndDate": "2026-09-14",
-      "contractDate": "2026-10-12",
-      "moveInMonth": "2026-11",
-      "supplyUnits": 3,
-      "recruitCount": 9,
-      "applicationCount": 272,
-      "applyUrl": "https://apply.lh.or.kr"
-    },
+    "aliases": [
+      {
+        "source": "LH",
+        "name": "서초서초동(아이리스예당)"
+      }
+    ],
     "floorplans": [
       {
         "id": "seocho-iris-2-3-01",
@@ -540,26 +520,22 @@
   },
   {
     "id": "seongdong-yongdap",
-    "title": "성동용답동(더위일스카이70)",
+    "name": "성동용답동(더위일스카이70)",
     "agency": "LH",
     "region": "서울",
+    "sigungu": "성동구",
     "address": "서울특별시 성동구 자동차시장1길 31(용답동) THE WEAL SKY70",
     "lat": 37.5613433361586,
     "lng": 127.061121935071,
-    "supplyType": null,
     "households": null,
+    "housingType": null,
     "imageUrl": null,
-    "notice": {
-      "postDate": "2026-08-24",
-      "applyStartDate": "2026-09-07",
-      "applyEndDate": "2026-09-11",
-      "contractDate": "2026-10-05",
-      "moveInMonth": "2026-11",
-      "supplyUnits": 1,
-      "recruitCount": 3,
-      "applicationCount": 691,
-      "applyUrl": "https://apply.lh.or.kr"
-    },
+    "aliases": [
+      {
+        "source": "LH",
+        "name": "성동용답동(더위일스카이70)"
+      }
+    ],
     "floorplans": [
       {
         "id": "seongdong-yongdap-3-15-1",
@@ -592,26 +568,22 @@
   },
   {
     "id": "songpa-ogeum",
-    "title": "송파오금동(더트라이앵글)",
+    "name": "송파오금동(더트라이앵글)",
     "agency": "LH",
     "region": "서울",
+    "sigungu": "송파구",
     "address": "서울특별시 송파구 마천로8길 19-12(오금동) 더트라이앵글",
     "lat": 37.5071632770913,
     "lng": 127.128399606278,
-    "supplyType": null,
     "households": 14,
+    "housingType": null,
     "imageUrl": "/housing/songpa-ogeum/exterior.png",
-    "notice": {
-      "postDate": "2026-09-01",
-      "applyStartDate": "2026-09-10",
-      "applyEndDate": "2026-09-16",
-      "contractDate": "2026-10-19",
-      "moveInMonth": "2026-12",
-      "supplyUnits": 1,
-      "recruitCount": 3,
-      "applicationCount": 193,
-      "applyUrl": "https://apply.lh.or.kr"
-    },
+    "aliases": [
+      {
+        "source": "LH",
+        "name": "송파오금동(더트라이앵글)"
+      }
+    ],
     "floorplans": [
       {
         "id": "songpa-ogeum-2-3-01",
@@ -707,26 +679,22 @@
   },
   {
     "id": "jungnang-myeonmok",
-    "title": "중랑면목동",
+    "name": "중랑면목동",
     "agency": "LH",
     "region": "서울",
+    "sigungu": "중랑구",
     "address": "서울특별시 중랑구 면목천로23길 52(면목동)",
     "lat": 37.5902226562583,
     "lng": 127.08217183363,
-    "supplyType": "다가구주택",
     "households": 12,
+    "housingType": "다가구주택",
     "imageUrl": "/housing/jungnang-myeonmok/exterior.png",
-    "notice": {
-      "postDate": "2026-09-04",
-      "applyStartDate": "2026-09-16",
-      "applyEndDate": "2026-09-25",
-      "contractDate": "2026-10-26",
-      "moveInMonth": "2026-12",
-      "supplyUnits": 3,
-      "recruitCount": 9,
-      "applicationCount": 178,
-      "applyUrl": "https://apply.lh.or.kr"
-    },
+    "aliases": [
+      {
+        "source": "LH",
+        "name": "중랑면목동"
+      }
+    ],
     "floorplans": [
       {
         "id": "jungnang-myeonmok-2-3-01",
@@ -795,26 +763,22 @@
   },
   {
     "id": "jungnang-muk",
-    "title": "중랑묵동",
+    "name": "중랑묵동",
     "agency": "LH",
     "region": "서울",
+    "sigungu": "중랑구",
     "address": "서울특별시 중랑구 동일로149가길 21(묵동) 묵동 245-39",
     "lat": 37.6075604459923,
     "lng": 127.077198178165,
-    "supplyType": null,
     "households": null,
+    "housingType": null,
     "imageUrl": null,
-    "notice": {
-      "postDate": "2026-09-01",
-      "applyStartDate": "2026-09-14",
-      "applyEndDate": "2026-09-22",
-      "contractDate": "2026-10-19",
-      "moveInMonth": "2026-12",
-      "supplyUnits": 2,
-      "recruitCount": 6,
-      "applicationCount": 133,
-      "applyUrl": "https://apply.lh.or.kr"
-    },
+    "aliases": [
+      {
+        "source": "LH",
+        "name": "중랑묵동"
+      }
+    ],
     "floorplans": []
   }
 ]

@@ -1,5 +1,6 @@
-// 집보다 ERD — S0~S2 범위(청약 공고·공급 주택형·평면도). 문서: docs/ZIPBODA_erd_v0.1.md
-// 코드성 값은 API 정의서의 공통 인터페이스(ITF-*) 정수·문자열을 그대로 저장한다
+// 집보다 ERD — S0~S2 범위(공고·원천 참조·단지·공고×단지 칸·일정·주택형·평면도·동기화). 문서: docs/ZIPBODA_erd_v0.1.md
+// 코드성 값은 API 정의서의 공통 인터페이스(ITF-*) 정수·문자열을 그대로 저장한다.
+// CHECK·부분 UNIQUE·NULLS NOT DISTINCT는 Prisma 스키마로 쓰지 못해 마이그레이션 SQL에만 있다(20261102000000_notice_complex_structure·20261102000100_area_range_pairs)
 
 generator client {
   provider               = "prisma-client"
@@ -13,80 +14,264 @@ datasource db {
   provider = "postgresql"
 }
 
-/// 청약 공고 한 건. 공급기관 공고 단위로 쌓는다
-model Subscription {
-  id               String    @id
-  title            String
+/// 공급기관이 낸 입주자 모집공고 한 건. 정정공고는 새 행이 아니라 같은 행에 원천 참조를 더한다
+model Notice {
+  id             String    @id
   /// ITF-001 공급기관(1 LH · 2 SH · 3 GH · 4 IH)
-  agencyCode       Int       @map("agency_code")
-  /// ITF-004 지역(1 서울 · 2 인천 · 3 경기)
-  regionCode       Int       @map("region_code")
-  address          String
-  lat              Float?
-  lng              Float?
-  supplyType       String?   @map("supply_type")
-  households       Int?
-  supplyUnits      Int?      @map("supply_units")
-  recruitCount     Int?      @map("recruit_count")
-  applicationCount Int?      @map("application_count")
-  postDate         DateTime? @map("post_date") @db.Date
-  applyStartDate   DateTime? @map("apply_start_date") @db.Date
-  applyEndDate     DateTime? @map("apply_end_date") @db.Date
-  contractDate     DateTime? @map("contract_date") @db.Date
-  /// 공고가 입주 시기를 월 단위로만 밝힌다(YYYY-MM)
-  moveInMonth      String?   @map("move_in_month")
+  agencyCode     Int       @map("agency_code")
+  /// 우선 원천의 최신 정정본 이름(정정 표시 포함)
+  title          String
+  /// 정정 표시를 뗀 이름 — 정정 묶음을 찾는다(ERD §5 규칙 7)
+  titleKey       String    @map("title_key")
+  /// SALE · PUBLIC_RENTAL · PURCHASE_RENTAL (ERD §5 규칙 14)
+  supplyCategory String    @map("supply_category")
+  supplyType     String?   @map("supply_type")
+  postDate       DateTime? @map("post_date") @db.Date
   /// 공급기관 신청 페이지(외부). 신청은 기관 사이트에서 한다
-  applyUrl         String?   @map("apply_url")
-  imageUrl         String?   @map("image_url")
-  /// 취소된 공고만 값이 있다. 접수예정·접수중·마감은 일정으로 계산한다(ITF-002)
-  cancelledAt      DateTime? @map("cancelled_at")
-  createdAt        DateTime  @default(now()) @map("created_at")
-  updatedAt        DateTime  @updatedAt @map("updated_at")
+  applyUrl       String?   @map("apply_url")
+  attachments    Json?
+  /// 원천이 표시한 상태. 참고용이고 상태는 일정으로 계산한다(ITF-002)
+  sourceStatus   String?   @map("source_status")
+  /// 관리자만 지정한다. 접수예정·접수중·마감은 일정으로 계산한다
+  cancelledAt    DateTime? @map("cancelled_at") @db.Timestamptz(3)
+  /// SYNC · MANUAL
+  origin         String
+  syncedAt       DateTime? @map("synced_at") @db.Timestamptz(3)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  units      SubscriptionUnit[]
-  floorplans Floorplan[]
+  sources       NoticeSource[]
+  subscriptions Subscription[]
 
-  @@index([agencyCode])
+  @@index([agencyCode, titleKey, postDate])
+  @@index([postDate(sort: Desc)])
+  @@map("notices")
+}
+
+/// 공고의 원천 참조. 같은 공고가 LH·청약홈, 원 공고·정정본으로 여러 번 올라온다
+model NoticeSource {
+  /// LH · APPLYHOME · IH · SH_RSS · GH_FILE
+  source       String
+  /// LH `{연계시스템코드}:{PAN_ID}`, 청약홈 `{주택관리번호}:{공고번호}`
+  sourceKey    String    @map("source_key")
+  noticeId     String    @map("notice_id")
+  notice       Notice    @relation(fields: [noticeId], references: [id], onDelete: Cascade)
+  sourceParams Json?     @map("source_params")
+  /// 값을 정하는 원천. 공고마다 하나
+  isPrimary    Boolean   @map("is_primary")
+  /// 열로 옮기지 않은 원문까지 남겨 정규화 규칙을 바꿔도 다시 조회하지 않고 다시 처리한다
+  rawPayload   Json?     @map("raw_payload")
+  fetchedAt    DateTime? @map("fetched_at") @db.Timestamptz(3)
+
+  @@id([source, sourceKey])
+  @@index([noticeId])
+  @@map("notice_sources")
+}
+
+/// 평면도가 붙는 물리적 단지·건물. 같은 단지가 여러 공고·여러 이름으로 나와도 한 행이다
+model Complex {
+  id            String    @id
+  agencyCode    Int       @map("agency_code")
+  /// ITF-004 지역(1 서울 · 2 인천 · 3 경기)
+  regionCode    Int       @map("region_code")
+  name          String
+  sigungu       String?
+  address       String?
+  /// 같은 단지 판별용 주소(ERD §5 규칙 8)
+  addressKey    String?   @map("address_key")
+  lat           Float?
+  lng           Float?
+  /// OK · NOT_FOUND · NO_ADDRESS · MANUAL
+  geocodeStatus String?   @map("geocode_status")
+  households    Int?
+  housingType   String?   @map("housing_type")
+  /// 단지 전용면적 범위(㎡). 주택형 행이 없는 공고의 면적 필터에 쓴다
+  areaMin       Decimal?  @map("area_min") @db.Decimal(9, 4)
+  areaMax       Decimal?  @map("area_max") @db.Decimal(9, 4)
+  imageUrl      String?   @map("image_url")
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  aliases       ComplexAlias[]
+  subscriptions Subscription[]
+  floorplans    Floorplan[]
+
+  @@index([regionCode])
+  @@index([lat, lng])
+  @@map("complexes")
+}
+
+/// 원천이 준 단지·건물 이름 → 단지. 주소가 없는 행은 이 표로만 단지를 찾는다
+model ComplexAlias {
+  source     String
+  agencyCode Int      @map("agency_code")
+  regionCode Int      @map("region_code")
+  /// 원천에 없으면 빈 문자열(키 열이라 NULL을 두지 않는다)
+  sigungu    String
+  nameKey    String   @map("name_key")
+  complexId  String   @map("complex_id")
+  complex    Complex  @relation(fields: [complexId], references: [id], onDelete: Cascade)
+  /// ADDRESS · NAME · MANUAL
+  method     String
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@id([source, agencyCode, regionCode, sigungu, nameKey])
+  @@index([complexId])
+  @@map("complex_aliases")
+}
+
+/// 목록 한 칸 = 공고 × 단지. 단지 정보가 없는 공고는 complexId가 빈 칸 하나다
+model Subscription {
+  id                String    @id
+  noticeId          String    @map("notice_id")
+  notice            Notice    @relation(fields: [noticeId], references: [id], onDelete: Restrict)
+  complexId         String?   @map("complex_id")
+  complex           Complex?  @relation(fields: [complexId], references: [id], onDelete: Restrict)
+  /// 단지를 정한 방법 ADDRESS · NAME · MANUAL. 평면도는 ADDRESS·MANUAL인 칸에만 보인다
+  complexMatch      String?   @map("complex_match")
+  /// ITF-004. 단지의 지역, 단지가 없으면 공고를 조회한 지역
+  regionCode        Int       @map("region_code")
+  /// 아래 다섯 날짜는 대상별 일정(SubscriptionSchedule)의 요약이다(ERD §5 규칙 2)
+  applyStartDate    DateTime? @map("apply_start_date") @db.Date
+  applyEndDate      DateTime? @map("apply_end_date") @db.Date
+  winnerDate        DateTime? @map("winner_date") @db.Date
+  contractStartDate DateTime? @map("contract_start_date") @db.Date
+  contractEndDate   DateTime? @map("contract_end_date") @db.Date
+  /// 공고가 입주 시기를 월 단위로만 밝힌다(YYYY-MM)
+  moveInMonth       String?   @map("move_in_month")
+  supplyUnits       Int?      @map("supply_units")
+  recruitCount      Int?      @map("recruit_count")
+  applicationCount  Int?      @map("application_count")
+  supplyNote        String?   @map("supply_note")
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  schedules SubscriptionSchedule[]
+  units     SubscriptionUnit[]
+
+  @@unique([noticeId, complexId])
+  @@index([complexId])
   @@index([regionCode])
   @@index([applyEndDate])
+  @@index([applyStartDate, applyEndDate])
   @@map("subscriptions")
 }
 
-/// 공고의 공급 주택형(평형별 공급 세대·가격)
-model SubscriptionUnit {
+/// 종류·대상별 일정. 원천이 단지·대상(특별공급·1순위·무순위 등)마다 주는 일정을 그대로 담는다
+model SubscriptionSchedule {
   id             String       @id @default(uuid()) @db.Uuid
   subscriptionId String       @map("subscription_id")
   subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
-  /// ITF-003 주택형 — 전용면적의 정수부(59.98㎡ → "59")
-  sizeType       String       @map("size_type")
-  unitType       String?      @map("unit_type")
-  households     Int?
-  /// 기관마다 보증금·임대료 표기가 달라 공고 문구 그대로 둔다
-  price          String?
+  /// APPLY · DOC_TARGET · DOC_SUBMIT · VIEWING · WINNER · WINNER_DOC · CONTRACT
+  kind           String
+  label          String?
+  startDate      DateTime?    @map("start_date") @db.Date
+  endDate        DateTime?    @map("end_date") @db.Date
+  /// 한국 시간. 원천에 시각이 없으면 비운다
+  startTime      DateTime?    @map("start_time") @db.Time(0)
+  endTime        DateTime?    @map("end_time") @db.Time(0)
+  note           String?
+  sortOrder      Int          @map("sort_order")
 
-  @@index([subscriptionId])
+  @@index([subscriptionId, sortOrder])
+  @@map("subscription_schedules")
+}
+
+/// 공급 주택형. 원천 표기가 "59A"·"70~80㎡"·"2형"처럼 제각각이라 원문과 정규화한 값을 함께 둔다
+model SubscriptionUnit {
+  id               String       @id @default(uuid()) @db.Uuid
+  subscriptionId   String       @map("subscription_id")
+  subscription     Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  label            String?
+  /// ITF-003 주택형 — 전용면적의 정수부(59.98㎡ → "59"). 면적이 구간이거나 없으면 비운다
+  sizeType         String?      @map("size_type")
+  unitType         String?      @map("unit_type")
+  exclusiveArea    Decimal?     @map("exclusive_area") @db.Decimal(9, 4)
+  /// 전용면적이 구간으로만 올 때("70~80㎡")
+  areaMin          Decimal?     @map("area_min") @db.Decimal(9, 4)
+  areaMax          Decimal?     @map("area_max") @db.Decimal(9, 4)
+  supplyArea       Decimal?     @map("supply_area") @db.Decimal(9, 4)
+  unitNumber       String?      @map("unit_number")
+  floorLabel       String?      @map("floor_label")
+  totalHouseholds  Int?         @map("total_households")
+  supplyHouseholds Int?         @map("supply_households")
+  recruitCount     Int?         @map("recruit_count")
+  applicationCount Int?         @map("application_count")
+  depositWon       BigInt?      @map("deposit_won")
+  monthlyRentWon   BigInt?      @map("monthly_rent_won")
+  salePriceWon     BigInt?      @map("sale_price_won")
+  /// 금액 대신 온 안내("공고문 참조")
+  priceNote        String?      @map("price_note")
+  note             String?
+  displayOrder     Int          @map("display_order")
+
+  @@index([subscriptionId, displayOrder])
   @@map("subscription_units")
 }
 
-/// 호별 평면도. 2D 도면과 3D 집구경 자산의 기준 단위
+/// 호별 평면도. 2D 도면과 3D 집구경 자산의 기준 단위. 같은 건물이 여러 공고에 나와 단지에 붙인다
 model Floorplan {
-  id             String       @id
-  subscriptionId String       @map("subscription_id")
-  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  id            String   @id
+  complexId     String   @map("complex_id")
+  complex       Complex  @relation(fields: [complexId], references: [id], onDelete: Restrict)
   /// 같은 도면을 쓰는 층 범위(예: "2-3")
-  floor          String?
-  unitNumber     String?      @map("unit_number")
-  unitType       String?      @map("unit_type")
-  exclusiveArea  Decimal?     @map("exclusive_area") @db.Decimal(9, 4)
+  floor         String?
+  unitNumber    String?  @map("unit_number")
+  unitType      String?  @map("unit_type")
+  exclusiveArea Decimal? @map("exclusive_area") @db.Decimal(9, 4)
   /// ITF-003 주택형
-  sizeType       String?      @map("size_type")
-  image2dUrl     String?      @map("image_2d_url")
-  has3d          Boolean      @default(false) @map("has_3d")
+  sizeType      String?  @map("size_type")
+  image2dUrl    String?  @map("image_2d_url")
+  has3d         Boolean  @default(false) @map("has_3d")
   /// 공고 상세가 처음 보여 줄 도면은 이 순서의 첫째다
-  displayOrder   Int          @default(0) @map("display_order")
-  createdAt      DateTime     @default(now()) @map("created_at")
-  updatedAt      DateTime     @updatedAt @map("updated_at")
+  displayOrder  Int      @default(0) @map("display_order")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
-  @@index([subscriptionId, displayOrder])
+  @@index([complexId, displayOrder])
   @@map("floorplans")
+}
+
+/// 공공데이터 동기화 한 번(= API-114 jobId)
+model SyncRun {
+  id            String    @id @default(uuid()) @db.Uuid
+  source        String
+  /// SCHEDULE · MANUAL · CLI
+  trigger       String
+  /// RUNNING · SUCCEEDED · PARTIAL · FAILED
+  status        String
+  startedAt     DateTime  @default(now()) @map("started_at") @db.Timestamptz(3)
+  finishedAt    DateTime? @map("finished_at") @db.Timestamptz(3)
+  fetchedCount  Int       @default(0) @map("fetched_count")
+  createdCount  Int       @default(0) @map("created_count")
+  updatedCount  Int       @default(0) @map("updated_count")
+  failedCount   Int       @default(0) @map("failed_count")
+  errorMessage  String?   @map("error_message")
+
+  failures SyncFailure[]
+
+  @@index([source, startedAt(sort: Desc)])
+  @@map("sync_runs")
+}
+
+/// 동기화 실패·경고와 재처리 큐. ERROR는 저장하지 못한 공고, WARNING은 저장하되 값을 비우거나 추정한 공고다
+model SyncFailure {
+  id           String    @id @default(uuid()) @db.Uuid
+  syncRunId    String    @map("sync_run_id") @db.Uuid
+  syncRun      SyncRun   @relation(fields: [syncRunId], references: [id], onDelete: Cascade)
+  source       String
+  sourceKey    String?   @map("source_key")
+  /// FETCH · NORMALIZE · MATCH · GEOCODE · SAVE
+  stage        String
+  /// ERROR · WARNING
+  level        String
+  errorCode    String?   @map("error_code")
+  errorMessage String?   @map("error_message")
+  payload      Json?
+  retryCount   Int       @default(0) @map("retry_count")
+  resolvedAt   DateTime? @map("resolved_at") @db.Timestamptz(3)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([syncRunId])
+  @@map("sync_failures")
 }

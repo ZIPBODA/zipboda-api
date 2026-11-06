@@ -28,27 +28,33 @@ const isFixtureId = (id: string): id is FixtureId => id in SCHEDULES;
 
 const listRecord = (id: FixtureId): SubscriptionListRecord => ({
   id,
-  title: `공고 ${id}`,
-  agencyCode: AgencyCode.LH,
+  noticeId: `notice-${id}`,
+  complexId: `complex-${id}`,
+  complexMatch: 'MANUAL',
   regionCode: RegionCode.SEOUL,
-  address: '서울',
-  lat: 37.5,
-  lng: 127,
-  supplyType: null,
-  households: null,
+  ...SCHEDULES[id],
+  winnerDate: null,
+  contractStartDate: null,
+  contractEndDate: null,
+  moveInMonth: null,
   supplyUnits: null,
   recruitCount: null,
   applicationCount: null,
-  postDate: null,
-  ...SCHEDULES[id],
-  contractDate: null,
-  moveInMonth: null,
-  applyUrl: null,
-  imageUrl: null,
-  cancelledAt: null,
+  supplyNote: null,
   createdAt: new Date(),
   updatedAt: new Date(),
-  floorplans: [{ exclusiveArea: new Prisma.Decimal(31.99) }, { exclusiveArea: new Prisma.Decimal(28.81) }],
+  notice: { title: `공고 ${id}`, agencyCode: AgencyCode.LH, supplyType: null, cancelledAt: null },
+  complex: {
+    name: `단지 ${id}`,
+    sigungu: '강남구',
+    address: null,
+    lat: 37.5,
+    lng: 127,
+    households: null,
+    imageUrl: null,
+    floorplans: [{ exclusiveArea: new Prisma.Decimal(31.99) }, { exclusiveArea: new Prisma.Decimal(28.81) }],
+  },
+  units: [],
 });
 
 const serviceWith = (page: { ids: string[]; totalCount: number } = { ids: [], totalCount: 0 }) => {
@@ -90,6 +96,27 @@ describe('청약 공고 목록(API-010)', () => {
     ]);
     expect(result).toMatchObject({ page: 2, pageSize: 3, totalCount: 3 });
     expect(result.items[0].sizes).toEqual([28.81, 31.99]);
+  });
+
+  it('칸 이름은 단지명, 단지가 없으면 공고명이고 위치는 주소 → 지역 시군구 → 지역 순으로 채운다', async () => {
+    const { service, repository } = serviceWith(PAGE);
+    const named = listRecord('open');
+    const noticeLevel = { ...listRecord('closed'), complexId: null, complexMatch: null, complex: null };
+    repository.findListedByIds.mockResolvedValueOnce([named, noticeLevel]);
+    const { items } = await service.list(listQuery());
+    expect(items.map(({ id, title, noticeTitle, address, lat }) => ({ id, title, noticeTitle, address, lat }))).toEqual([
+      { id: 'open', title: '단지 open', noticeTitle: '공고 open', address: '서울 강남구', lat: 37.5 },
+      { id: 'closed', title: '공고 closed', noticeTitle: '공고 closed', address: '서울', lat: null },
+    ]);
+  });
+
+  it('이름으로만 이은 단지의 평면도 면적은 넣지 않고, 주택형 전용면적은 넣는다', async () => {
+    const { service, repository } = serviceWith(PAGE);
+    repository.findListedByIds.mockResolvedValueOnce([
+      { ...listRecord('open'), complexMatch: 'NAME', units: [{ exclusiveArea: new Prisma.Decimal(59.98) }] },
+    ]);
+    const { items } = await service.list(listQuery());
+    expect(items[0].sizes).toEqual([59.98]);
   });
 
   it('범위를 넘은 페이지는 다시 읽지 않고 전체 건수만 준다', async () => {

@@ -1,7 +1,7 @@
 /**
- * 공공데이터 연계(API-114) 전까지 쓸 개발용 데이터. web이 쓰던 서울 LH 현황도 9개 단지 자료
- * (zipboda-web/src/shared/api/housing-data + 3D 검수 목록)를 옮긴 seed-data/subscriptions.json을 넣는다.
- * 연계가 들어오는 PR에서 이 시드와 seed-data를 함께 지운다(backend.rule A1).
+ * 개발용 단지·평면도. web이 쓰던 서울 LH 현황도 9개 단지 자료(zipboda-web/src/shared/api/housing-data + 3D 검수 목록)를
+ * 옮긴 seed-data/complexes.json을 넣는다. 공고는 넣지 않는다 — LH 수집이 매입임대 공고의 건물 이름을 시드의
+ * 확인된 별칭(MANUAL)으로 이 단지들에 잇는다(ERD §6). 평면도를 관리자 화면에서 올리게 되면(S4 API-122) 지운다.
  */
 import 'dotenv/config';
 import { readFileSync } from 'node:fs';
@@ -13,38 +13,28 @@ import {
   REGION_NAME,
   type StoredRegionCode,
 } from '../common/constants/interface-codes.js';
+import { addressKeyOf, nameKeyOf } from '../modules/subscription/complex-keys.js';
+import { ComplexMatch, GeocodeStatus, NoticeSourceName } from '../modules/subscription/constants.js';
 import { sizeTypeOf } from '../modules/subscription/size-type.js';
 import { PrismaClient } from './generated/client.js';
 
-const SEED_FILE = new URL('./seed-data/subscriptions.json', import.meta.url);
-
-const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+const SEED_FILE = new URL('./seed-data/complexes.json', import.meta.url);
 
 const seedSchema = z.array(
   z.object({
     id: z.string().min(1),
-    title: z.string().min(1),
+    name: z.string().min(1),
     agency: z.enum(['LH', 'SH', 'GH', 'IH']),
     region: z.string().min(1),
+    sigungu: z.string().min(1),
     address: z.string().min(1),
     lat: z.number().nullable(),
     lng: z.number().nullable(),
-    supplyType: z.string().nullable(),
     households: z.number().int().nullable(),
+    housingType: z.string().nullable(),
     imageUrl: z.string().nullable(),
-    notice: z
-      .object({
-        postDate: isoDate,
-        applyStartDate: isoDate,
-        applyEndDate: isoDate,
-        contractDate: isoDate,
-        moveInMonth: z.string().regex(/^\d{4}-\d{2}$/),
-        supplyUnits: z.number().int(),
-        recruitCount: z.number().int(),
-        applicationCount: z.number().int(),
-        applyUrl: z.url(),
-      })
-      .nullable(),
+    /** 원천이 이 단지를 부르는 이름. PR 2(LH 수집기)에서 실제 원천 표기와 완전히 같은지 확인한다(ERD 미결 10) */
+    aliases: z.array(z.object({ source: z.enum([NoticeSourceName.LH]), name: z.string().min(1) })),
     floorplans: z.array(
       z.object({
         id: z.string().min(1),
@@ -67,9 +57,6 @@ const regionCodeOf = (name: string): StoredRegionCode => {
   return code;
 };
 
-const dateOf = (isoDateText: string | undefined): Date | null =>
-  isoDateText ? new Date(`${isoDateText}T00:00:00Z`) : null;
-
 const LOCAL_DATABASE_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
 
 /**
@@ -91,33 +78,29 @@ const seedDatabaseUrl = (): string => {
 
 async function main(): Promise<void> {
   const connectionString = seedDatabaseUrl();
-  const subscriptions = seedSchema.parse(JSON.parse(readFileSync(SEED_FILE, 'utf8')));
+  const complexes = seedSchema.parse(JSON.parse(readFileSync(SEED_FILE, 'utf8')));
   const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
   try {
-    for (const subscription of subscriptions) {
-      const { notice } = subscription;
+    for (const complex of complexes) {
+      const agencyCode = AgencyCode[complex.agency];
+      const regionCode = regionCodeOf(complex.region);
       const data = {
-        title: subscription.title,
-        agencyCode: AgencyCode[subscription.agency],
-        regionCode: regionCodeOf(subscription.region),
-        address: subscription.address,
-        lat: subscription.lat,
-        lng: subscription.lng,
-        supplyType: subscription.supplyType,
-        households: subscription.households,
-        imageUrl: subscription.imageUrl,
-        postDate: dateOf(notice?.postDate),
-        applyStartDate: dateOf(notice?.applyStartDate),
-        applyEndDate: dateOf(notice?.applyEndDate),
-        contractDate: dateOf(notice?.contractDate),
-        moveInMonth: notice?.moveInMonth ?? null,
-        supplyUnits: notice?.supplyUnits ?? null,
-        recruitCount: notice?.recruitCount ?? null,
-        applicationCount: notice?.applicationCount ?? null,
-        applyUrl: notice?.applyUrl ?? null,
+        agencyCode,
+        regionCode,
+        name: complex.name,
+        sigungu: complex.sigungu,
+        address: complex.address,
+        addressKey: addressKeyOf(complex.address),
+        lat: complex.lat,
+        lng: complex.lng,
+        geocodeStatus: complex.lat === null || complex.lng === null ? GeocodeStatus.NOT_FOUND : GeocodeStatus.OK,
+        households: complex.households,
+        housingType: complex.housingType,
+        imageUrl: complex.imageUrl,
       };
-      const floorplans = subscription.floorplans.map((plan, order) => ({
+      const floorplans = complex.floorplans.map((plan, order) => ({
         id: plan.id,
+        complexId: complex.id,
         floor: plan.floor,
         unitNumber: plan.unitNumber,
         unitType: plan.unitType,
@@ -127,19 +110,29 @@ async function main(): Promise<void> {
         has3d: plan.has3d,
         displayOrder: order,
       }));
-      // 몇 번을 돌려도 같은 결과가 되게 공고는 덮어쓰고 도면은 갈아 끼운다
+      const aliasKeys = complex.aliases.map((alias) => ({
+        source: alias.source,
+        agencyCode,
+        regionCode,
+        sigungu: complex.sigungu,
+        nameKey: nameKeyOf(alias.name),
+      }));
+      // 몇 번을 돌려도 같은 결과가 되게 단지·별칭은 덮어쓰고 도면은 갈아 끼운다
       await prisma.$transaction([
-        prisma.subscription.upsert({
-          where: { id: subscription.id },
-          create: { id: subscription.id, ...data },
-          update: data,
-        }),
-        prisma.floorplan.deleteMany({ where: { subscriptionId: subscription.id } }),
-        prisma.floorplan.createMany({ data: floorplans.map((plan) => ({ ...plan, subscriptionId: subscription.id })) }),
+        prisma.complex.upsert({ where: { id: complex.id }, create: { id: complex.id, ...data }, update: data }),
+        ...aliasKeys.map((key) =>
+          prisma.complexAlias.upsert({
+            where: { source_agencyCode_regionCode_sigungu_nameKey: key },
+            create: { ...key, complexId: complex.id, method: ComplexMatch.MANUAL },
+            update: { complexId: complex.id, method: ComplexMatch.MANUAL },
+          }),
+        ),
+        prisma.floorplan.deleteMany({ where: { complexId: complex.id } }),
+        prisma.floorplan.createMany({ data: floorplans }),
       ]);
     }
     console.log(
-      `시드 완료: 공고 ${subscriptions.length}건, 도면 ${subscriptions.reduce((sum, item) => sum + item.floorplans.length, 0)}건`,
+      `시드 완료: 단지 ${complexes.length}곳, 도면 ${complexes.reduce((sum, item) => sum + item.floorplans.length, 0)}건`,
     );
   } finally {
     await prisma.$disconnect();

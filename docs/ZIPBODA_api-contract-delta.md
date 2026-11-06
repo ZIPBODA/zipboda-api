@@ -5,9 +5,9 @@
 | 항목 | 내용 |
 |------|------|
 | 문서명 | 집보다(Zipboda) API 계약 차이 기록 (구현 ↔ API 및 인터페이스 정의서) |
-| 버전 | v0.2.0 |
+| 버전 | v0.3.0 |
 | 작성일 | 2026-10-22 |
-| 기반 문서 | ../zipboda-web/docs/ZIPBODA_API 및 인터페이스 정의서_v0.1.xlsx, ../zipboda-web/src/entities/subscription/model/types.ts, ../zipboda-web/src/entities/subscription/config/constants.ts, /src/modules/subscription/dto/subscription-filter.request.ts, /src/modules/subscription/dto/subscription-list.response.ts, /src/modules/subscription/dto/subscription-detail.response.ts, /src/modules/subscription/dto/search.request.ts, /src/modules/subscription/dto/search.response.ts, ../zipboda-web/src/features/search/lib/search.ts, ../zipboda-web/src/features/search/lib/createSearchIndex.ts, ../zipboda-web/src/shared/lib/searchQuery.ts |
+| 기반 문서 | ../zipboda-web/docs/ZIPBODA_API 및 인터페이스 정의서_v0.1.xlsx, ../zipboda-web/src/entities/subscription/model/types.ts, ../zipboda-web/src/entities/subscription/config/constants.ts, /src/modules/subscription/dto/subscription-filter.request.ts, /src/modules/subscription/dto/subscription-list.response.ts, /src/modules/subscription/dto/subscription-detail.response.ts, /src/modules/subscription/dto/search.request.ts, /src/modules/subscription/dto/search.response.ts, ../zipboda-web/src/features/search/lib/search.ts, ../zipboda-web/src/features/search/lib/createSearchIndex.ts, ../zipboda-web/src/shared/lib/searchQuery.ts, /docs/ZIPBODA_erd_v0.1.md |
 
 ### 변경 이력
 
@@ -16,6 +16,7 @@
 | v0.1.0 | 2026-10-22 | Claude | 신규 작성 — 청약 조회 API(010·011·012)와 신규 필터 선택지 API의 정의서 대비 차이, ITF-003·ITF-010 변경 필요 사항, 정의서 갱신 체크리스트 |
 | v0.1.1 | 2026-10-22 | Claude | 기반 문서의 요청 DTO 경로를 실제 파일명(subscription-filter.request.ts)으로 고침 |
 | v0.2.0 | 2026-10-22 | Claude | §4.5 API-095 통합 검색 추가 — q 필수(중복 시 422)·type 미지원·page/pageSize 추가(목록과 같은 페이지 규칙), 응답을 page·pageSize + 종류별 {items, totalCount}로(floorplans 없음, products는 S6 전까지 비어 있음), 주택 검색 필드·순위를 web searchAll 기준으로 기록하고 동순위 id 정렬을 예외로 명시, S6 남은 일(종류를 섞는 순위) 기록. §6 체크리스트에 API-095 항목 추가. 기반 문서에 web 검색(features/search, shared/lib/searchQuery)과 검색 DTO 추가 |
+| v0.3.0 | 2026-11-02 | Claude | ERD v0.3(공고·단지·공고×단지 칸) 반영 — §3 목록 대상을 '평면도 있는 공고만'에서 '모든 칸'으로(공고 단위 칸 포함), 응답 단위가 공고×단지 칸임을 명시. §4.1 응답에 `noticeTitle` 추가, `title`은 단지명(공고 단위 칸은 공고명), `address`는 빈 값 없이 주소→'지역 시군구'→지역, `supplyType`은 공급 유형(행복주택 등), `sizes`에 주택형 전용면적 포함·이름으로만 이은 단지의 평면도 제외, `keyword` 찾는 필드에 시군구 추가, `size` 구간 규칙(주택형 구간·단지 면적 범위). §4.2 `noticeTitle`·`contractDate`(계약 시작일)·`units` 모양(size null 허용, label·floor·unitNumber 추가, households는 이번 공급 세대, price는 원 단위 금액을 읽은 한 줄)·순서(전용면적→타입→호수)·`floorplans` 노출 조건. §4.3 핀 대상·이름표. §4.5 찾는 필드·'도면이 있는 공고만' 삭제. §6 체크리스트에 web 매퍼 항목 추가. 기반 문서에 ERD 추가 |
 
 ---
 
@@ -31,7 +32,8 @@
 |------|--------|------|
 | 오류 응답 | `error: (object\|null)` | `error: { code, message }` — code는 오류코드 정의서의 '반환 코드'(E001…), message는 '반환 메시지'(BAD_REQUEST…) |
 | 날짜 형식 | 미정 | 날짜 `YYYY-MM-DD`, 입주 시기 `YYYY-MM`. 값이 없으면 `null` |
-| 목록 대상 | 미정 | 평면도가 한 장 이상 있는 공고만 목록·지도에 올린다(상세는 열린다) |
+| 목록 단위 | 공고 | **공고 × 단지 한 칸**(ERD v0.3 subscriptions). 단지가 여러 곳인 공고는 칸이 여러 개고, 단지·건물 정보가 없는 공고는 공고 단위 칸 하나다. `id`는 칸 id |
+| 목록 대상 | 미정 | 수집한 모든 칸을 올린다 — 평면도가 없어도 올린다(사용자 결정 2026-10-27, 이전의 '평면도 있는 공고만' 폐지) |
 | 상태·D-day 기준 | 미정 | 한국 날짜(Asia/Seoul)로 계산. D-day는 접수 중일 때만 있다 |
 | 빈 조건 값 | 미정 | `?region=`처럼 비어 있으면 조건을 걸지 않는다(정렬·페이지는 기본값) |
 | 정의 밖 조건 값 | 미정 | 422(ERR-005). 목록·지도에 정의되지 않은 조건 키, 정수가 아닌 코드(공백·`0x3`·소수), 목록에 없는 구간·정렬, 상한(페이지 10,000·페이지 크기 100)을 넘는 값, NUL 문자를 막는다. **web과 다른 점:** web은 예전 링크(`?size=39`)가 빈 목록이 되지 않게 모르는 `size`·`sort`를 무시한다 — web을 API로 옮길 때 주소 값을 API 값으로 바꾸는 쪽에서 걸러 보낸다 |
@@ -46,22 +48,23 @@
 |------|--------|----------------|
 | `region` | int(ITF-004) | 같음. 0은 전체 |
 | `agency` | int(ITF-001) | 같음. 0은 전체 |
-| `size` | string(ITF-003 주택형 39·59·84·114) | **전용면적 구간** `0-15`·`15-20`·`20-25`·`25-30`·`30-` (min ≤ 면적 < max). 매입임대 면적이 소수점이라 주택형 일치로는 못 거른다 |
+| `size` | string(ITF-003 주택형 39·59·84·114) | **전용면적 구간** `0-15`·`15-20`·`20-25`·`25-30`·`30-` (min ≤ 면적 < max). 매입임대 면적이 소수점이라 주택형 일치로는 못 거른다. 주택형 전용면적이 구간 안이거나, 주택형 면적 구간("70~80㎡")이 겹치거나, 보여 주는 평면도의 전용면적이 구간 안이거나, 주택형이 없을 때 단지 면적 범위가 겹치면 든다(ERD §5 규칙 11) |
 | `status` | 없음 | **추가** int(ITF-002). 0은 전체 |
 | `sort` | ITF-010 POPULAR·LATEST·DEADLINE | **DEADLINE**(D-day 작은 순, D-day 없는 공고 뒤)·**COMPETITION**(경쟁률 낮은 순, 모르면 뒤)·**HOUSEHOLDS**(세대 수 많은 순, 모르면 뒤). 값이 같으면 id 순. 기본 DEADLINE |
-| `keyword` | string | 같은 이름. 공고명·주소·공급 유형·기관 약칭(LH 등)·지역 이름에서 대소문자 없이 포함 검색. 검색어의 앞뒤·연속 공백 정리, `%`·`_`·`\`는 글자로 찾는다. 최대 100자. web은 저장된 글자 쪽 공백도 정리하지만 API는 검색어만 정리한다 — 제목의 연속 공백은 적재할 때 정리한다 |
+| `keyword` | string | 같은 이름. 단지명·주소·시군구·공고명·공급 유형·기관 약칭(LH 등)·지역 이름에서 대소문자 없이 포함 검색. 검색어의 앞뒤·연속 공백 정리, `%`·`_`·`\`는 글자로 찾는다. 최대 100자. web은 저장된 글자 쪽 공백도 정리하지만 API는 검색어만 정리한다 — 제목의 연속 공백은 적재할 때 정리한다 |
 | `page` | int | 같음(1부터) |
 | `pageSize` | 없음 | **추가** 기본 20, 최대 100 |
-| 응답 항목 | id·title·agencyCode·region·sizes·dday·deadline·households·competition·moveIn, 키-값 의미에 statusCode | **추가** address·lat·lng·supplyType·applicationCount·imageUrl. `sizes`는 전용면적(㎡) 숫자 배열(오름차순·중복 없음) |
+| 응답 항목 | id·title·agencyCode·region·sizes·dday·deadline·households·competition·moveIn, 키-값 의미에 statusCode | **추가** noticeTitle·address·lat·lng·supplyType·applicationCount·imageUrl. `title`은 단지명(web 카드 제목), 공고 단위 칸은 공고명. `noticeTitle`은 공고명. `address`는 빈 값이 없다 — 주소가 없는 단지(매입임대 건물 대부분)는 '지역 시군구'(예 `서울 노원구`), 공고 단위 칸은 지역 이름. `supplyType`은 공급 유형(행복주택·국민임대·매입임대 등 — web 목 데이터는 주택 유형을 넣었지만 화면 라벨이 '공급 유형'이다). `lat`·`lng`·`households`·`imageUrl`은 단지 값이라 공고 단위 칸은 null. `sizes`는 주택형과 보여 주는 평면도의 전용면적(㎡) 숫자 배열(오름차순·중복 없음) — 구간으로만 온 주택형은 넣지 않고, 이름으로만 이은 단지의 평면도도 넣지 않는다 |
 | 응답 페이지 | page·totalCount | **추가** pageSize |
 
 ### 4.2 API-011 `GET /api/subscriptions/{id}` — 상세
 
 | 구분 | 정의서 | 구현(web 기준) |
 |------|--------|----------------|
-| 응답 추가 | — | `dday`·`contractDate`·`supplyUnits`(공급 호수)·`recruitCount`(모집 인원)·`applicationCount`(신청 인원)·`imageUrl`(대표 사진) |
-| `units` 순서 | 미정 | 주택형 숫자 크기순 → 타입 순 |
-| `floorplans` 추가 | id·size·type·has2d·has3d | **추가** `floor`(층 범위)·`unitNumber`(호)·`exclusiveArea`(전용면적 ㎡). 첫째가 상세가 처음 보여 줄 도면 |
+| 응답 추가 | — | `noticeTitle`(공고명)·`dday`·`contractDate`(계약 시작일)·`supplyUnits`(공급 호수)·`recruitCount`(모집 인원)·`applicationCount`(신청 인원)·`imageUrl`(대표 사진). `title`·`address`·`supplyType`은 목록(§4.1)과 같은 의미 |
+| `units` 모양 | size·type·households·price | `size`(ITF-003)는 전용면적이 구간으로만 왔으면 **null**. **추가** `label`(원천 표기 "59A"·"70~80㎡"·"2형")·`floor`(층)·`unitNumber`(호 — 매입임대 호별 공급). `households`는 이번 공급 세대(없으면 총세대). `price`는 원 단위로 저장한 보증금·월임대료·분양가를 읽은 한 줄(예 `보증금 3,000만 원 · 월 15만 원`), 금액 대신 안내만 왔으면 그 원문("공고문 참조") |
+| `units` 순서 | 미정 | 전용면적 오름차순(구간이면 하한, 면적이 없으면 뒤) → 타입 → 호수 |
+| `floorplans` 추가 | id·size·type·has2d·has3d | **추가** `floor`(층 범위)·`unitNumber`(호)·`exclusiveArea`(전용면적 ㎡). 첫째가 상세가 처음 보여 줄 도면. 평면도는 단지에 붙어 같은 단지의 다른 공고에도 나온다. 이름으로만 이은 단지는 같은 이름의 다른 건물일 수 있어 빈 배열이다(ERD §5 규칙 8) |
 
 ### 4.3 API-012 `GET /api/subscriptions/map` — 지도
 
@@ -70,8 +73,8 @@
 | `bounds` | bbox(형식 미정) | `남,서,북,동`(위도·경도, 예 `37.4,126.8,37.7,127.2`). 남>북·서>동이면 ERR-005 |
 | 조건 | `agency` | **추가** `region`·`status`·`size`·`keyword` — 목록과 같은 거르기 조건. 정렬·페이지(`sort`·`page`·`pageSize`)는 받지 않는다(422) |
 | `bounds` 검사 | 미정 | 위도 −90~90·경도 −180~180, 남≤북·서≤동. 어긋나면 422 |
-| 응답 핀 | id·lat·lng·dday·agencyCode | **추가** `title`(핀 이름표)·`statusCode` |
-| 대상 | 미정 | 평면도와 좌표가 모두 있는 공고 |
+| 응답 핀 | id·lat·lng·dday·agencyCode | **추가** `title`(핀 이름표 — 목록과 같은 단지명)·`statusCode` |
+| 대상 | 미정 | 단지 좌표가 있는 칸. 공고 단위 칸과 주소가 없는 단지(매입임대 건물 대부분)는 핀이 없다. 같은 단지가 여러 공고에 나오면 핀이 겹친다(ERD 미결 6) |
 
 ### 4.4 신규 `GET /api/subscriptions/filter-options` — 필터 선택지
 
@@ -90,7 +93,7 @@
 | `type` | string(결과 종류) | **받지 않는다**(422) — web은 종류를 거르지 않고 주택·가구를 한 번에 보여 준다 |
 | `page`·`pageSize` | 없음 | **추가** 목록(API-010)과 같다 — page 1부터, pageSize 기본 20·최대 100. 종류마다 같은 페이지로 자른다. web 헤더 추천은 pageSize=8, 결과 화면은 맞은 공고를 모두 보여 주므로 totalCount까지 페이지를 이어 받는다 |
 | 응답 | `{ subscriptions:[], floorplans:[], products:[] }` | `{ page, pageSize, subscriptions: { items, totalCount }, products: { items, totalCount } }` — 결과 화면이 종류별 건수를 보여 줘 배열 대신 건수를 함께 준다. **floorplans 없음**(web은 평면도를 따로 찾지 않고 공고로 들어간다). products는 커머스(S6) 전이라 늘 비어 있다 |
-| 주택 찾는 필드 | 미정 | 목록 `keyword`와 같다 — 공고명·주소·공급 유형·기관 약칭·지역 이름. 도면이 있는 공고만. web은 저장된 글자의 연속 공백도 정리하지만 API는 검색어만 정리한다(§4.1과 같음) |
+| 주택 찾는 필드 | 미정 | 목록 `keyword`와 같다 — 단지명·주소·시군구·공고명·공급 유형·기관 약칭·지역 이름. 순위의 '제목'은 목록 `title`(단지명, 공고 단위 칸은 공고명)이다. web은 저장된 글자의 연속 공백도 정리하지만 API는 검색어만 정리한다(§4.1과 같음) |
 | 주택 순위 | 미정 | web `searchAll`과 같다 — 공고명이 검색어와 같음 → 검색어로 시작 → 포함 → 다른 필드만 맞음, 같은 순위는 마감 임박순. **예외**: 그다음 동순위를 web은 카탈로그 순서로, API는 id 순으로 둔다(페이지 경계가 매번 같도록) |
 | 주택 항목 | 미정 | 목록(API-010) 항목과 같은 모양 |
 | 남은 일(S6) | — | web 헤더 추천은 주택·가구를 순위로 섞은 상위 8건이다. 가구가 들어오면 종류를 넘어 섞을 수 있게 항목마다 순위를 줄지 정하고, 검색을 조합하는 쪽을 subscription 모듈 밖으로 뺀다 |
@@ -114,4 +117,5 @@
 - [ ] 필터 선택지 API 신규 행 추가(§4.4)
 - [ ] API-095 Request(`type` 삭제·`page`·`pageSize` 추가)·Response 모양 갱신(§4.5)
 - [ ] ITF-003·ITF-010 갱신(§5)
+- [ ] web을 API로 옮길 때 매퍼가 `units[].size`(문자열·null)를 web `SubscriptionUnit.size`(숫자)로, `unitNumber`를 `unit`으로 바꾸고 `noticeTitle`을 보일 곳을 정한다(§4.1·4.2)
 - [ ] 오류 응답 `{code, message}` 규칙을 공통 인터페이스에 명시(§3)
