@@ -5,7 +5,7 @@
 | 항목 | 내용 |
 |------|------|
 | 문서명 | 집보다(Zipboda) ERD 및 스키마 정의서 |
-| 버전 | v0.3.2 |
+| 버전 | v0.3.3 |
 | 작성일 | 2026-10-22 |
 | 기반 문서 | /docs/ZIPBODA_development-plan_v0.1.md, /src/database/schema.prisma, /docs/ZIPBODA_api-contract-delta.md, /docs/ZIPBODA_public-data-sources_v0.1.md, /docs/ZIPBODA_erd-draft_v0.1.md, ../zipboda-web/docs/ZIPBODA_API 및 인터페이스 정의서_v0.1.xlsx, ../zipboda-web/src/entities/subscription/model/types.ts |
 
@@ -22,6 +22,7 @@
 | v0.3.0 | 2026-10-27 | Claude | **공공데이터 연계(API-114)에 맞춘 구조 개편 — 사용자 승인 대기.** LH 실데이터(서울·인천·경기 공고 999건) 조사 결과를 근거로 공고를 notices(공고)·notice_sources(원천 참조)·complexes(단지·건물)로 나누고, subscriptions를 '공고×단지 한 칸'으로 바꿈. 일정은 단지·대상마다 달라 subscriptions와 새 subscription_schedules에 둠. subscription_units를 주택형 원문·전용/공급면적·면적 구간·세대수·금액(원)·가격 안내로 재정의. floorplans를 단지(complex_id)에 붙임(같은 건물이 여러 공고에 반복). sync_runs·sync_failures 정의. 저장 규칙에 정정공고·단지 판별·날짜·금액 정규화, 면적 구간 필터 규칙 추가. 시드를 가짜 공고 없이 단지 9개·평면도 66건으로 축소. 미결 1·2번 해결, 7~11번 추가. 사용자 결정(2026-10-27): 평면도 없는 공고도 노출, 공고×단지 한 칸, 수집 범위는 분양·건설임대·매입임대, 시드는 실제 공고와 연결 후 제거 |
 | v0.3.1 | 2026-10-27 | Claude | **독립 검토 반영 — 사용자 승인 대기.** ① 단지 정보가 없는 공고(경기북부 매입임대 — 주택 목록이 첨부 xlsx뿐)도 노출되게 subscriptions.complex_id를 NULL 허용으로 바꾸고 공고 단위 칸을 공고당 하나로 제한. ② 단지 판별을 이름 단독에서 '주소 우선 → 별칭' 순서로 바꾸고 complex_aliases(원천 이름 → 단지, 자동·관리자 확인 구분)를 신설. 일반명('매입다가구(경기부천시)')은 단지로 합치지 않음. 이름으로만 이어진 칸에는 평면도를 보여 주지 않음(subscriptions.complex_match). ③ 정정공고를 새 공고로 두지 않고 같은 공고에 원천 참조를 더하는 방식으로 바꿔 공고·칸 id를 유지(superseded_by_id 삭제, notices.title_key 신설, 접미어 '(정정공고)'·공백 정리 포함). ④ subscription_schedules를 종류(APPLY·DOC_TARGET·DOC_SUBMIT·VIEWING·WINNER·WINNER_DOC·CONTRACT)와 날짜·시각 분리 구조로 일반화하고, 연계시스템별 필드 대응·접수 마감 날짜와 시각이 어긋날 때의 우선순위·일정의 단지 배정 규칙을 정함. ⑤ 원천별로 덮어쓸 열을 나눔(규칙 12·13 충돌 해소). ⑥ subscription_units에 호수·층·안내 열 추가, label NULL 허용, 매핑 안 된 원문은 notice_sources.raw_payload에 보존. ⑦ complexes에 단지 전용면적 범위 추가(주택형 행이 없는 영구임대 등이 면적 필터에서 빠지던 문제). ⑧ 공급 유형 코드 → 수집 분류표(규칙 14), 행 단위 지역(규칙 15), 대표 이미지 확장자 규칙 추가. ⑨ §2.1의 '임대 03·분양 02' 서술을 연계시스템 코드 기준으로 고침(10년 공공임대가 02), '409개 중 324개'를 이름 반복으로 정정. ⑩ API 대응 표(§4.10→§4.11, complex_aliases가 §4.4에 들어가 번호가 밀림)에 빠진 필드(postDate·applyStartDate·contractDate·applyUrl·supplyUnits·recruitCount·units 세부)와 NULL 처리를 채움. ⑪ FK를 공고→칸·단지→칸·단지→평면도 RESTRICT로 바꾸고 §8 이행 순서(평면도 66건 보존)를 신설. ⑫ sync_failures에 level(ERROR·WARNING)·중복 방지 UNIQUE, sync_runs에 원천별 동시 실행 방지 추가. 미결 12~14번 추가 |
 | v0.3.2 | 2026-11-02 | Claude | v0.3.1 사용자 승인(2026-11-02) 반영 — §2 '정의' 테이블 10개(notices·notice_sources·complexes·complex_aliases·subscriptions·subscription_schedules·subscription_units·floorplans·sync_runs·sync_failures)를 확정으로 표시하고 §8 이행 순서로 PR 1 마이그레이션 착수 가능. 미결 13(든든전세 포함·051 공가세대 분류)은 승인 범위에서 지금 분류표(든든전세 포함, 051 분양)를 유지하고 PR 2 착수 전 확인으로 남김. 스키마 내용 변경 없음 |
+| v0.3.3 | 2026-11-02 | Claude | PR 1(스키마 이전) 구현 반영 — 마이그레이션 `20261102000000_notice_complex_structure`(§8 1~5, 개발 DB 복사본에서 평면도 66건이 단지 9곳에 그대로 붙는 것과 빈 DB에서의 적용을 확인). §4.11 `sizes`를 주택형 size_type이 아니라 전용면적(㎡) 값으로 고침(지금 응답·web이 전용면적을 쓴다), `units[]`를 구현에 맞춤 — `type`은 null 허용, 호수는 API 평면도와 같은 이름 `unitNumber`, `households` = 이번 공급 세대(없으면 총세대), `price` = 원 단위 금액을 읽은 한 줄(없으면 price_note). §7 미결 5에 v0.3 측정(1만·5만 칸) 기록과 필터 선택지 쿼리 개선(5만 칸 P95 506→31ms) 추가, 미결 6에 v0.3 지도 핀 측정 추가. §8에 실행 기록과 '마이그레이션 직후 시드 필수' 추가. 독립 리뷰 반영 — §5 규칙 8 주소 판별 키에 쉼표 뒤 상세주소·'번지'·'산 12' 표기 정리 추가, 면적 범위 하한·상한 짝 CHECK(마이그레이션 `20261102000100_area_range_pairs`), 미결 15(면적 정보 없는 주택형만 있는 칸) 추가 |
 
 ---
 
@@ -465,7 +466,7 @@ web 화면 모델(/zipboda-web/src/entities/subscription/model/types.ts) 기준�
 | `coord` | complexes.lat·lng. 없으면 null(지도 핀 없음) |
 | `households` | complexes.households |
 | `image` | complexes.image_url |
-| `sizes` | 주택형 size_type + 노출되는 평면도(§5 규칙 8)의 size_type, 중복 제거·오름차순. 구간만 있는 주택형은 넣지 않는다(필터는 §5 규칙 11로 건다) |
+| `sizes` | 주택형 exclusive_area + 노출되는 평면도(§5 규칙 8)의 exclusive_area(㎡), 중복 제거·오름차순. 구간만 있는 주택형은 넣지 않는다(필터는 §5 규칙 11로 건다) |
 | `status`·`deadline`·`dday`·`applyStartDate`·`applyPeriod` | subscriptions 요약 일정 + notices.cancelled_at(§5 규칙 2·3) |
 | `applicants`·`competition` | subscriptions.application_count, §5 규칙 5 |
 | `moveIn` | subscriptions.move_in_month |
@@ -473,7 +474,7 @@ web 화면 모델(/zipboda-web/src/entities/subscription/model/types.ts) 기준�
 | `postDate` | notices.post_date |
 | `applyUrl` | notices.apply_url |
 | `supplyUnits`·`recruitCount` | subscriptions.supply_units·recruit_count |
-| `units[]` | subscription_units — `size` = size_type(없으면 null), `type` = unit_type(없으면 빈 문자열), `label`, `floor` = floor_label, `unit` = unit_number |
+| `units[]` | subscription_units — `size` = size_type, `type` = unit_type, `label`, `floor` = floor_label, `unitNumber` = unit_number(API 평면도와 같은 이름 — web `unit`으로는 web 매퍼가 바꾼다), `households` = supply_households(없으면 total_households), `price` = 보증금·월임대료·분양가를 읽은 한 줄(없으면 price_note). 값이 없으면 null |
 | `floorplans`(상세) | complex_match가 ADDRESS·MANUAL인 칸의 단지 floorplans. NAME이거나 공고 단위 칸이면 빈 배열 |
 | 검색어(API-010 `q`, API-095) | complexes.name·address·sigungu, notices.title·supply_type |
 
@@ -498,7 +499,7 @@ web 화면 모델(/zipboda-web/src/entities/subscription/model/types.ts) 기준�
    - 묶음 안에서 정정 표시가 가장 많은(같으면 공고번호가 큰) 원천을 우선 원천(is_primary)으로 두고, 공고명·일정·단지·주택형을 그 원천 값으로 다시 쓴다. 공고·칸 id는 그대로라 알림·관심·공유 링크가 정정본을 가리킨다.
    - 같은 키의 공고가 둘 이상이면 합치지 않고 새 공고로 두며 WARNING(MATCH)으로 남긴다.
 8. **단지 판별**(공급행·단지 행 하나를 단지에 잇는 순서):
-   - ① 주소가 있으면 address_key로 같은 기관 단지를 찾고, 없으면 새로 만든다(complex_match = ADDRESS). address_key = 시도·시군구·도로명(또는 법정동)·건물 본번-부번까지. 괄호 안 참고 항목, '일원', 동·호·층, 공백 차이는 버린다(예: "서울특별시 노원구 공릉동 240-1 일원 (서울공릉 신혼희망타운)" → "서울특별시 노원구 공릉동 240-1").
+   - ① 주소가 있으면 address_key로 같은 기관 단지를 찾고, 없으면 새로 만든다(complex_match = ADDRESS). address_key = 시도·시군구·도로명(또는 법정동)·건물 본번-부번까지. 괄호 안 참고 항목, '일원', 쉼표 뒤 상세주소, 동·호·층, 공백 차이는 버리고, 지번의 '번지'를 떼며 '산 12'는 '산12'로 붙인다(예: "서울특별시 노원구 공릉동 240-1 일원 (서울공릉 신혼희망타운)" → "서울특별시 노원구 공릉동 240-1").
    - ② 주소가 없으면 complex_aliases에서 (원천, 기관, 지역, 시군구, name_key)로 찾는다. 별칭이 MANUAL이면 complex_match = MANUAL, 아니면 NAME이다.
    - ③ 별칭도 없으면 새 단지와 별칭(method = NAME)을 만든다(complex_match = NAME). 주소가 없는 이름으로는 주소가 있는 기존 단지에 자동으로 잇지 않는다.
    - name_key: 이름에서 앞뒤 공백을 버리고 연속 공백을 하나로 줄인 값. **완전히 같을 때만** 같은 이름이다 — '강서화곡동'과 '강서화곡동(…)'처럼 앞부분만 같은 이름이 실제로 있다.
@@ -566,8 +567,8 @@ web 화면 모델(/zipboda-web/src/entities/subscription/model/types.ts) 기준�
 | 2 | ~~공급 주택형 원천~~ **해결(v0.3)** | LH 공급정보 API·청약홈 주택형(Mdl) → subscription_units(원문 표기·면적·구간·호수·세대·금액·가격 안내) | — |
 | 3 | 3D 자산 형식 | 정의서(API-032)는 glTF/GLB URL, web은 평면도 JSON으로 3D를 생성한다. floorplan_assets 설계 전 결정 필요. 초안 D9는 평면도 모델 JSON을 DB(jsonb, floorplan_models)에 두고 파일은 미디어로 관리하기를 권장한다 | S4 착수 전 |
 | 4 | 정의서에 없는 응답 필드 | recruitCount·contractDate·image 등은 web 기준으로 API 응답에 먼저 넣었다. v0.3에서 `noticeTitle`이 더해지고 `units[].size`가 null일 수 있게 된다. 차이는 /docs/ZIPBODA_api-contract-delta.md에 모은다 | 정의서 일괄 갱신 시 |
-| 5 | ~~목록 정렬을 SQL로~~ **해결(v0.2.3)** | 목록은 조건·정렬(D-day·경쟁률은 SQL 식으로 계산)·LIMIT/OFFSET·건수까지 DB가 하고, id 동순위는 `COLLATE "C"`(문자 코드 순)로 가른다. 측정(2026-10-23, 로컬, /test/perf, 동시 10, 필터 없는 목록 P95): 1만 건 540~578ms → **39~43ms**, 5만 건 177~211ms. v0.3은 notices·complexes를 조인하므로 PR 1에서 같은 도구로 다시 잰다 | PR 1 |
-| 6 | 지도 핀 개수 | API-012는 영역 안의 핀을 모두 준다. 합성 공고로 서울 영역 핀 4,049개(1만 건)에서 P95 426ms, 19,877개(5만 건)에서 1.8초 — 응답 크기가 핀 수에 비례한다. 확대 단계별 상한이나 서버 클러스터링(격자로 묶은 개수)을 둘지 web 지도와 함께 정한다. v0.3에서는 같은 단지가 여러 공고에 나와 핀이 겹치므로 핀을 단지 단위로 묶을지, 좌표 인덱스를 GiST로 바꿀지도 함께 정한다. 참고: Docker로 띄운 Postgres는 /dev/shm 기본 64MB라 shm_size를 넉넉히 준다 | API-114 연계로 실제 건수가 들어올 때 |
+| 5 | ~~목록 정렬을 SQL로~~ **해결(v0.2.3)** | 목록은 조건·정렬(D-day·경쟁률은 SQL 식으로 계산)·LIMIT/OFFSET·건수까지 DB가 하고, id 동순위는 `COLLATE "C"`(문자 코드 순)로 가른다. 측정(2026-10-23, 로컬, /test/perf, 동시 10, 필터 없는 목록 P95): 1만 건 540~578ms → **39~43ms**, 5만 건 177~211ms. **v0.3 재측정(2026-11-02, PR 1)**: 합성 데이터를 공고×단지 구조로 바꿔(공고당 칸 2, 칸당 주택형 2, 공고 단위 칸 5%, 이름 연결 70%, 단지 20%에 평면도) 같은 도구·조건(동시 10, 측정 DB만 병렬 쿼리 끔)으로 잼 — 목록 시나리오 8종 P95 1만 칸 58~133ms, 5만 칸 39~222ms(가장 느린 것은 검색어·지역+기관+면적). 필터 선택지는 처음 모양에서 5만 칸 P95 506ms였다 — 면적 구간 확인을 EXISTS로 감싸면 플래너가 주택형 전체로 해시를 만든 뒤에야 첫 행을 봐서, 맞는 행에서 바로 멈추는 모양으로 따로 두고 선택지 16개를 한 쿼리로 물어 **31ms**(1만 칸 32ms) | — |
+| 6 | 지도 핀 개수 | API-012는 영역 안의 핀을 모두 준다. 합성 공고로 서울 영역 핀 4,049개(1만 건)에서 P95 426ms, 19,877개(5만 건)에서 1.8초 — 응답 크기가 핀 수에 비례한다. 확대 단계별 상한이나 서버 클러스터링(격자로 묶은 개수)을 둘지 web 지도와 함께 정한다. v0.3에서는 같은 단지가 여러 공고에 나와 핀이 겹치므로 핀을 단지 단위로 묶을지, 좌표 인덱스를 GiST로 바꿀지도 함께 정한다. v0.3 합성 데이터(좌표 있는 단지 30%)에서 서울 영역 핀 1,238개(1만 칸) P95 170ms, 6,027개(5만 칸) P95 556ms(2026-11-02). 참고: Docker로 띄운 Postgres는 /dev/shm 기본 64MB라 shm_size를 넉넉히 준다 | API-114 연계로 실제 건수가 들어올 때 |
 | 7 | 정정공고 판별 규칙 검증 | §5 규칙 7은 LH 공고 999건 표본의 정정 묶음으로 세웠다. 이 표본은 이름만으로 묶었고 지역별 조회에서 생긴 같은 PAN_ID 중복을 빼지 않아 묶음 수(175개)가 부풀었을 수 있다. 수집 후 ① 같은 날 같은 이름의 정정이 아닌 다른 공고, ② 정정본 게시일이 원 공고와 다른 사례, ③ 예비자 포함 공급 세대와 신청 인원이 함께 있는 공고가 있는지 확인한다 | PR 2(LH 수집기) |
 | 8 | 매입임대 건물 위치 | 대부분 건물 이름·시군구만 있어 지도 핀이 없다. 일부 공고(인천 일반 매입임대)는 호별 주소를 주므로 그 주소로 단지를 판별하고 지오코딩한다. 이름으로 지오코딩(카카오 키워드 검색)할지는 정확도를 보고 정한다 | PR 2 |
 | 9 | LH·청약홈 같은 공고 잇기 | §5 규칙 12대로 기관 원천을 기준으로 두고 청약홈을 보조 원천으로 잇는 규칙(주택명·모집공고일·주소)은 청약홈 수집(PR 3)에서 실데이터로 정한다. 단지는 주소로 합쳐지는지 함께 확인한다 | PR 3 |
@@ -576,12 +577,13 @@ web 화면 모델(/zipboda-web/src/entities/subscription/model/types.ts) 기준�
 | 12 | 운영 DB의 평면도 | 시드는 운영에서 실행되지 않아, S4(API-122) 전까지 운영에는 평면도·3D가 없다. S4 전에 운영에서 3D를 보여 줘야 하면 시드와 별도로 여러 번 실행해도 같은 결과가 나오는 데이터 이관 작업을 만든다. API 호스팅 결정과 함께 정한다 | API 호스팅 결정 시 |
 | 13 | 수집 분류 확인(승인 시 현 분류 유지) | ① 051 분양주택 공가세대 공고에 임대보증금이 붙어 온다 — 분양인지 임대인지 공고문으로 확인. ② 144 든든전세(LH가 매입한 주택의 전세형 공급)를 매입임대로 넣었다 — 사용자 결정의 '전세임대 제외'와 다른 유형이라 포함했다. 빼려면 규칙 14 표만 고친다 | PR 2 착수 전(사용자 확인) |
 | 14 | 이름만 같은 다른 건물 | 주소 없이 이름으로 이은 칸(NAME)은 같은 이름의 다른 건물일 수 있다. 평면도를 숨겨 잘못된 3D 노출은 막았지만, 목록에서 같은 단지로 묶이는 문제는 남는다. 수집 후 호별 주소가 있는 공고로 이름 재사용이 같은 건물인지 표본을 확인한다 | PR 2 |
+| 15 | 면적 정보 없는 주택형만 있는 칸 | §5 규칙 11 ④는 주택형 행이 하나도 없을 때만 단지 면적 범위를 본다. 그래서 '2형'처럼 면적 정보가 없는 주택형만 있는 칸은 단지 범위가 있어도 어떤 면적 구간에도 걸리지 않는다. ④를 '면적 정보(전용면적·구간)가 있는 주택형이 없을 때'로 넓힐지 실데이터에서 이런 칸이 얼마나 되는지 보고 정한다(PR 1 독립 리뷰 지적) | PR 2 |
 
 ---
 
 ## 8. 이행 순서 (PR 1 마이그레이션)
 
-운영 DB에는 아직 데이터가 없고(호스팅 미정), 로컬·CI DB에는 시드만 있다. 그래도 평면도 66건을 잃지 않도록 아래 순서를 지킨다.
+운영 DB에는 아직 데이터가 없고(호스팅 미정), 로컬·CI DB에는 시드만 있다. 그래도 평면도 66건을 잃지 않도록 아래 순서를 지킨다. PR 1에서 1~5는 마이그레이션 `20261102000000_notice_complex_structure`(면적 범위 짝 CHECK는 `20261102000100_area_range_pairs`)가, 6~8은 코드·문서·측정이 맡았다(2026-11-02 — 개발 DB 복사본에 적용해 단지 9곳·평면도 66건이 그대로 이어지고, 빈 DB에서도 처음부터 적용되며, 스키마와 DB 사이 차이가 없음을 확인). **마이그레이션 직후 `pnpm db:seed`를 돌린다** — 마이그레이션이 옛 공고 행으로 만든 단지 9곳은 주소 판별 키·시군구·별칭이 비어 있어, 시드가 채우기 전에 수집기를 돌리면 이 단지들을 찾지 못하고 이름 연결 단지를 새로 만든다.
 
 1. notices·notice_sources·complexes·complex_aliases·sync_runs·sync_failures를 만든다.
 2. 지금의 시드 공고 9행으로 complexes 9행을 만든다(id 유지, 이름·주소·좌표·세대 복사, address_key 계산). address_key 계산은 수집기와 같은 함수를 쓴다(SQL로 따로 흉내 내지 않는다 — 시드 스크립트에서 계산).
