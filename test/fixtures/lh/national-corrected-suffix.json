@@ -1,0 +1,210 @@
+{
+  "queryRegion": "11",
+  "notice": {
+    "PAN_NT_ST_DT": "2025.12.31",
+    "PAN_ID": "2015122300018941",
+    "AIS_TP_CD_NM": "국민임대",
+    "CNP_CD_NM": "서울특별시",
+    "ALL_CNT": "27",
+    "SPL_INF_TP_CD": "062",
+    "AIS_TP_CD": "07",
+    "PAN_DT": "20250905",
+    "RNUM": "10",
+    "CCR_CNNT_SYS_DS_CD": "03",
+    "DTL_URL": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?panId=2015122300018941&ccrCnntSysDsCd=03&uppAisTpCd=06&aisTpCd=07&mi=1026",
+    "CLSG_DT": "2025.09.16",
+    "UPP_AIS_TP_CD": "06",
+    "PAN_NM": "[정정공고]도봉주공1단지 국민임대주택 예비입주자 모집 공고(정정공고)",
+    "UPP_AIS_TP_NM": "임대주택",
+    "PAN_SS": "접수마감",
+    "DTL_URL_MOB": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?panId=2015122300018941&ccrCnntSysDsCd=03&uppAisTpCd=06&aisTpCd=07&mi=1026"
+  },
+  "detail": [
+    {
+      "dsSch": [
+        {
+          "PAN_ID": "2015122300018941",
+          "CCR_CNNT_SYS_DS_CD": "03",
+          "SPL_INF_TP_CD": "062",
+          "UPP_AIS_TP_CD": "06",
+          "AIS_TP_CD": "07"
+        }
+      ]
+    },
+    {
+      "dsSplScdl": [
+        {
+          "PPR_SBM_OPE_ANC_DT": "2025.12.31",
+          "PPR_ACP_CLSG_DT": "2026.01.12",
+          "PZWR_ANC_DT": "2026.03.31",
+          "CTRT_ED_DT": "",
+          "SBD_LGO_NM": "",
+          "SBSC_ACP_ST_DT": "2025.09.16",
+          "ACP_DTTM": "2025.09.16 10:00 ~ 2025.09.16 16:00",
+          "SBSC_ACP_CLSG_DT": "2025.09.17",
+          "CTRT_ST_DT": "",
+          "PPR_ACP_ST_DT": "2026.01.05"
+        }
+      ],
+      "dsSbdAhflNm": [
+        {
+          "LCC_NT_NM": "단지명",
+          "AHFL_URL": "다운로드",
+          "LS_SPL_INF_UPL_FL_DS_CD_NM": "파일구분명",
+          "CMN_AHFL_NM": "첨부파일명"
+        }
+      ],
+      "dsSbdNm": [
+        {
+          "LGDN_ADR": "단지주소",
+          "LGDN_DTL_ADR": "단지상세주소",
+          "HSH_CNT": "총세대수",
+          "HTN_FMLA_DESC": "난방방식",
+          "LCC_NT_NM": "단지명",
+          "DDO_AR": "전용면적",
+          "SPL_INF_GUD_FCTS": "안내사항",
+          "MVIN_XPC_YM": "입주예정월"
+        }
+      ],
+      "dsEtcInfo": [
+        {
+          "ETC_CTS": "자세한 사항은 공고문을 반드시 확인하시기 바랍니다.",
+          "CRC_RSN": "★서류 제출자 발표 및 당첨자 발표일 변경\n당첨자 발표: \n서류 제출자 발표 [변경전]  '25.12.31. 16:00 이후 > [변경후] '26.1.30. 16:00 이후\n당첨자 발표 [변경전] '26.3.31. 16:00 이후 > [변경후] '26.4.30. 16:00 이후\n- 청약 공고 재확인 필요 \n자세한 사항은 공고문을 확인하여 주시기 바랍니다."
+        }
+      ],
+      "dsAhflInfo": [
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=65051343",
+          "SL_PAN_AHFL_DS_CD_NM": "공고문(hwp)",
+          "CMN_AHFL_NM": "(250905)국민임대예비입주자표준모집공고문(서울도봉).hwp"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=65051342",
+          "SL_PAN_AHFL_DS_CD_NM": "공고문(PDF)",
+          "CMN_AHFL_NM": "(250905)국민임대예비입주자표준모집공고문(서울도봉).pdf"
+        }
+      ],
+      "dsSbd": [
+        {
+          "LGDN_ADR": "서울특별시 도봉구 도봉로180길 83-14(도봉동,주공아파트)",
+          "LGDN_DTL_ADR": "",
+          "HSH_CNT": "245",
+          "HTN_FMLA_DESC": "개별가스난방",
+          "LCC_NT_NM": "서울도봉",
+          "DDO_AR": "36.44~45.32",
+          "SPL_INF_GUD_FCTS": "",
+          "MVIN_XPC_YM": "2002.12"
+        }
+      ],
+      "dsSbdAhfl": [],
+      "dsCtrtPlcNm": [
+        {
+          "CTRT_PLC_DTL_ADR": "접수처소재지상세주소",
+          "SIL_OFC_GUD_FCTS": "접수처안내사항",
+          "CTRT_PLC_ADR": "접수처소재지주소",
+          "TSK_ST_DTTM": "운영기간시작일시",
+          "TSK_ED_DTTM": "운영기간종료일시",
+          "SIL_OFC_TLNO": "전화번호"
+        }
+      ],
+      "dsEtcInfoNm": [
+        {
+          "ETC_CTS": "기타사항",
+          "CRC_RSN": "정정/취소사유"
+        }
+      ],
+      "dsAhflInfoNm": [
+        {
+          "AHFL_URL": "다운로드",
+          "SL_PAN_AHFL_DS_CD_NM": "파일구분명",
+          "CMN_AHFL_NM": "첨부파일명"
+        }
+      ],
+      "dsCtrtPlc": [
+        {
+          "CTRT_PLC_DTL_ADR": "102동 관리사무소",
+          "SIL_OFC_GUD_FCTS": "* 도봉주공1단지 (02-954-6776) \n  - 전화문의는 장시간 접속지연 및 통화대기 등의 불편이 있을 수 있으니, \n  - 예비입주자 모집 신청과 관련한 내용은 공고문을 참고하여 주시기 바랍니다.\n    (통화가능 시간 : 평일 10:00~17:00, 점심시간 제외(12:00~13:00))\n\n* 1순위 접수결과 신청자가 모집할 예비입주자를 초과하는 때에는 후순위 접수는 받지 않습니다.\n* 후순위 접수여부는 1순위 접수마감일 20:00 이후에 한국토지주택공사 홈페이지에 게시합니다.",
+          "CTRT_PLC_ADR": "서울특별시 도봉구 도봉로180길 83-14(도봉동,주공아파트)",
+          "TSK_ST_DTTM": "2025.09.05",
+          "TSK_ED_DTTM": "2026.04.30",
+          "SIL_OFC_TLNO": "02-954-6776"
+        }
+      ],
+      "dsSplScdlNm": [
+        {
+          "PPR_SBM_OPE_ANC_DT": "서류제출대상자발표일",
+          "PPR_ACP_CLSG_DT": "서류접수기간종료일",
+          "PZWR_ANC_DT": "당첨자발표일",
+          "CTRT_ED_DT": "계약기간종료일",
+          "SBD_LGO_NM": "단지명",
+          "SBSC_ACP_ST_DT": "접수기간시작일",
+          "ACP_DTTM": "신청일시",
+          "SBSC_ACP_CLSG_DT": "접수기간종료일",
+          "CTRT_ST_DT": "계약기간시작일",
+          "PPR_ACP_ST_DT": "서류접수기간시작일"
+        }
+      ],
+      "resHeader": [
+        {
+          "RS_DTTM": "20261106050018",
+          "SS_CODE": "Y"
+        }
+      ]
+    }
+  ],
+  "supply": [
+    {
+      "dsSch": [
+        {
+          "PAN_ID": "2015122300018941",
+          "CCR_CNNT_SYS_DS_CD": "03",
+          "SPL_INF_TP_CD": "062",
+          "UPP_AIS_TP_CD": "06",
+          "AIS_TP_CD": "07"
+        }
+      ]
+    },
+    {
+      "dsList01Nm": [
+        {
+          "RFE": "월임대료(원)",
+          "NOW_HSH_CNT": "금회공급 세대수",
+          "HSH_CNT": "세대수",
+          "HTY_NNA": "주택형",
+          "LS_GMY": "임대보증금(원)",
+          "SBD_LGO_NM": "단지명",
+          "DDO_AR": "전용면적(㎡)",
+          "SPL_AR": "공급면적"
+        }
+      ],
+      "resHeader": [
+        {
+          "RS_DTTM": "20261106050020",
+          "SS_CODE": "Y"
+        }
+      ],
+      "dsList01": [
+        {
+          "RFE": "공고문 참조",
+          "NOW_HSH_CNT": "32",
+          "HSH_CNT": "191",
+          "HTY_NNA": "36형",
+          "LS_GMY": "공고문 참조",
+          "SBD_LGO_NM": "서울도봉",
+          "DDO_AR": "36.44",
+          "SPL_AR": "51.4592"
+        },
+        {
+          "RFE": "공고문 참조",
+          "NOW_HSH_CNT": "9",
+          "HSH_CNT": "54",
+          "HTY_NNA": "45형",
+          "LS_GMY": "공고문 참조",
+          "SBD_LGO_NM": "서울도봉",
+          "DDO_AR": "45.32",
+          "SPL_AR": "63.9992"
+        }
+      ]
+    }
+  ]
+}

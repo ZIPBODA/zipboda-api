@@ -33,8 +33,13 @@ const seedSchema = z.array(
     households: z.number().int().nullable(),
     housingType: z.string().nullable(),
     imageUrl: z.string().nullable(),
-    /** 원천이 이 단지를 부르는 이름. PR 2(LH 수집기)에서 실제 원천 표기와 완전히 같은지 확인한다(ERD 미결 10) */
-    aliases: z.array(z.object({ source: z.enum([NoticeSourceName.LH]), name: z.string().min(1) })),
+    /**
+     * 원천이 이 단지를 부르는 이름. 9곳 모두 LH '26년 3차 청년 매입임대' 공고의 건물 이름과 완전히 같다(2026-11-06 확인, ERD 미결 10).
+     * 그 공고의 공급행은 시군구 없이 시도만 줘서 시군구를 비운 별칭이어야 수집기가 찾는다
+     */
+    aliases: z.array(
+      z.object({ source: z.enum([NoticeSourceName.LH]), name: z.string().min(1), sigungu: z.string().default('') }),
+    ),
     floorplans: z.array(
       z.object({
         id: z.string().min(1),
@@ -114,10 +119,11 @@ async function main(): Promise<void> {
         source: alias.source,
         agencyCode,
         regionCode,
-        sigungu: complex.sigungu,
+        sigungu: alias.sigungu,
         nameKey: nameKeyOf(alias.name),
       }));
-      // 몇 번을 돌려도 같은 결과가 되게 단지·별칭은 덮어쓰고 도면은 갈아 끼운다
+      // 몇 번을 돌려도 같은 결과가 되게 단지·별칭은 덮어쓰고 도면은 갈아 끼운다. 별칭은 지우지 않는다 — 수집이 먼저 만든
+      // 같은 이름의 NAME 별칭은 시드가 확인한 MANUAL로 바꾸고, 관리자가 단 다른 별칭은 남긴다
       await prisma.$transaction([
         prisma.complex.upsert({ where: { id: complex.id }, create: { id: complex.id, ...data }, update: data }),
         ...aliasKeys.map((key) =>

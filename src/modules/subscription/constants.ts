@@ -16,6 +16,32 @@ export const FLOORPLAN_VISIBLE_MATCHES: readonly string[] = [ComplexMatch.ADDRES
 /** 단지 좌표를 얻은 결과. 마이그레이션 CHECK와 같은 값이다 */
 export const GeocodeStatus = { OK: 'OK', NOT_FOUND: 'NOT_FOUND', NO_ADDRESS: 'NO_ADDRESS', MANUAL: 'MANUAL' } as const;
 
+/** 공고 수집 분류(ERD §5 규칙 14). 마이그레이션 CHECK와 같은 값이다 */
+export const SupplyCategory = { SALE: 'SALE', PUBLIC_RENTAL: 'PUBLIC_RENTAL', PURCHASE_RENTAL: 'PURCHASE_RENTAL' } as const;
+export type SupplyCategory = (typeof SupplyCategory)[keyof typeof SupplyCategory];
+
+/** 칸의 종류·대상별 일정(ERD §4.6). 마이그레이션 CHECK와 같은 값이다 */
+export const ScheduleKind = {
+  APPLY: 'APPLY',
+  DOC_TARGET: 'DOC_TARGET',
+  DOC_SUBMIT: 'DOC_SUBMIT',
+  VIEWING: 'VIEWING',
+  WINNER: 'WINNER',
+  WINNER_DOC: 'WINNER_DOC',
+  CONTRACT: 'CONTRACT',
+} as const;
+export type ScheduleKind = (typeof ScheduleKind)[keyof typeof ScheduleKind];
+
+/** 동기화에서 문제가 난 단계(ERD §4.10). 마이그레이션 CHECK와 같은 값이다 */
+export const SyncStage = {
+  FETCH: 'FETCH',
+  NORMALIZE: 'NORMALIZE',
+  MATCH: 'MATCH',
+  GEOCODE: 'GEOCODE',
+  SAVE: 'SAVE',
+} as const;
+export type SyncStage = (typeof SyncStage)[keyof typeof SyncStage];
+
 /** 공고 원천. 마이그레이션 CHECK와 같은 값이다 */
 export const NoticeSourceName = {
   LH: 'LH',
@@ -24,6 +50,7 @@ export const NoticeSourceName = {
   SH_RSS: 'SH_RSS',
   GH_FILE: 'GH_FILE',
 } as const;
+export type NoticeSourceName = (typeof NoticeSourceName)[keyof typeof NoticeSourceName];
 
 /**
  * 면적은 값이 아니라 전용면적 구간으로 고른다(web 목록 필터와 같은 구간).

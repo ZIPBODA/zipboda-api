@@ -1,0 +1,230 @@
+{
+  "queryRegion": "11",
+  "notice": {
+    "PAN_NT_ST_DT": "2026.02.24",
+    "PAN_ID": "2015122300019376",
+    "AIS_TP_CD_NM": "전세임대",
+    "CNP_CD_NM": "서울특별시 외",
+    "ALL_CNT": "49",
+    "SPL_INF_TP_CD": "137",
+    "AIS_TP_CD": "17",
+    "PAN_DT": "20260224",
+    "RNUM": "19",
+    "CCR_CNNT_SYS_DS_CD": "03",
+    "DTL_URL": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?panId=2015122300019376&ccrCnntSysDsCd=03&uppAisTpCd=13&aisTpCd=17&mi=1026",
+    "CLSG_DT": "2026.12.31",
+    "UPP_AIS_TP_CD": "13",
+    "PAN_NM": "2026년 청년 전세임대 1순위 입주자 수시모집",
+    "UPP_AIS_TP_NM": "주거복지",
+    "PAN_SS": "접수중",
+    "DTL_URL_MOB": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?panId=2015122300019376&ccrCnntSysDsCd=03&uppAisTpCd=13&aisTpCd=17&mi=1026"
+  },
+  "detail": [
+    {
+      "dsSch": [
+        {
+          "PAN_ID": "2015122300019376",
+          "CCR_CNNT_SYS_DS_CD": "03",
+          "SPL_INF_TP_CD": "137",
+          "UPP_AIS_TP_CD": "13",
+          "AIS_TP_CD": "17"
+        }
+      ]
+    },
+    {
+      "dsCtrtPlcNm": [
+        {
+          "CTRT_PLC_DTL_ADR": "접수처소재지상세주소",
+          "SIL_OFC_GUD_FCTS": "접수처안내사항",
+          "CTRT_PLC_ADR": "접수처소재지주소",
+          "TSK_ST_DTTM": "운영기간시작일시",
+          "TSK_ED_DTTM": "운영기간종료일시",
+          "SIL_OFC_TLNO": "전화번호"
+        }
+      ],
+      "dsEtcInfoNm": [
+        {
+          "ETC_CTS2": "신청자격안내사항",
+          "TRG_HS_CTS": "대상주택",
+          "SPL_HO_CNT_CTS": "공급호수",
+          "LSC_CTS": "임대조건",
+          "CRC_RSN": "정정/취소사유",
+          "SPPT_LMT_AMT_CTS": "지원한도액",
+          "LSTR_CTS": "임대기간"
+        }
+      ],
+      "dsAhflInfoNm": [
+        {
+          "AHFL_URL": "다운로드",
+          "SL_PAN_AHFL_DS_CD_NM": "파일구분명",
+          "CMN_AHFL_NM": "첨부파일명"
+        }
+      ],
+      "dsEtcListNm": [
+        {
+          "ETC_CTS": "신청자격세부자격요건",
+          "PAN_ETC_INF_CD_NM": "신청자격구분"
+        }
+      ],
+      "dsCtrtPlc": [
+        {
+          "CTRT_PLC_DTL_ADR": "",
+          "SIL_OFC_GUD_FCTS": "",
+          "CTRT_PLC_ADR": "",
+          "TSK_ST_DTTM": "",
+          "TSK_ED_DTTM": "",
+          "SIL_OFC_TLNO": ""
+        }
+      ],
+      "dsSplScdl": [
+        {
+          "PPR_SBM_OPE_ANC_DT": "",
+          "PPR_ACP_CLSG_DT": "",
+          "PZWR_ANC_DT": "",
+          "UST_ACP_CLSG_DTTM": "2026-12-31 18:00",
+          "UST_ACP_ST_DTTM": "2026-02-24 10:00",
+          "PPR_ACP_ST_DT": ""
+        }
+      ],
+      "dsEtcList": [
+        {
+          "ETC_CTS": "신청일 현재 본인이 무주택자이면서 혼인 중이 아닌 취업준비생, 대학생, 19세 이상 39세 이하 청년으로 아래 1순위 유형 중 어느 하나에 해당하는 자",
+          "PAN_ETC_INF_CD_NM": "공통신청자격"
+        },
+        {
+          "ETC_CTS": "* 수급자 : 「국민기초생활보장법」 제7조 제1항 제1호~3호 생계 · 주거 · 의료급여 수급 가구의 청년\n\n*  한부모가족 : 「한부모가족 지원법 시행규칙」 제3조의 규정에 따라 여성가족부장관이 정하는 기준에\n                       해당하는 보호대상 한부모가족 가구의 청년\n\n* 차상위계층 : 「국민기초생활보장법」 제2조 제10호에 따른 차상위계층 가구의 청년",
+          "PAN_ETC_INF_CD_NM": "1순위"
+        }
+      ],
+      "dsEtcInfo": [
+        {
+          "ETC_CTS2": "공급호수 대비 입주신청 접수 초과 시 공고가 조기에 종료될 수 있음",
+          "TRG_HS_CTS": "전용면적 85㎡ 이하 전세 또는 보증부월세로 계약 가능한 주택",
+          "SPL_HO_CNT_CTS": "7000",
+          "LSC_CTS": "- 임대보증금 : 100만원\n- 월임대료 : LH 지원금의 연 1.2~2.2%이자\n\n- 상세내역은 입주자모집 공고문 참조",
+          "CRC_RSN": "",
+          "SPPT_LMT_AMT_CTS": "- 수도권 12,000만원, 광역시 9,500만원, 기타 도 지역 8,500만원",
+          "LSTR_CTS": "- 최초 임대기간은 2년이며, 2년 단위로 4회까지 재계약 가능 (최장10년)"
+        }
+      ],
+      "dsSplScdlNm": [
+        {
+          "PPR_SBM_OPE_ANC_DT": "서류제출대상자발표일",
+          "PPR_ACP_CLSG_DT": "서류접수기간종료일",
+          "PZWR_ANC_DT": "입주대상자발표일",
+          "UST_ACP_CLSG_DTTM": "접수기간종료일",
+          "UST_ACP_ST_DTTM": "접수기간시작일",
+          "PPR_ACP_ST_DT": "서류접수기간시작일"
+        }
+      ],
+      "resHeader": [
+        {
+          "RS_DTTM": "20261106045946",
+          "SS_CODE": "Y"
+        }
+      ],
+      "dsAhflInfo": [
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=65733877",
+          "SL_PAN_AHFL_DS_CD_NM": "기타 첨부파일",
+          "CMN_AHFL_NM": "1.2026년청년전세임대1순위입주자수시모집QnA.hwp"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=68824433",
+          "SL_PAN_AHFL_DS_CD_NM": "기타 첨부파일",
+          "CMN_AHFL_NM": "2.개인정보수집이용및제3자제공동의서(양식_수정).hwpx"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=65733879",
+          "SL_PAN_AHFL_DS_CD_NM": "기타 첨부파일",
+          "CMN_AHFL_NM": "3.복학확약각서양식.hwp"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=68869881",
+          "SL_PAN_AHFL_DS_CD_NM": "공고문(hwp)",
+          "CMN_AHFL_NM": "[공고문]2026년청년전세임대1순위입주자수시모집(수정).hwpx"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=68869885",
+          "SL_PAN_AHFL_DS_CD_NM": "공고문(PDF)",
+          "CMN_AHFL_NM": "[공고문]2026년청년전세임대1순위입주자수시모집(수정).pdf"
+        }
+      ]
+    }
+  ],
+  "supply": [
+    {
+      "dsSch": [
+        {
+          "PAN_ID": "2015122300019376",
+          "CCR_CNNT_SYS_DS_CD": "03",
+          "SPL_INF_TP_CD": "137",
+          "UPP_AIS_TP_CD": "13",
+          "AIS_TP_CD": "17"
+        }
+      ]
+    },
+    {
+      "dsList01Nm": [
+        {
+          "UST_SPL_QOM": "대학생공급물량",
+          "YT_OPE_SPL_QOM": "청년공급물량",
+          "TOT_RSDC_SPL_QOM": "총공급물량",
+          "STDT_CS_NM": "학생분류",
+          "SBD_LGO_NM": "지역(지자체)",
+          "COP_RSDC_SPL_QOM": "공동거주공급물량",
+          "CNP_NM": "지역본부",
+          "EMPT_PPRT_OPE_SPL_QOM": "취업준비생공급물량"
+        }
+      ],
+      "resHeader": [
+        {
+          "RS_DTTM": "20261106050004",
+          "SS_CODE": "Y"
+        }
+      ],
+      "dsList01": [
+        {
+          "UST_SPL_QOM": "10",
+          "YT_OPE_SPL_QOM": "10",
+          "TOT_RSDC_SPL_QOM": "30",
+          "STDT_CS_NM": "청년1순위(신입생(정시) , 신입생(수시) , 신입생(편입) , 재학생 , 휴학생 , 복학생 , 취업준비생",
+          "SBD_LGO_NM": "전세(서울종로구)",
+          "COP_RSDC_SPL_QOM": "0",
+          "CNP_NM": "서울지역본부 전세임대",
+          "EMPT_PPRT_OPE_SPL_QOM": "10"
+        },
+        {
+          "UST_SPL_QOM": "10",
+          "YT_OPE_SPL_QOM": "10",
+          "TOT_RSDC_SPL_QOM": "30",
+          "STDT_CS_NM": "청년1순위(신입생(정시) , 신입생(수시) , 신입생(편입) , 재학생 , 휴학생 , 복학생 , 취업준비생",
+          "SBD_LGO_NM": "전세(서울중구)",
+          "COP_RSDC_SPL_QOM": "0",
+          "CNP_NM": "서울지역본부 전세임대",
+          "EMPT_PPRT_OPE_SPL_QOM": "10"
+        },
+        {
+          "UST_SPL_QOM": "10",
+          "YT_OPE_SPL_QOM": "10",
+          "TOT_RSDC_SPL_QOM": "30",
+          "STDT_CS_NM": "청년1순위(신입생(정시) , 신입생(수시) , 신입생(편입) , 재학생 , 휴학생 , 복학생 , 취업준비생",
+          "SBD_LGO_NM": "전세(서울용산구)",
+          "COP_RSDC_SPL_QOM": "0",
+          "CNP_NM": "서울지역본부 전세임대",
+          "EMPT_PPRT_OPE_SPL_QOM": "10"
+        },
+        {
+          "UST_SPL_QOM": "10",
+          "YT_OPE_SPL_QOM": "10",
+          "TOT_RSDC_SPL_QOM": "30",
+          "STDT_CS_NM": "청년1순위(신입생(정시) , 신입생(수시) , 신입생(편입) , 재학생 , 휴학생 , 복학생 , 취업준비생",
+          "SBD_LGO_NM": "전세(서울성동구)",
+          "COP_RSDC_SPL_QOM": "0",
+          "CNP_NM": "서울지역본부 전세임대",
+          "EMPT_PPRT_OPE_SPL_QOM": "10"
+        }
+      ]
+    }
+  ]
+}

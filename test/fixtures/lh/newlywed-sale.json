@@ -1,0 +1,285 @@
+{
+  "queryRegion": "11",
+  "notice": {
+    "PAN_NT_ST_DT": "2025.06.27",
+    "PAN_ID": "0000060903",
+    "AIS_TP_CD_NM": "공공분양(신혼희망)",
+    "CNP_CD_NM": "서울특별시",
+    "ALL_CNT": "7",
+    "SPL_INF_TP_CD": "390",
+    "AIS_TP_CD": "39",
+    "PAN_DT": "20250627",
+    "RNUM": "4",
+    "CCR_CNNT_SYS_DS_CD": "02",
+    "DTL_URL": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?panId=0000060903&ccrCnntSysDsCd=02&uppAisTpCd=39&aisTpCd=39&mi=1027",
+    "CLSG_DT": "2025.07.10",
+    "UPP_AIS_TP_CD": "39",
+    "PAN_NM": "서울공릉지구 신혼희망타운(공공분양) 추가 입주자모집공고",
+    "UPP_AIS_TP_NM": "공공분양(신혼희망)",
+    "PAN_SS": "접수마감",
+    "DTL_URL_MOB": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?panId=0000060903&ccrCnntSysDsCd=02&uppAisTpCd=39&aisTpCd=39&mi=1027"
+  },
+  "detail": [
+    {
+      "dsSch": [
+        {
+          "PAN_ID": "0000060903",
+          "CCR_CNNT_SYS_DS_CD": "02",
+          "SPL_INF_TP_CD": "390",
+          "UPP_AIS_TP_CD": "39",
+          "AIS_TP_CD": "39"
+        }
+      ]
+    },
+    {
+      "dsSplScdl": [
+        {
+          "RMK": "인터넷접수",
+          "PZWR_ANC_DT": "20250718",
+          "CTRT_ED_DT": "20251023",
+          "HS_SBSC_ACP_TRG_CD_NM": "예비신혼부부",
+          "ACP_DTTM": "2025.07.09 10:00 ~ 2025.07.10 17:00",
+          "PZWR_PPR_SBM_ST_DT": "20250723",
+          "SPL_SCD_GUD_FCTS": "",
+          "CTRT_ST_DT": "20251022",
+          "PZWR_PPR_SBM_ED_DT": "20250724"
+        },
+        {
+          "RMK": "인터넷접수",
+          "PZWR_ANC_DT": "20250718",
+          "CTRT_ED_DT": "20251023",
+          "HS_SBSC_ACP_TRG_CD_NM": "신혼부부",
+          "ACP_DTTM": "2025.07.09 10:00 ~ 2025.07.10 17:00",
+          "PZWR_PPR_SBM_ST_DT": "20250723",
+          "SPL_SCD_GUD_FCTS": "",
+          "CTRT_ST_DT": "20251022",
+          "PZWR_PPR_SBM_ED_DT": "20250724"
+        },
+        {
+          "RMK": "인터넷접수",
+          "PZWR_ANC_DT": "20250718",
+          "CTRT_ED_DT": "20251023",
+          "HS_SBSC_ACP_TRG_CD_NM": "한부모가족",
+          "ACP_DTTM": "2025.07.09 10:00 ~ 2025.07.10 17:00",
+          "PZWR_PPR_SBM_ST_DT": "20250723",
+          "SPL_SCD_GUD_FCTS": "",
+          "CTRT_ST_DT": "20251022",
+          "PZWR_PPR_SBM_ED_DT": "20250724"
+        }
+      ],
+      "dsSbdAhflNm": [
+        {
+          "BZDT_NM": "단지명",
+          "AHFL_URL": "다운로드",
+          "SL_PAN_AHFL_DS_CD_NM": "파일구분명",
+          "CMN_AHFL_NM": "첨부파일명"
+        }
+      ],
+      "dsSbdNm": [
+        {
+          "LCT_ARA_DTL_ADR": "단지상세주소",
+          "BZDT_NM": "단지명",
+          "EDC_FCL_CTS": "교육환경",
+          "MIN_MAX_RSDN_DDO_AR": "전용면적",
+          "SUM_TOT_HSH_CNT": "총세대수",
+          "TFFC_FCL_CTS": "교통여건",
+          "LCT_ARA_ADR": "단지주소",
+          "CVN_FCL_CTS": "편의시설",
+          "HTN_FMLA_DS_CD_NM": "난방방식",
+          "IDT_FCL_CTS": "부대시설",
+          "SPL_INF_GUD_FCTS": "안내사항",
+          "MVIN_XPC_YM": "입주예정월"
+        }
+      ],
+      "dsEtcInfo": [
+        {
+          "ETC_FCTS": "",
+          "PAN_DTL_CTS": "■ 본 공고는 최초 이주자용(공공분양) 물량 중 미계약된 세대(3호)를 신혼희망타운(공공분양)으로 유형 변경하여 공급하기 위한 공고이며, 기공급한 신혼희망타운(139세대, 입주자모집공고일(2023.12.29.))의 추가 공급입니다.\r\n\r\n■ 이 주택의 입주자모집공고일은 2025.06.27(금)이며, 이는 청약자격(청약신청, 자격조건의 기간, 나이, 세대구성원, 지역우선, 주택소유 등)의 판단기준일이 됩니다.\r\n\r\n■ 금회 공급되는 주택은 입주자모집공고일 현재 수도권(서울특별시, 경기도, 인천광역시)에 거주(주민등록표등본 기준)하는 성년자인 무주택세대구성원(예비신혼부부는 혼인으로 구성 될 세대를 말함)에게 1세대 1주택 기준으로 공급(1세대 2인 이상이 청약하여 한 명이라도 당첨될 경우 중복청약으로 모두 부적격 처리)합니다.\r\n\r\n■ 금회 공급하는 주택은 건축공정 상 기본형으로 시공되며, 공간선택, 추가선택품목 및 장애인 편의증진시설 설치 등을 요구하실 수 없습니다.\r\n\r\n■ 종전 통장(청약저축·청약예금·청약부금)을 주택청약종합저축으로 전환하여 해당 주택에 신청하고자 할 경우, 입주자모집공고일 전일(2025.06.26.)까지 주택청약종합저축으로 전환한 경우에만 신청 가능하며, 전환한 주택청약종합저축 실적이 각 공급유형별 입주자저축 요건 및 배점 판단의 기준이 됩니다.[입주자모집공고일(2025.06.27) 이후 종전 통장에서 주택청약종합저축으로 전환한 경우, 해당 주택의 순위확인서 발급(순위확인)이 불가하며 추첨대상에서 제외] 이 때, 청약저축을 주택청약종합저축으로 전환한 경우 청약저축 기 납입실적을 합산하여 인정하며, 청약예금·청약부금을 주택청약종합저축으로 전환한 경우 전환한 날부터 납입실적을 인정합니다.\r\n\r\n■ 기타 자세한 사항은 입주자모집공고문을 통해 반드시 확인하시기 바랍니다."
+        }
+      ],
+      "dsAhflInfo": [
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=62393771",
+          "SL_PAN_AHFL_DS_CD_NM": "카탈로그",
+          "CMN_AHFL_NM": "(최초)서울공릉신혼희망타운팸플릿.pdf"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=62393775",
+          "SL_PAN_AHFL_DS_CD_NM": "기타 첨부파일",
+          "CMN_AHFL_NM": "1.위임장.hwp"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=62393781",
+          "SL_PAN_AHFL_DS_CD_NM": "기타 첨부파일",
+          "CMN_AHFL_NM": "2.개인정보수집이용및제3자제공동의서.hwp"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=62393795",
+          "SL_PAN_AHFL_DS_CD_NM": "기타 첨부파일",
+          "CMN_AHFL_NM": "3-1.금융정보등(금융ㆍ신용ㆍ보험정보)제공동의서.hwp"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=62393812",
+          "SL_PAN_AHFL_DS_CD_NM": "기타 첨부파일",
+          "CMN_AHFL_NM": "3-2.금융정보등(금융ㆍ신용ㆍ보험정보)제공동의서(작성방법).pdf"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=62393815",
+          "SL_PAN_AHFL_DS_CD_NM": "기타 첨부파일",
+          "CMN_AHFL_NM": "4.자산보유사실확인서.hwp"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=62393746",
+          "SL_PAN_AHFL_DS_CD_NM": "공고문(hwp)",
+          "CMN_AHFL_NM": "서울공릉지구신혼희망타운(공공분양)추가입주자모집공고문.hwpx"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=62393759",
+          "SL_PAN_AHFL_DS_CD_NM": "공고문(PDF)",
+          "CMN_AHFL_NM": "서울공릉지구신혼희망타운(공공분양)추가입주자모집공고문.pdf"
+        }
+      ],
+      "dsSbd": [
+        {
+          "LCT_ARA_DTL_ADR": "240-1 일원 (서울공릉 신혼희망타운)",
+          "BZDT_NM": "서울공릉(복합개발) 1",
+          "EDC_FCL_CTS": "공고문 및 팸플릿 참조",
+          "MIN_MAX_RSDN_DDO_AR": "59.95 ~ 74.98",
+          "SUM_TOT_HSH_CNT": "294",
+          "TFFC_FCL_CTS": "공고문 및 팸플릿 참조",
+          "LCT_ARA_ADR": "서울특별시 노원구 공릉동",
+          "CVN_FCL_CTS": "공고문 및 팸플릿 참조",
+          "HTN_FMLA_DS_CD_NM": "개별난방",
+          "IDT_FCL_CTS": "공고문 및 팸플릿 참조",
+          "SPL_INF_GUD_FCTS": "",
+          "MVIN_XPC_YM": "2027년 10월"
+        }
+      ],
+      "dsSbdAhfl": [
+        {
+          "BZDT_NM": "서울공릉(복합개발) 1",
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhImageView2.do?fileid=62373415",
+          "SL_PAN_AHFL_DS_CD_NM": "지역위치도",
+          "CMN_AHFL_NM": "서울공릉신혼희망타운팜플렛교통도.jpg"
+        },
+        {
+          "BZDT_NM": "서울공릉(복합개발) 1",
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhImageView2.do?fileid=62373416",
+          "SL_PAN_AHFL_DS_CD_NM": "단지배치도",
+          "CMN_AHFL_NM": "서울공릉신혼희망타운팜플렛단지배치l도.jpg"
+        },
+        {
+          "BZDT_NM": "서울공릉(복합개발) 1",
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhImageView2.do?fileid=62373417",
+          "SL_PAN_AHFL_DS_CD_NM": "단지조감도",
+          "CMN_AHFL_NM": "서울공릉신혼희망타운팜플렛단지조감도.jpg"
+        },
+        {
+          "BZDT_NM": "서울공릉(복합개발) 1",
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhImageView2.do?fileid=62373420",
+          "SL_PAN_AHFL_DS_CD_NM": "동호배치도",
+          "CMN_AHFL_NM": "서울공릉신혼희망타운팜플렛동호배치도.jpg"
+        }
+      ],
+      "dsCtrtPlcNm": [
+        {
+          "SIL_OFC_BCLS_DT": "운영기간종료일시",
+          "CTRT_PLC_DTL_ADR": "접수처소재지상세주소",
+          "SIL_OFC_GUD_FCTS": "접수처안내사항",
+          "CTRT_PLC_ADR": "접수처소재지주소",
+          "SIL_OFC_DT": "운영기간",
+          "TSK_SCD_CTS": "일정내용",
+          "SIL_OFC_TLNO": "전화번호",
+          "SIL_OFC_OPEN_DT": "운영기간시작일시"
+        }
+      ],
+      "dsEtcInfoNm": [
+        {
+          "ETC_FCTS": "기타사항",
+          "PAN_DTL_CTS": "공고내용"
+        }
+      ],
+      "dsAhflInfoNm": [
+        {
+          "AHFL_URL": "다운로드",
+          "SL_PAN_AHFL_DS_CD_NM": "파일구분명",
+          "CMN_AHFL_NM": "첨부파일명"
+        }
+      ],
+      "dsCtrtPlc": [
+        {
+          "SIL_OFC_BCLS_DT": "",
+          "CTRT_PLC_DTL_ADR": "(논현동)",
+          "SIL_OFC_GUD_FCTS": "■  본 주택의 견본주택은 설치되어 있지 않으며 팸플릿 및 사이버 견본주택으로 대체되오니 청약 전 세부 내용을 확인하시기 바랍니다.\n ※ 팸플릿은 최초 입주자모집공고 당시를 기준으로 제작되었으니 유의 바랍니다.",
+          "CTRT_PLC_ADR": "서울특별시 강남구 선릉로121길 12",
+          "SIL_OFC_DT": "()",
+          "TSK_SCD_CTS": "",
+          "SIL_OFC_TLNO": "02-2015-1045~6",
+          "SIL_OFC_OPEN_DT": ""
+        }
+      ],
+      "dsSplScdlNm": [
+        {
+          "RMK": "신청방법",
+          "PZWR_ANC_DT": "당첨자발표일자",
+          "CTRT_ED_DT": "계약체결기간종료일",
+          "HS_SBSC_ACP_TRG_CD_NM": "구분",
+          "ACP_DTTM": "신청일시",
+          "PZWR_PPR_SBM_ST_DT": "당첨자서류제출기간시작일",
+          "SPL_SCD_GUD_FCTS": "공급일정안내사항",
+          "CTRT_ST_DT": "계약체결기간시작일",
+          "PZWR_PPR_SBM_ED_DT": "당첨자서류제출기간종료일"
+        }
+      ],
+      "resHeader": [
+        {
+          "RS_DTTM": "20261106050008",
+          "SS_CODE": "Y"
+        }
+      ]
+    }
+  ],
+  "supply": [
+    {
+      "dsSch": [
+        {
+          "PAN_ID": "0000060903",
+          "CCR_CNNT_SYS_DS_CD": "02",
+          "SPL_INF_TP_CD": "390",
+          "UPP_AIS_TP_CD": "39",
+          "AIS_TP_CD": "39"
+        }
+      ]
+    },
+    {
+      "dsList01Nm": [
+        {
+          "RSDN_DDO_AR": "전용면적(㎡)",
+          "BZDT_NM": "단지명",
+          "SIL_HSH_CNT": "금회공급세대수",
+          "HTY_NM": "주택형",
+          "SPL_AR": "공급면적",
+          "SIL_AMT": "평균분양가격(원)",
+          "TOT_HSH_CNT": "세대수"
+        }
+      ],
+      "resHeader": [
+        {
+          "RS_DTTM": "20261106050008",
+          "SS_CODE": "Y"
+        }
+      ],
+      "dsList01": [
+        {
+          "RSDN_DDO_AR": "59.95",
+          "BZDT_NM": "서울공릉(복합개발) 1",
+          "SIL_HSH_CNT": "3",
+          "HTY_NM": "59.9500A",
+          "SPL_AR": "83.5178",
+          "SIL_AMT": "613400000",
+          "TOT_HSH_CNT": "214"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,219 @@
+{
+  "queryRegion": "11",
+  "notice": {
+    "PAN_NT_ST_DT": "2025.07.21",
+    "PAN_ID": "2015122300018497",
+    "AIS_TP_CD_NM": "매입임대",
+    "CNP_CD_NM": "서울특별시",
+    "ALL_CNT": "49",
+    "SPL_INF_TP_CD": "130",
+    "AIS_TP_CD": "26",
+    "PAN_DT": "20250721",
+    "RNUM": "35",
+    "CCR_CNNT_SYS_DS_CD": "03",
+    "DTL_URL": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?panId=2015122300018497&ccrCnntSysDsCd=03&uppAisTpCd=13&aisTpCd=26&mi=1026",
+    "CLSG_DT": "2025.08.07",
+    "UPP_AIS_TP_CD": "13",
+    "PAN_NM": "[청년신혼부부매입임대리츠] 서울지역 입주자 모집",
+    "UPP_AIS_TP_NM": "주거복지",
+    "PAN_SS": "접수마감",
+    "DTL_URL_MOB": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?panId=2015122300018497&ccrCnntSysDsCd=03&uppAisTpCd=13&aisTpCd=26&mi=1026"
+  },
+  "detail": [
+    {
+      "dsSch": [
+        {
+          "PAN_ID": "2015122300018497",
+          "CCR_CNNT_SYS_DS_CD": "03",
+          "SPL_INF_TP_CD": "130",
+          "UPP_AIS_TP_CD": "13",
+          "AIS_TP_CD": "26"
+        }
+      ]
+    },
+    {
+      "dsCtrtPlcNm": [
+        {
+          "CTRT_PLC_DTL_ADR": "접수처소재지상세주소",
+          "SIL_OFC_GUD_FCTS": "접수처안내사항",
+          "CTRT_PLC_ADR": "접수처소재지주소",
+          "TSK_ST_DTTM": "운영기간시작일시",
+          "TSK_ED_DTTM": "운영기간종료일시",
+          "SIL_OFC_TLNO": "전화번호"
+        }
+      ],
+      "dsEtcInfoNm": [
+        {
+          "ETC_CTS2": "기타사항",
+          "ARAG_RCR_HSH_CTS": "모집지역",
+          "LSC_CTS": "임대조건",
+          "ETC_CTS3": "공동생활가정운영기관",
+          "CRC_RSN": "정정/취소사유",
+          "LSTR_CTS": "임대기간",
+          "CAU_FCTS": "주의사항"
+        }
+      ],
+      "dsAhflInfoNm": [
+        {
+          "AHFL_URL": "다운로드",
+          "SL_PAN_AHFL_DS_CD_NM": "파일구분명",
+          "CMN_AHFL_NM": "첨부파일명"
+        }
+      ],
+      "dsEtcListNm": [
+        {
+          "ETC_CTS": "신청자격세부자격요건",
+          "PAN_ETC_INF_CD_NM": "신청자격구분"
+        }
+      ],
+      "dsCtrtPlc": [
+        {
+          "CTRT_PLC_DTL_ADR": "해랑빌딩 4층",
+          "SIL_OFC_GUD_FCTS": "청약신청(인터넷 및 모바일) 및 서류제출(등기우편)을 비대면 업무로 진행하오니, 적극 협조하여 주시기 바랍니다.",
+          "CTRT_PLC_ADR": "경기도 의정부시 경의로 60(의정부동)",
+          "TSK_ST_DTTM": "2025.08.11",
+          "TSK_ED_DTTM": "2025.08.14",
+          "SIL_OFC_TLNO": "031-827-1777"
+        }
+      ],
+      "dsSplScdl": [
+        {
+          "PPR_SBM_OPE_ANC_DT": "2025.08.08",
+          "PPR_ACP_CLSG_DT": "2025.08.14",
+          "PZWR_ANC_DT": "2025.09.30",
+          "CTRT_ED_DT": "",
+          "SBSC_ACP_ST_DT": "2025.08.04",
+          "ACP_DTTM": "2025.08.04 09:00 ~ 2025.08.07 18:10",
+          "HS_VIE_ED_DT": "",
+          "HS_VIE_ST_DT": "",
+          "SBSC_ACP_CLSG_DT": "2025.08.07",
+          "CTRT_ST_DT": "",
+          "PPR_ACP_ST_DT": "2025.08.11"
+        }
+      ],
+      "dsEtcList": [
+        {
+          "ETC_CTS": "제1순위와 제2순위에 해당하지 않는 사람 중 6세 이하 자녀가 있는 혼인 가구",
+          "PAN_ETC_INF_CD_NM": "일반신청자격"
+        },
+        {
+          "ETC_CTS": "공고일 현재 신청자 본인의 혼인기간이 7년 이내일 것",
+          "PAN_ETC_INF_CD_NM": "신혼부부"
+        },
+        {
+          "ETC_CTS": "혼인을 계획 중이며 입주 전까지 혼인사실을 증명할 수 있을 것(혼인신고)\n※ 혼인으로 구성될 세대의 세대구성원이 모두 무주택자일 것",
+          "PAN_ETC_INF_CD_NM": "예비신혼부부"
+        },
+        {
+          "ETC_CTS": "① 만19세 이상 39세 이하인 사람(출생일: 1985.07.22. ~ 2006.07.21.)\n② 대학생 (입주신청일 현재 해당연도 입학 및 복학 예정자 포함) \n대학 또는 ‘초, 중, 고등교육법’ 제2조 제3항에 따른 고등,고등기술학교를 졸업하였거나 중퇴한 후 2년 이내인 사람(졸업유예자 포함)으로서 직장에 재직 중이지 않은 사람",
+          "PAN_ETC_INF_CD_NM": "청년"
+        },
+        {
+          "ETC_CTS": "모자가족 또는 부자가족이며, 만6세 이하 자녀를 둔 경우로 한정함.",
+          "PAN_ETC_INF_CD_NM": "한부모가족"
+        }
+      ],
+      "dsEtcInfo": [
+        {
+          "ETC_CTS2": "",
+          "ARAG_RCR_HSH_CTS": "",
+          "LSC_CTS": "임대보증금 및 임대료 상세내역은 공고문을 참조하시기 바랍니다.",
+          "ETC_CTS3": "모자가족 또는 부자가족이며, 만6세 이하 자녀를 둔 경우로 한정함.",
+          "CRC_RSN": "",
+          "LSTR_CTS": "임대차 계약은 2년마다 갱신이며, 10년에서 이전임대기간을 제외한 나머지 기간까지 임대합니다.",
+          "CAU_FCTS": ""
+        }
+      ],
+      "dsSplScdlNm": [
+        {
+          "PPR_SBM_OPE_ANC_DT": "서류제출대상자발표일",
+          "PPR_ACP_CLSG_DT": "서류접수기간종료일",
+          "PZWR_ANC_DT": "당첨자발표일",
+          "CTRT_ED_DT": "계약기간종료일",
+          "SBSC_ACP_ST_DT": "접수기간시작일",
+          "ACP_DTTM": "접수일시",
+          "HS_VIE_ED_DT": "주택열람기간종료일",
+          "HS_VIE_ST_DT": "주택열람기간시작일",
+          "SBSC_ACP_CLSG_DT": "접수기간종료일",
+          "CTRT_ST_DT": "계약기간시작일",
+          "PPR_ACP_ST_DT": "서류접수기간시작일"
+        }
+      ],
+      "resHeader": [
+        {
+          "RS_DTTM": "20261106050245",
+          "SS_CODE": "Y"
+        }
+      ],
+      "dsAhflInfo": [
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=62715864",
+          "SL_PAN_AHFL_DS_CD_NM": "공고문(hwp)",
+          "CMN_AHFL_NM": "청년신혼부부매입임대리츠_입주자_모집공고(재임대250721)__서울.hwp"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=62715871",
+          "SL_PAN_AHFL_DS_CD_NM": "공고문(PDF)",
+          "CMN_AHFL_NM": "청년신혼부부매입임대리츠_입주자_모집공고(재임대250721)__서울.pdf"
+        }
+      ]
+    }
+  ],
+  "supply": [
+    {
+      "dsSch": [
+        {
+          "PAN_ID": "2015122300018497",
+          "CCR_CNNT_SYS_DS_CD": "03",
+          "SPL_INF_TP_CD": "130",
+          "UPP_AIS_TP_CD": "13",
+          "AIS_TP_CD": "26"
+        }
+      ]
+    },
+    {
+      "dsList01Nm": [
+        {
+          "HTY_DS_NM": "주택유형",
+          "GNR_SPL_RMNO": "공급호수",
+          "LTR_UNT_NM": "상세지역",
+          "SBD_CNP_NM": "지역",
+          "PZWR_CNT": "당첨자수",
+          "CAL_QUP_CNT": "예비자수"
+        }
+      ],
+      "resHeader": [
+        {
+          "RS_DTTM": "20261106050245",
+          "SS_CODE": "Y"
+        }
+      ],
+      "dsList01": [
+        {
+          "HTY_DS_NM": "전용59㎡",
+          "GNR_SPL_RMNO": "1",
+          "LTR_UNT_NM": "(서울관악구) 신림동 관악산휴먼시아1단지",
+          "SBD_CNP_NM": "서울특별시",
+          "PZWR_CNT": "0",
+          "CAL_QUP_CNT": "10"
+        },
+        {
+          "HTY_DS_NM": "전용59㎡",
+          "GNR_SPL_RMNO": "1",
+          "LTR_UNT_NM": "(서울양천구) 신월동 벽산블루밍2단지",
+          "SBD_CNP_NM": "서울특별시",
+          "PZWR_CNT": "0",
+          "CAL_QUP_CNT": "10"
+        },
+        {
+          "HTY_DS_NM": "전용59㎡",
+          "GNR_SPL_RMNO": "3",
+          "LTR_UNT_NM": "(서울중랑구) 망우동 중랑숲리가아파트",
+          "SBD_CNP_NM": "서울특별시",
+          "PZWR_CNT": "0",
+          "CAL_QUP_CNT": "30"
+        }
+      ]
+    }
+  ]
+}

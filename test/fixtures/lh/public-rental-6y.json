@@ -1,0 +1,460 @@
+{
+  "queryRegion": "41",
+  "notice": {
+    "PAN_NT_ST_DT": "2026.07.08",
+    "PAN_ID": "0000061132",
+    "AIS_TP_CD_NM": "6년 공공임대주택",
+    "CNP_CD_NM": "경기도",
+    "ALL_CNT": "392",
+    "SPL_INF_TP_CD": "065",
+    "AIS_TP_CD": "52",
+    "PAN_DT": "20260630",
+    "RNUM": "48",
+    "CCR_CNNT_SYS_DS_CD": "02",
+    "DTL_URL": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?panId=0000061132&ccrCnntSysDsCd=02&uppAisTpCd=06&aisTpCd=52&mi=1026",
+    "CLSG_DT": "2026.07.24",
+    "UPP_AIS_TP_CD": "06",
+    "PAN_NM": "[정정공고][정정공고]군포대야미 A-1블록 6년 분양전환공공임대주택 입주자모집공고",
+    "UPP_AIS_TP_NM": "임대주택",
+    "PAN_SS": "접수마감",
+    "DTL_URL_MOB": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?panId=0000061132&ccrCnntSysDsCd=02&uppAisTpCd=06&aisTpCd=52&mi=1026"
+  },
+  "detail": [
+    {
+      "dsSch": [
+        {
+          "PAN_ID": "0000061132",
+          "CCR_CNNT_SYS_DS_CD": "02",
+          "SPL_INF_TP_CD": "065",
+          "UPP_AIS_TP_CD": "06",
+          "AIS_TP_CD": "52"
+        }
+      ]
+    },
+    {
+      "dsSplScdl": [
+        {
+          "RMK": "인터넷접수,현장접수",
+          "PZWR_ANC_DT": "20260807",
+          "CTRT_ED_DT": "20261117",
+          "HS_SBSC_ACP_TRG_CD_NM": "사전청약당첨자",
+          "ACP_DTTM": "2026.07.13 10:00 ~ 2026.07.14 17:00",
+          "PZWR_PPR_SBM_ST_DT": "20260814",
+          "SPL_SCD_GUD_FCTS": "",
+          "CTRT_ST_DT": "20261112",
+          "PZWR_PPR_SBM_ED_DT": "20260817"
+        },
+        {
+          "RMK": "인터넷접수,현장접수",
+          "PZWR_ANC_DT": "20260807",
+          "CTRT_ED_DT": "20261117",
+          "HS_SBSC_ACP_TRG_CD_NM": "기관추천 특별공급",
+          "ACP_DTTM": "2026.07.22 10:00 ~ 2026.07.23 17:00",
+          "PZWR_PPR_SBM_ST_DT": "20260814",
+          "SPL_SCD_GUD_FCTS": "",
+          "CTRT_ST_DT": "20261112",
+          "PZWR_PPR_SBM_ED_DT": "20260817"
+        },
+        {
+          "RMK": "인터넷접수,현장접수",
+          "PZWR_ANC_DT": "20260807",
+          "CTRT_ED_DT": "20261117",
+          "HS_SBSC_ACP_TRG_CD_NM": "신혼부부 특별공급",
+          "ACP_DTTM": "2026.07.22 10:00 ~ 2026.07.23 17:00",
+          "PZWR_PPR_SBM_ST_DT": "20260814",
+          "SPL_SCD_GUD_FCTS": "",
+          "CTRT_ST_DT": "20261112",
+          "PZWR_PPR_SBM_ED_DT": "20260817"
+        },
+        {
+          "RMK": "인터넷접수,현장접수",
+          "PZWR_ANC_DT": "20260807",
+          "CTRT_ED_DT": "20261117",
+          "HS_SBSC_ACP_TRG_CD_NM": "생애최초 특별공급",
+          "ACP_DTTM": "2026.07.22 10:00 ~ 2026.07.23 17:00",
+          "PZWR_PPR_SBM_ST_DT": "20260814",
+          "SPL_SCD_GUD_FCTS": "",
+          "CTRT_ST_DT": "20261112",
+          "PZWR_PPR_SBM_ED_DT": "20260817"
+        },
+        {
+          "RMK": "인터넷접수,현장접수",
+          "PZWR_ANC_DT": "20260807",
+          "CTRT_ED_DT": "20261117",
+          "HS_SBSC_ACP_TRG_CD_NM": "노부모부양 특별공급",
+          "ACP_DTTM": "2026.07.22 10:00 ~ 2026.07.23 17:00",
+          "PZWR_PPR_SBM_ST_DT": "20260814",
+          "SPL_SCD_GUD_FCTS": "",
+          "CTRT_ST_DT": "20261112",
+          "PZWR_PPR_SBM_ED_DT": "20260817"
+        },
+        {
+          "RMK": "인터넷접수,현장접수",
+          "PZWR_ANC_DT": "20260807",
+          "CTRT_ED_DT": "20261117",
+          "HS_SBSC_ACP_TRG_CD_NM": "다자녀 특별공급",
+          "ACP_DTTM": "2026.07.22 10:00 ~ 2026.07.23 17:00",
+          "PZWR_PPR_SBM_ST_DT": "20260814",
+          "SPL_SCD_GUD_FCTS": "",
+          "CTRT_ST_DT": "20261112",
+          "PZWR_PPR_SBM_ED_DT": "20260817"
+        },
+        {
+          "RMK": "인터넷접수,현장접수",
+          "PZWR_ANC_DT": "20260807",
+          "CTRT_ED_DT": "20261117",
+          "HS_SBSC_ACP_TRG_CD_NM": "청년 특별공급",
+          "ACP_DTTM": "2026.07.22 10:00 ~ 2026.07.23 17:00",
+          "PZWR_PPR_SBM_ST_DT": "20260814",
+          "SPL_SCD_GUD_FCTS": "",
+          "CTRT_ST_DT": "20261112",
+          "PZWR_PPR_SBM_ED_DT": "20260817"
+        },
+        {
+          "RMK": "인터넷접수,현장접수",
+          "PZWR_ANC_DT": "20260807",
+          "CTRT_ED_DT": "20261117",
+          "HS_SBSC_ACP_TRG_CD_NM": "신생아 특별공급",
+          "ACP_DTTM": "2026.07.22 10:00 ~ 2026.07.23 17:00",
+          "PZWR_PPR_SBM_ST_DT": "20260814",
+          "SPL_SCD_GUD_FCTS": "",
+          "CTRT_ST_DT": "20261112",
+          "PZWR_PPR_SBM_ED_DT": "20260817"
+        },
+        {
+          "RMK": "인터넷접수,현장접수",
+          "PZWR_ANC_DT": "20260807",
+          "CTRT_ED_DT": "20261117",
+          "HS_SBSC_ACP_TRG_CD_NM": "일반공급(우선)",
+          "ACP_DTTM": "2026.07.24 10:00 ~ 2026.07.24 17:00",
+          "PZWR_PPR_SBM_ST_DT": "20260814",
+          "SPL_SCD_GUD_FCTS": "",
+          "CTRT_ST_DT": "20261112",
+          "PZWR_PPR_SBM_ED_DT": "20260817"
+        },
+        {
+          "RMK": "인터넷접수,현장접수",
+          "PZWR_ANC_DT": "20260807",
+          "CTRT_ED_DT": "20261117",
+          "HS_SBSC_ACP_TRG_CD_NM": "일반공급(추첨)",
+          "ACP_DTTM": "2026.07.24 10:00 ~ 2026.07.24 17:00",
+          "PZWR_PPR_SBM_ST_DT": "20260814",
+          "SPL_SCD_GUD_FCTS": "",
+          "CTRT_ST_DT": "20261112",
+          "PZWR_PPR_SBM_ED_DT": "20260817"
+        },
+        {
+          "RMK": "인터넷접수,현장접수",
+          "PZWR_ANC_DT": "20260807",
+          "CTRT_ED_DT": "20261117",
+          "HS_SBSC_ACP_TRG_CD_NM": "신생아 우선공급",
+          "ACP_DTTM": "2026.07.24 10:00 ~ 2026.07.24 17:00",
+          "PZWR_PPR_SBM_ST_DT": "20260814",
+          "SPL_SCD_GUD_FCTS": "",
+          "CTRT_ST_DT": "20261112",
+          "PZWR_PPR_SBM_ED_DT": "20260817"
+        }
+      ],
+      "dsSbdAhflNm": [
+        {
+          "BZDT_NM": "단지명",
+          "AHFL_URL": "다운로드",
+          "SL_PAN_AHFL_DS_CD_NM": "파일구분명",
+          "CMN_AHFL_NM": "첨부파일명"
+        }
+      ],
+      "dsSbdNm": [
+        {
+          "LCT_ARA_DTL_ADR": "단지상세주소",
+          "BZDT_NM": "단지명",
+          "EDC_FCL_CTS": "교육환경",
+          "MIN_MAX_RSDN_DDO_AR": "전용면적",
+          "SUM_TOT_HSH_CNT": "총세대수",
+          "TFFC_FCL_CTS": "교통여건",
+          "LCT_ARA_ADR": "단지주소",
+          "CVN_FCL_CTS": "편의시설",
+          "HTN_FMLA_DS_CD_NM": "난방방식",
+          "IDT_FCL_CTS": "부대시설",
+          "SPL_INF_GUD_FCTS": "안내사항",
+          "MVIN_XPC_YM": "입주예정월"
+        }
+      ],
+      "dsEtcInfo": [
+        {
+          "ETC_FCTS": "",
+          "PAN_DTL_CTS": "※ 정정사항\n■ p.1 : 6년 분양전환 공공임대주택 임대보증금 및 분양전환 잔금 대출 관련 안내사항 추가\n(정정사항 이외 내용은 당초 공고내용과 동일합니다.)\n\n■ 금회 공급하는 주택의 입주자모집공고일은 2026.06.30.(화)이며, 이는 청약자격(청약신청, 자격조건의 기간, 나이, 세대구성원, 지역우선, 주택소유 등)의 판단기준일 입니다.\n\n■ 공급위치 : 경기도 군포시 대야미동, 속달동, 둔대동 일원 군포대야미 공공주택지구 내 A-1블록\n\n■ 공급대상 : 6년 분양전환 공공임대주택(전용 55㎡ 52세대, 전용 59㎡ 326세대)\n\n■ 당첨자 선정 시, 신청자격을 확인(검증)하지 않고 신청자의 입력(기재)사항만으로 당첨자를 결정하므로, 공고문의 공급유형별 신청자격(재당첨제한여부, 주택, 소득 및 자산 등), 유의사항 등을 사전에 정확하게 확인하시기 바라며, 청약자격 미숙지, 착오 신청 등에 대해서는 엄격하게 처리(부적격 처리 혹은 불이익 부과)되며, 청약자 본인에게 책임이 있음을 유의하여 주시기 바랍니다.\n\n■ 인터넷 청약을 위하여 신청접수일전에 인증서(공동인증서, 네이버인증서, 금융인증서, 토스인증서, KB국민인증서 중 1개)를 미리 발급 받으시기 바라며, 공급구분별 신청접수일이 다르므로 반드시 해당 접수일에 청약신청하시기 바랍니다.(자격별 해당 접수일 이외의 일자에는 접수불가 함에 유의)\n\n■ 군포대야미 A-1블록은 견본주택을 별도로 운영하지 않으므로, 자세한 세대정보는 사이버모델하우스(www.lhgd-a1.co.kr) 및 팸플릿을 참고하여 주시기 바랍니다.\n  ※ 단, 현장상담을 위해 2026.07.11.(토) ~ 07.12.(일) (10:00 ~ 17:00) 기간동안 LH수원주택전시관을 운영합니다.(점심시간 12:00 ~ 13:00 제외)\n  ※ LH수원 주택전시관 위치 : 경기도 수원시 권선구 금곡동 1149"
+        }
+      ],
+      "dsAhflInfo": [
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=67625812",
+          "SL_PAN_AHFL_DS_CD_NM": "기타 첨부파일",
+          "CMN_AHFL_NM": "1.위임장.hwp"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=67625815",
+          "SL_PAN_AHFL_DS_CD_NM": "기타 첨부파일",
+          "CMN_AHFL_NM": "2-1.개인정보수집이용및제3자제공동의서(사전청약당첨자용).hwp"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=67625823",
+          "SL_PAN_AHFL_DS_CD_NM": "기타 첨부파일",
+          "CMN_AHFL_NM": "2-2.개인정보수집이용및제3자제공동의서(본청약자용).hwp"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=67625826",
+          "SL_PAN_AHFL_DS_CD_NM": "기타 첨부파일",
+          "CMN_AHFL_NM": "3-1.금융정보등(금융ㆍ신용ㆍ보험정보)제공동의서.hwp"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=67625832",
+          "SL_PAN_AHFL_DS_CD_NM": "기타 첨부파일",
+          "CMN_AHFL_NM": "3-2.금융정보등(금융ㆍ신용ㆍ보험정보)제공동의서-작성방법.pdf"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=67625839",
+          "SL_PAN_AHFL_DS_CD_NM": "기타 첨부파일",
+          "CMN_AHFL_NM": "4.자산보유사실확인서.hwp"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=67625807",
+          "SL_PAN_AHFL_DS_CD_NM": "정정공고문(HWP)",
+          "CMN_AHFL_NM": "[정정]군포대야미A-1블록6년분양전환공공임대주택입주자모집공고문.hwp"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=67625810",
+          "SL_PAN_AHFL_DS_CD_NM": "정정공고문(PDF)",
+          "CMN_AHFL_NM": "[정정]군포대야미A-1블록6년분양전환공공임대주택입주자모집공고문.pdf"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=67625843",
+          "SL_PAN_AHFL_DS_CD_NM": "정정카탈로그",
+          "CMN_AHFL_NM": "팸플릿(군포대야미A-1블록).pdf"
+        }
+      ],
+      "dsSbd": [
+        {
+          "LCT_ARA_DTL_ADR": "군포대야미 A-1BL",
+          "BZDT_NM": "군포대야미 A-1",
+          "EDC_FCL_CTS": "공고문 및 팸플릿을 참고하시기 바랍니다.",
+          "MIN_MAX_RSDN_DDO_AR": "55.94 ~ 59.99",
+          "SUM_TOT_HSH_CNT": "378",
+          "TFFC_FCL_CTS": "공고문 및 팸플릿을 참고하시기 바랍니다.",
+          "LCT_ARA_ADR": "경기도 군포시 둔대동",
+          "CVN_FCL_CTS": "공고문 및 팸플릿을 참고하시기 바랍니다.",
+          "HTN_FMLA_DS_CD_NM": "",
+          "IDT_FCL_CTS": "공고문 및 팸플릿을 참고하시기 바랍니다.",
+          "SPL_INF_GUD_FCTS": "※ 상기 임대조건은 주택형(타입) 별 세부평형의 평균가격이므로, 정확한 임대조건은 공고문을 반드시 확인하시기 바랍니다.",
+          "MVIN_XPC_YM": "2029년 12월"
+        }
+      ],
+      "dsSbdAhfl": [
+        {
+          "BZDT_NM": "군포대야미 A-1",
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhImageView2.do?fileid=67603872",
+          "SL_PAN_AHFL_DS_CD_NM": "단지배치도",
+          "CMN_AHFL_NM": "단지배치도(군포대야미A-1블록).jpg"
+        },
+        {
+          "BZDT_NM": "군포대야미 A-1",
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhImageView2.do?fileid=67603873",
+          "SL_PAN_AHFL_DS_CD_NM": "동호배치도",
+          "CMN_AHFL_NM": "동호배치도(군포대야미A-1블록).jpg"
+        },
+        {
+          "BZDT_NM": "군포대야미 A-1",
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhImageView2.do?fileid=67603874",
+          "SL_PAN_AHFL_DS_CD_NM": "지역위치도",
+          "CMN_AHFL_NM": "지역위치도(군포대야미A-1블록).jpg"
+        },
+        {
+          "BZDT_NM": "군포대야미 A-1",
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhImageView2.do?fileid=67603875",
+          "SL_PAN_AHFL_DS_CD_NM": "토지이용계획도",
+          "CMN_AHFL_NM": "토지이용계획도(군포대야미A-1블록).jpg"
+        }
+      ],
+      "dsCtrtPlcNm": [
+        {
+          "SIL_OFC_BCLS_DT": "운영기간종료일시",
+          "CTRT_PLC_DTL_ADR": "접수처소재지상세주소",
+          "SIL_OFC_GUD_FCTS": "접수처안내사항",
+          "CTRT_PLC_ADR": "접수처소재지주소",
+          "SIL_OFC_DT": "운영기간",
+          "TSK_SCD_CTS": "일정내용",
+          "SIL_OFC_TLNO": "전화번호",
+          "SIL_OFC_OPEN_DT": "운영기간시작일시"
+        }
+      ],
+      "dsEtcInfoNm": [
+        {
+          "ETC_FCTS": "기타사항",
+          "PAN_DTL_CTS": "공고내용"
+        }
+      ],
+      "dsAhflInfoNm": [
+        {
+          "AHFL_URL": "다운로드",
+          "SL_PAN_AHFL_DS_CD_NM": "파일구분명",
+          "CMN_AHFL_NM": "첨부파일명"
+        }
+      ],
+      "dsCtrtPlc": [
+        {
+          "SIL_OFC_BCLS_DT": "2026.08.17 16:00",
+          "CTRT_PLC_DTL_ADR": "1149, LH 수원주택전시관",
+          "SIL_OFC_GUD_FCTS": "■ 해당주택은 견본주택을 별도로 운영하지 않으므로, 자세한 세대정보는 사이버모델하우스 및 팸플릿을 참고하여 주시기 바랍니다.\n  ※ 단, 현장상담을 위해 2026.07.11.(토) ~ 07.12.(일) 10:00 ~ 17:00 기간동안 LH 수원주택전시관을 운영합니다",
+          "CTRT_PLC_ADR": "경기도 수원시 권선구 금곡동",
+          "SIL_OFC_DT": "2026.08.14~2026.08.17 (10:00~16:00)()",
+          "TSK_SCD_CTS": "",
+          "SIL_OFC_TLNO": "031-297-5229",
+          "SIL_OFC_OPEN_DT": "2026.08.14 10:00"
+        }
+      ],
+      "dsSplScdlNm": [
+        {
+          "RMK": "신청방법",
+          "PZWR_ANC_DT": "당첨자발표일자",
+          "CTRT_ED_DT": "계약체결기간종료일",
+          "HS_SBSC_ACP_TRG_CD_NM": "구분",
+          "ACP_DTTM": "신청일시",
+          "PZWR_PPR_SBM_ST_DT": "당첨자서류제출기간시작일",
+          "SPL_SCD_GUD_FCTS": "공급일정안내사항",
+          "CTRT_ST_DT": "계약체결기간시작일",
+          "PZWR_PPR_SBM_ED_DT": "당첨자서류제출기간종료일"
+        }
+      ],
+      "resHeader": [
+        {
+          "RS_DTTM": "20261106050015",
+          "SS_CODE": "Y"
+        }
+      ]
+    }
+  ],
+  "supply": [
+    {
+      "dsSch": [
+        {
+          "PAN_ID": "0000061132",
+          "CCR_CNNT_SYS_DS_CD": "02",
+          "SPL_INF_TP_CD": "065",
+          "UPP_AIS_TP_CD": "06",
+          "AIS_TP_CD": "52"
+        }
+      ]
+    },
+    {
+      "dsList03": [],
+      "dsList01Nm": [
+        {
+          "RSDN_DDO_AR": "전용면적(㎡)",
+          "BZDT_NM": "단지명",
+          "SIL_HSH_CNT": "금회공급세대수",
+          "HTY_NM": "주택형",
+          "SPL_AR": "공급면적",
+          "SIL_AMT": "평균분양가격(원)",
+          "TOT_HSH_CNT": "세대수"
+        }
+      ],
+      "dsList04": [
+        {
+          "RSDN_DDO_AR": "55.94",
+          "BZDT_NM": "군포대야미 A-1",
+          "SIL_HSH_CNT": "52",
+          "LS_GMY": "85614000",
+          "HTY_NM": "55.0000A",
+          "MM_RFE": "647610",
+          "SPL_AR": "77.858",
+          "TOT_HSH_CNT": "52"
+        },
+        {
+          "RSDN_DDO_AR": "59.97",
+          "BZDT_NM": "군포대야미 A-1",
+          "SIL_HSH_CNT": "184",
+          "LS_GMY": "96292000",
+          "HTY_NM": "59.0000A",
+          "MM_RFE": "703860",
+          "SPL_AR": "83.467",
+          "TOT_HSH_CNT": "185"
+        },
+        {
+          "RSDN_DDO_AR": "59.84",
+          "BZDT_NM": "군포대야미 A-1",
+          "SIL_HSH_CNT": "70",
+          "LS_GMY": "95616000",
+          "HTY_NM": "59.0000B",
+          "MM_RFE": "699710",
+          "SPL_AR": "83.2861",
+          "TOT_HSH_CNT": "70"
+        },
+        {
+          "RSDN_DDO_AR": "59.96",
+          "BZDT_NM": "군포대야미 A-1",
+          "SIL_HSH_CNT": "71",
+          "LS_GMY": "95802000",
+          "HTY_NM": "59.0000C",
+          "MM_RFE": "700450",
+          "SPL_AR": "83.4531",
+          "TOT_HSH_CNT": "71"
+        }
+      ],
+      "dsList02Nm": [
+        {
+          "RSDN_DDO_AR": "전용면적(㎡)",
+          "BZDT_NM": "단지명",
+          "SIL_HSH_CNT": "금회공급세대수",
+          "LS_GMY": "임대보증금(원)",
+          "HTY_NM": "주택형",
+          "MM_RFE": "월임대료(원)",
+          "SPL_AR": "공급면적",
+          "TOT_HSH_CNT": "세대수"
+        }
+      ],
+      "dsList05": [],
+      "dsList03Nm": [
+        {
+          "RSDN_DDO_AR": "전용면적(㎡)",
+          "BZDT_NM": "단지명",
+          "SIL_HSH_CNT": "금회공급세대수",
+          "HTY_NM": "주택형",
+          "MM_RFE": "월임대료(원)",
+          "SPL_AR": "공급면적",
+          "ELY_DSU_AMT": "초기분납금(원)",
+          "TOT_HSH_CNT": "세대수"
+        }
+      ],
+      "resHeader": [
+        {
+          "RS_DTTM": "20261106050015",
+          "SS_CODE": "Y"
+        }
+      ],
+      "dsList04Nm": [
+        {
+          "RSDN_DDO_AR": "전용면적(㎡)",
+          "BZDT_NM": "단지명",
+          "SIL_HSH_CNT": "금회공급세대수",
+          "LS_GMY": "임대보증금(원)",
+          "HTY_NM": "주택형",
+          "MM_RFE": "월임대료(원)",
+          "SPL_AR": "공급면적",
+          "TOT_HSH_CNT": "세대수"
+        }
+      ],
+      "dsList05Nm": [
+        {
+          "RSDN_DDO_AR": "전용면적(㎡)",
+          "BZDT_NM": "단지명",
+          "SIL_HSH_CNT": "금회공급세대수",
+          "HTY_NM": "주택형",
+          "SPL_AR": "공급면적",
+          "SIL_AMT": "평균분양가격(원)",
+          "TOT_HSH_CNT": "세대수"
+        }
+      ],
+      "dsList01": [],
+      "dsList02": []
+    }
+  ]
+}
