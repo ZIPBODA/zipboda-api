@@ -21,6 +21,10 @@ export const AGENCY_NAME: Record<StoredAgencyCode, string> = {
 
 export const isStoredAgencyCode = (value: number): value is StoredAgencyCode => value in AGENCY_NAME;
 
+export const STORED_AGENCY_CODES: readonly StoredAgencyCode[] = Object.keys(AGENCY_NAME)
+  .map(Number)
+  .filter(isStoredAgencyCode);
+
 /** ITF-002 청약 공고 상태 */
 export enum SubscriptionStatusCode {
   ALL = 0,
@@ -47,3 +51,7 @@ export const REGION_NAME: Record<StoredRegionCode, string> = {
 };
 
 export const isStoredRegionCode = (value: number): value is StoredRegionCode => value in REGION_NAME;
+
+export const STORED_REGION_CODES: readonly StoredRegionCode[] = Object.keys(REGION_NAME)
+  .map(Number)
+  .filter(isStoredRegionCode);

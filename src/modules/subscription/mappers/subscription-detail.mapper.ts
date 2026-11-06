@@ -1,55 +1,88 @@
 import { AGENCY_NAME } from '@/common/constants/interface-codes.js';
 import { competitionOf } from '../competition.js';
 import type { SubscriptionDetailResponse } from '../dto/subscription-detail.response.js';
+import { compareCodePoints } from '../list-rules.js';
 import { ddayOf, statusCodeOf } from '../schedule.js';
 import type { SubscriptionDetailRecord } from '../subscription.repository.js';
-import { agencyCodeOf, isoDateOrNull, regionCodeOf, scheduleOf } from './subscription-fields.js';
+import {
+  addressOf,
+  agencyCodeOf,
+  displayTitleOf,
+  isFloorplanVisible,
+  isoDateOrNull,
+  regionCodeOf,
+  scheduleOf,
+} from './subscription-fields.js';
+import { unitPriceOf } from './unit-price.js';
 
 type UnitRecord = SubscriptionDetailRecord['units'][number];
 
-// 주택형은 숫자 문자열이라 DB에서 문자열로 정렬하면 "114"가 "39"보다 앞선다
-const bySizeThenType = (a: UnitRecord, b: UnitRecord): number =>
-  Number(a.sizeType) - Number(b.sizeType) ||
-  (a.unitType ?? '').localeCompare(b.unitType ?? '') ||
-  a.id.localeCompare(b.id);
+const ALL_DIGITS = /^\d+$/;
+
+/** 전용면적이 구간으로만 온 주택형은 구간 하한으로 줄 세운다 */
+const sortAreaOf = (unit: UnitRecord): number | null => (unit.exclusiveArea ?? unit.areaMin)?.toNumber() ?? null;
+
+const nullsLast = <T>(a: T | null, b: T | null, compare: (left: T, right: T) => number): number => {
+  if (a === b) return 0;
+  if (a === null) return 1;
+  if (b === null) return -1;
+  return compare(a, b);
+};
+
+/** 호수는 숫자끼리면 크기로("402" < "1001"), 아니면 목록 SQL(COLLATE "C")과 같은 코드 포인트 순 — 서버 로캘에 따라 바뀌지 않게 */
+const compareUnitNumbers = (a: string, b: string): number =>
+  ALL_DIGITS.test(a) && ALL_DIGITS.test(b) ? Number(a) - Number(b) : compareCodePoints(a, b);
+
+const byAreaThenTypeThenUnit = (a: UnitRecord, b: UnitRecord): number =>
+  nullsLast(sortAreaOf(a), sortAreaOf(b), (left, right) => left - right) ||
+  nullsLast(a.unitType, b.unitType, compareCodePoints) ||
+  nullsLast(a.unitNumber, b.unitNumber, compareUnitNumbers) ||
+  a.displayOrder - b.displayOrder;
 
 export const toSubscriptionDetailResponse = (
   record: SubscriptionDetailRecord,
   today: string,
 ): SubscriptionDetailResponse => {
-  const schedule = scheduleOf(record);
-  const agencyCode = agencyCodeOf(record.agencyCode);
+  const { notice, complex } = record;
+  const schedule = scheduleOf(record, notice.cancelledAt);
+  const agencyCode = agencyCodeOf(notice.agencyCode);
+  const region = regionCodeOf(record.regionCode);
+  const floorplans = complex && isFloorplanVisible(record.complexMatch) ? complex.floorplans : [];
   return {
     id: record.id,
-    title: record.title,
+    title: displayTitleOf(complex, notice.title),
+    noticeTitle: notice.title,
     agencyCode,
     agencyName: AGENCY_NAME[agencyCode],
     statusCode: statusCodeOf(schedule, today),
     dday: ddayOf(schedule, today),
-    region: regionCodeOf(record.regionCode),
-    address: record.address,
-    lat: record.lat,
-    lng: record.lng,
-    postDate: isoDateOrNull(record.postDate),
+    region,
+    address: addressOf(complex, region),
+    lat: complex?.lat ?? null,
+    lng: complex?.lng ?? null,
+    postDate: isoDateOrNull(notice.postDate),
     applyStartDate: schedule.applyStartDate,
     deadline: schedule.applyEndDate,
-    contractDate: isoDateOrNull(record.contractDate),
-    supplyType: record.supplyType,
-    households: record.households,
+    contractDate: isoDateOrNull(record.contractStartDate),
+    supplyType: notice.supplyType,
+    households: complex?.households ?? null,
     supplyUnits: record.supplyUnits,
     recruitCount: record.recruitCount,
     applicationCount: record.applicationCount,
     moveIn: record.moveInMonth,
     competition: competitionOf(record.applicationCount, record.supplyUnits),
-    imageUrl: record.imageUrl,
-    units: [...record.units].sort(bySizeThenType).map((unit) => ({
+    imageUrl: complex?.imageUrl ?? null,
+    units: [...record.units].sort(byAreaThenTypeThenUnit).map((unit) => ({
       size: unit.sizeType,
       type: unit.unitType,
-      households: unit.households,
-      price: unit.price,
+      label: unit.label,
+      floor: unit.floorLabel,
+      unitNumber: unit.unitNumber,
+      households: unit.supplyHouseholds ?? unit.totalHouseholds,
+      price: unitPriceOf(unit),
     })),
-    applyUrl: record.applyUrl,
-    floorplans: record.floorplans.map((plan) => ({
+    applyUrl: notice.applyUrl,
+    floorplans: floorplans.map((plan) => ({
       id: plan.id,
       size: plan.sizeType,
       type: plan.unitType,

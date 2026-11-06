@@ -1,9 +1,8 @@
 import {
-  AGENCY_NAME,
   AgencyCode,
   REGION_NAME,
-  isStoredAgencyCode,
-  isStoredRegionCode,
+  STORED_AGENCY_CODES,
+  STORED_REGION_CODES,
   type StoredAgencyCode,
   type StoredRegionCode,
 } from '@/common/constants/interface-codes.js';
@@ -18,9 +17,6 @@ export const normalizeKeyword = (raw: string | undefined): string | null => {
   return keyword || null;
 };
 
-const storedAgencyCodes = Object.keys(AGENCY_NAME).map(Number).filter(isStoredAgencyCode);
-const storedRegionCodes = Object.keys(REGION_NAME).map(Number).filter(isStoredRegionCode);
-
 /**
  * 공급기관·지역은 코드로 저장돼 있어 글자로 찾을 수 없다. 검색어가 기관 약칭(LH 등)이나 지역 이름(서울 등)에
  * 들어 있으면 그 코드를 함께 조건으로 쓴다
@@ -28,8 +24,8 @@ const storedRegionCodes = Object.keys(REGION_NAME).map(Number).filter(isStoredRe
 export const codesMatchingKeyword = (
   keyword: string,
 ): { agencyCodes: StoredAgencyCode[]; regionCodes: StoredRegionCode[] } => ({
-  agencyCodes: storedAgencyCodes.filter((code) => AgencyCode[code].toLowerCase().includes(keyword)),
-  regionCodes: storedRegionCodes.filter((code) => REGION_NAME[code].toLowerCase().includes(keyword)),
+  agencyCodes: STORED_AGENCY_CODES.filter((code) => AgencyCode[code].toLowerCase().includes(keyword)),
+  regionCodes: STORED_REGION_CODES.filter((code) => REGION_NAME[code].toLowerCase().includes(keyword)),
 });
 
 export interface GeoBounds {
@@ -72,7 +68,7 @@ export interface SearchCandidate {
  * localeCompare는 로캘이 무시하는 문자만 다른 두 id를 같다고 볼 수 있고, 문자열 < 비교는 UTF-16 코드 단위라
  * 보조 평면 문자(이모지 등)에서 SQL과 순서가 갈린다
  */
-const compareCodePoints = (a: string, b: string): number => {
+export const compareCodePoints = (a: string, b: string): number => {
   const left = [...a];
   const right = [...b];
   for (let index = 0; index < Math.min(left.length, right.length); index++) {

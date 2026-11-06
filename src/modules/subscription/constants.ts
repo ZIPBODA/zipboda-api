@@ -5,6 +5,27 @@ export const SERVICE_TIME_ZONE = 'Asia/Seoul';
 export const SUBSCRIPTION_ID_MAX_LENGTH = 100;
 
 /**
+ * 공고×단지 칸이 단지를 정한 방법이자 단지 별칭이 생긴 방법(ERD §5 규칙 8). 마이그레이션 CHECK와 같은 값이다.
+ * ADDRESS = 주소가 같아 이음, NAME = 이름으로만 이음, MANUAL = 관리자·시드가 확인함
+ */
+export const ComplexMatch = { ADDRESS: 'ADDRESS', NAME: 'NAME', MANUAL: 'MANUAL' } as const;
+
+/** 이름으로만 이은 단지는 같은 이름의 다른 건물일 수 있어 평면도를 보여 주지 않는다 */
+export const FLOORPLAN_VISIBLE_MATCHES: readonly string[] = [ComplexMatch.ADDRESS, ComplexMatch.MANUAL];
+
+/** 단지 좌표를 얻은 결과. 마이그레이션 CHECK와 같은 값이다 */
+export const GeocodeStatus = { OK: 'OK', NOT_FOUND: 'NOT_FOUND', NO_ADDRESS: 'NO_ADDRESS', MANUAL: 'MANUAL' } as const;
+
+/** 공고 원천. 마이그레이션 CHECK와 같은 값이다 */
+export const NoticeSourceName = {
+  LH: 'LH',
+  APPLYHOME: 'APPLYHOME',
+  IH: 'IH',
+  SH_RSS: 'SH_RSS',
+  GH_FILE: 'GH_FILE',
+} as const;
+
+/**
  * 면적은 값이 아니라 전용면적 구간으로 고른다(web 목록 필터와 같은 구간).
  * 매입임대의 전용면적은 14.6475㎡처럼 소수점이 붙어 값 일치로는 맞출 수 없다. 경계는 왼쪽만 포함한다(min ≤ 면적 < max)
  */
