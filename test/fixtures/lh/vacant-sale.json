@@ -1,0 +1,245 @@
+{
+  "queryRegion": "11",
+  "notice": {
+    "PAN_NT_ST_DT": "2025.05.30",
+    "PAN_ID": "2015122300018175",
+    "AIS_TP_CD_NM": "분양주택",
+    "CNP_CD_NM": "서울특별시",
+    "ALL_CNT": "1",
+    "SPL_INF_TP_CD": "051",
+    "AIS_TP_CD": "05",
+    "PAN_DT": "20250530",
+    "RNUM": "1",
+    "CCR_CNNT_SYS_DS_CD": "03",
+    "DTL_URL": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?panId=2015122300018175&ccrCnntSysDsCd=03&uppAisTpCd=05&aisTpCd=05&mi=1027",
+    "CLSG_DT": "2025.06.11",
+    "UPP_AIS_TP_CD": "05",
+    "PAN_NM": "서울강남권도시형주택 석촌·송파 공가세대 일반공급 입주자모집공고(무순위)",
+    "UPP_AIS_TP_NM": "분양주택",
+    "PAN_SS": "접수마감",
+    "DTL_URL_MOB": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?panId=2015122300018175&ccrCnntSysDsCd=03&uppAisTpCd=05&aisTpCd=05&mi=1027"
+  },
+  "detail": [
+    {
+      "dsSch": [
+        {
+          "PAN_ID": "2015122300018175",
+          "CCR_CNNT_SYS_DS_CD": "03",
+          "SPL_INF_TP_CD": "051",
+          "UPP_AIS_TP_CD": "05",
+          "AIS_TP_CD": "05"
+        }
+      ]
+    },
+    {
+      "dsSplScdl": [
+        {
+          "PPR_SBM_OPE_ANC_DT": "",
+          "PPR_ACP_CLSG_DT": "2025.06.17",
+          "PZWR_ANC_DT": "2025.06.12",
+          "CTRT_ED_DT": "2025.07.23",
+          "SBD_LGO_NM": "서울강남권도시형주택(송파)",
+          "SBSC_ACP_ST_DT": "2025.06.11",
+          "ACP_DTTM": "2025.06.11 10:00 ~ 2025.06.11 17:01",
+          "SBSC_ACP_CLSG_DT": "2025.06.11",
+          "CTRT_ST_DT": "2025.07.21",
+          "PPR_ACP_ST_DT": "2025.06.13"
+        },
+        {
+          "PPR_SBM_OPE_ANC_DT": "",
+          "PPR_ACP_CLSG_DT": "2025.06.17",
+          "PZWR_ANC_DT": "2025.06.12",
+          "CTRT_ED_DT": "2025.07.23",
+          "SBD_LGO_NM": "서울강남권도시형주택(석촌)",
+          "SBSC_ACP_ST_DT": "2025.06.11",
+          "ACP_DTTM": "2025.06.11 10:00 ~ 2025.06.11 17:01",
+          "SBSC_ACP_CLSG_DT": "2025.06.11",
+          "CTRT_ST_DT": "2025.07.21",
+          "PPR_ACP_ST_DT": "2025.06.13"
+        }
+      ],
+      "dsSbdAhflNm": [
+        {
+          "LCC_NT_NM": "단지명",
+          "AHFL_URL": "다운로드",
+          "LS_SPL_INF_UPL_FL_DS_CD_NM": "파일구분명",
+          "CMN_AHFL_NM": "첨부파일명"
+        }
+      ],
+      "dsSbdNm": [
+        {
+          "LGDN_ADR": "단지주소",
+          "LGDN_DTL_ADR": "단지상세주소",
+          "HSH_CNT": "총세대수",
+          "HTN_FMLA_DESC": "난방방식",
+          "LCC_NT_NM": "단지명",
+          "DDO_AR": "전용면적",
+          "SPL_INF_GUD_FCTS": "안내사항",
+          "MVIN_XPC_YM": "입주예정월"
+        }
+      ],
+      "dsEtcInfo": [
+        {
+          "ETC_CTS": "금회공급 세대수는 금회 공급물량에 예비자(10배수)가 포함된 세대수임을 안내드립니다. 자세한 공급 내역 및 세부사항은 공고문을 참고하여 주시기 바랍니다.",
+          "CRC_RSN": ""
+        }
+      ],
+      "dsAhflInfo": [
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=62010865",
+          "SL_PAN_AHFL_DS_CD_NM": "공고문(hwp)",
+          "CMN_AHFL_NM": "서울강남권도시형주택석촌·송파일반공급입주자모집공고(무순위).hwp"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=62010866",
+          "SL_PAN_AHFL_DS_CD_NM": "공고문(PDF)",
+          "CMN_AHFL_NM": "서울강남권도시형주택석촌·송파일반공급입주자모집공고(무순위).pdf"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=62010867",
+          "SL_PAN_AHFL_DS_CD_NM": "기타 첨부파일",
+          "CMN_AHFL_NM": "첨부1.서울강남권도시형주택(석촌)팜플렛.pdf"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=62010869",
+          "SL_PAN_AHFL_DS_CD_NM": "기타 첨부파일",
+          "CMN_AHFL_NM": "첨부2.서울강남권도시형주택(송파)팜플렛.pdf"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=62010870",
+          "SL_PAN_AHFL_DS_CD_NM": "기타 첨부파일",
+          "CMN_AHFL_NM": "첨부3.확약서(주택상태확인서).pdf"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=62010871",
+          "SL_PAN_AHFL_DS_CD_NM": "기타 첨부파일",
+          "CMN_AHFL_NM": "첨부4.개인정보수집？이용및제3자제공동의서.pdf"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=62010872",
+          "SL_PAN_AHFL_DS_CD_NM": "기타 첨부파일",
+          "CMN_AHFL_NM": "첨부5.위임장(대리인계약시).pdf"
+        }
+      ],
+      "dsSbd": [
+        {
+          "LGDN_ADR": "서울특별시 송파구 가락로11길 8-19(석촌동,엘에이치석촌도시형생활주택)",
+          "LGDN_DTL_ADR": "",
+          "HSH_CNT": "22",
+          "HTN_FMLA_DESC": "개별난방",
+          "LCC_NT_NM": "서울강남권도시형주택(석촌)",
+          "DDO_AR": "17.53~26.72",
+          "SPL_INF_GUD_FCTS": "금회공급 세대수는 금회 공급물량에 예비자(10배수)가 포함된 세대수임을 안내드립니다. 자세한 공급 내역 및 세부사항은 공고문을 참고하여 주시기 바랍니다.",
+          "MVIN_XPC_YM": "2012.11"
+        },
+        {
+          "LGDN_ADR": "서울특별시 송파구 백제고분로41길 27-1(송파동,엘에이치송파도시형생활주택)",
+          "LGDN_DTL_ADR": "",
+          "HSH_CNT": "22",
+          "HTN_FMLA_DESC": "개별난방",
+          "LCC_NT_NM": "서울강남권도시형주택(송파)",
+          "DDO_AR": "17.59~29.37",
+          "SPL_INF_GUD_FCTS": "금회공급 세대수는 금회 공급물량에 예비자(10배수)가 포함된 세대수임을 안내드립니다. 자세한 공급 내역 및 세부사항은 공고문을 참고하여 주시기 바랍니다.",
+          "MVIN_XPC_YM": "2013.08"
+        }
+      ],
+      "dsSbdAhfl": [],
+      "dsCtrtPlcNm": [
+        {
+          "CTRT_PLC_DTL_ADR": "접수처소재지상세주소",
+          "SIL_OFC_GUD_FCTS": "접수처안내사항",
+          "CTRT_PLC_ADR": "접수처소재지주소",
+          "TSK_ST_DTTM": "운영기간시작일시",
+          "TSK_ED_DTTM": "운영기간종료일시",
+          "SIL_OFC_TLNO": "전화번호"
+        }
+      ],
+      "dsEtcInfoNm": [
+        {
+          "ETC_CTS": "기타사항",
+          "CRC_RSN": "정정/취소사유"
+        }
+      ],
+      "dsAhflInfoNm": [
+        {
+          "AHFL_URL": "다운로드",
+          "SL_PAN_AHFL_DS_CD_NM": "파일구분명",
+          "CMN_AHFL_NM": "첨부파일명"
+        }
+      ],
+      "dsCtrtPlc": [
+        {
+          "CTRT_PLC_DTL_ADR": "",
+          "SIL_OFC_GUD_FCTS": "",
+          "CTRT_PLC_ADR": "서울특별시 강남구 선릉로121길 12(논현동)",
+          "TSK_ST_DTTM": "2025.05.30",
+          "TSK_ED_DTTM": "2025.07.30",
+          "SIL_OFC_TLNO": "02-3416-3830"
+        }
+      ],
+      "dsSplScdlNm": [
+        {
+          "PPR_SBM_OPE_ANC_DT": "서류제출대상자발표일",
+          "PPR_ACP_CLSG_DT": "서류접수기간종료일",
+          "PZWR_ANC_DT": "당첨자발표일",
+          "CTRT_ED_DT": "계약기간종료일",
+          "SBD_LGO_NM": "단지명",
+          "SBSC_ACP_ST_DT": "접수기간시작일",
+          "ACP_DTTM": "신청일시",
+          "SBSC_ACP_CLSG_DT": "접수기간종료일",
+          "CTRT_ST_DT": "계약기간시작일",
+          "PPR_ACP_ST_DT": "서류접수기간시작일"
+        }
+      ],
+      "resHeader": [
+        {
+          "RS_DTTM": "20261106045929",
+          "SS_CODE": "Y"
+        }
+      ]
+    }
+  ],
+  "supply": [
+    {
+      "dsSch": [
+        {
+          "PAN_ID": "2015122300018175",
+          "CCR_CNNT_SYS_DS_CD": "03",
+          "SPL_INF_TP_CD": "051",
+          "UPP_AIS_TP_CD": "05",
+          "AIS_TP_CD": "05"
+        }
+      ]
+    },
+    {
+      "dsList01Nm": [
+        {
+          "NOW_HSH_CNT": "금회공급 세대수",
+          "HSH_CNT": "세대수",
+          "HTY_NNA": "주택형",
+          "LS_GMY": "평균분양가격(원)",
+          "SBD_LGO_NM": "단지명",
+          "DDO_AR": "전용면적(㎡)",
+          "SPL_AR": "공급면적"
+        }
+      ],
+      "resHeader": [
+        {
+          "RS_DTTM": "20261106045932",
+          "SS_CODE": "Y"
+        }
+      ],
+      "dsList01": [
+        {
+          "NOW_HSH_CNT": "44",
+          "HSH_CNT": "2",
+          "HTY_NNA": "24.A",
+          "LS_GMY": "공고문 참조",
+          "SBD_LGO_NM": "서울강남권도시형주택(석촌)",
+          "DDO_AR": "24.71",
+          "SPL_AR": "41.2375"
+        }
+      ]
+    }
+  ]
+}

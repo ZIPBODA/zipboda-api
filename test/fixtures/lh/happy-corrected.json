@@ -1,0 +1,259 @@
+{
+  "queryRegion": "11",
+  "notice": {
+    "PAN_NT_ST_DT": "2026.08.21",
+    "PAN_ID": "2015122300020605",
+    "AIS_TP_CD_NM": "행복주택",
+    "CNP_CD_NM": "서울특별시",
+    "ALL_CNT": "27",
+    "SPL_INF_TP_CD": "063",
+    "AIS_TP_CD": "10",
+    "PAN_DT": "20260819",
+    "RNUM": "3",
+    "CCR_CNNT_SYS_DS_CD": "03",
+    "DTL_URL": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?panId=2015122300020605&ccrCnntSysDsCd=03&uppAisTpCd=06&aisTpCd=10&mi=1026",
+    "CLSG_DT": "2026.09.02",
+    "UPP_AIS_TP_CD": "06",
+    "PAN_NM": "[정정공고]서울번동3 행복주택 예비입주자 모집",
+    "UPP_AIS_TP_NM": "임대주택",
+    "PAN_SS": "접수마감",
+    "DTL_URL_MOB": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?panId=2015122300020605&ccrCnntSysDsCd=03&uppAisTpCd=06&aisTpCd=10&mi=1026"
+  },
+  "detail": [
+    {
+      "dsSch": [
+        {
+          "PAN_ID": "2015122300020605",
+          "CCR_CNNT_SYS_DS_CD": "03",
+          "SPL_INF_TP_CD": "063",
+          "UPP_AIS_TP_CD": "06",
+          "AIS_TP_CD": "10"
+        }
+      ]
+    },
+    {
+      "dsSplScdl": [
+        {
+          "PPR_SBM_OPE_ANC_DT": "2026.09.28",
+          "PPR_ACP_CLSG_DT": "2026.10.01",
+          "PZWR_ANC_DT": "2026.12.07",
+          "CTRT_ED_DT": "2028.12.31",
+          "SBD_LGO_NM": "",
+          "SBSC_ACP_ST_DT": "2026.08.31",
+          "ACP_DTTM": "2026.08.31 10:00 ~ 2026.09.02 17:00",
+          "SBSC_ACP_CLSG_DT": "2026.09.02",
+          "CTRT_ST_DT": "2027.01.01",
+          "PPR_ACP_ST_DT": "2026.09.29"
+        }
+      ],
+      "dsSbdAhflNm": [
+        {
+          "LCC_NT_NM": "단지명",
+          "AHFL_URL": "다운로드",
+          "LS_SPL_INF_UPL_FL_DS_CD_NM": "파일구분명",
+          "CMN_AHFL_NM": "첨부파일명"
+        }
+      ],
+      "dsSbdNm": [
+        {
+          "LGDN_ADR": "단지주소",
+          "LGDN_DTL_ADR": "단지상세주소",
+          "HSH_CNT": "총세대수",
+          "HTN_FMLA_DESC": "난방방식",
+          "LCC_NT_NM": "단지명",
+          "DDO_AR": "전용면적",
+          "SPL_INF_GUD_FCTS": "안내사항",
+          "MVIN_XPC_YM": "입주예정월"
+        }
+      ],
+      "dsEtcInfo": [
+        {
+          "ETC_CTS": "자세한 사항은 공고문을 반드시 확인하시기 바랍니다.\n* 첨부 팜플렛은 단지배치 및 형별 구조 등 이해를 돕기위한 참고용으로만 활용하시기 바랍니다.\n\n* 입주자 모집 공고내용과 관련하여 자세한 안내가 이루어질 수 있도록 상담을 실시하고 있으나, \n신청자 개별상황 등에 대한 의사소통 오류로 관련사항 착오안내가 이루어지는 경우가 있습니다. \n고객 여러분께서는 신청과 관련한 상담은 주택신청의 참고자료로만 활용해 주시기 바라며, 신청자\n본인이 입주자 모집공고를 통해 신청자격 등을 숙지하시어 신청하시기 바랍니다. 아울러 신청\n자격 미숙지, 착오 신청 등에 대해서는 신청자 본인에게 책임이 있으니 유의하여 주시기 바랍니다.",
+          "CRC_RSN": "21A 최대전환시 임대조건 (소득有)\n임대조건 증액시 70,320->75,400 \n임대조건 감액시 8,320 ->8,400"
+        }
+      ],
+      "dsAhflInfo": [
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=68214581",
+          "SL_PAN_AHFL_DS_CD_NM": "기타 첨부파일",
+          "CMN_AHFL_NM": "(공통)필수제출서류.hwpx"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=68214582",
+          "SL_PAN_AHFL_DS_CD_NM": "기타 첨부파일",
+          "CMN_AHFL_NM": "(복학예정자)추가서류.hwpx"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=68214583",
+          "SL_PAN_AHFL_DS_CD_NM": "기타 첨부파일",
+          "CMN_AHFL_NM": "(예비신혼부부만제출)공동신청확인서및세대구성확인서.hwpx"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=68214584",
+          "SL_PAN_AHFL_DS_CD_NM": "공고문(hwp)",
+          "CMN_AHFL_NM": "서울번동3_행복주택_예비입주자_표준모집공고문.hwpx"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=68214585",
+          "SL_PAN_AHFL_DS_CD_NM": "공고문(PDF)",
+          "CMN_AHFL_NM": "서울번동3_행복주택_예비입주자_표준모집공고문.pdf"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=68214586",
+          "SL_PAN_AHFL_DS_CD_NM": "카탈로그",
+          "CMN_AHFL_NM": "서울번동3행복주택팸플릿.pdf"
+        }
+      ],
+      "dsSbd": [
+        {
+          "LGDN_ADR": "서울특별시 강북구 오현로 208(번동,번동주공아파트)",
+          "LGDN_DTL_ADR": "",
+          "HSH_CNT": "168",
+          "HTN_FMLA_DESC": "",
+          "LCC_NT_NM": "서울번동3 행복주택",
+          "DDO_AR": "16.99~44.68",
+          "SPL_INF_GUD_FCTS": "",
+          "MVIN_XPC_YM": "2023.04"
+        }
+      ],
+      "dsSbdAhfl": [
+        {
+          "LCC_NT_NM": "서울번동3 행복주택",
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhImageView2.do?fileid=45756529",
+          "LS_SPL_INF_UPL_FL_DS_CD_NM": "단지조감도",
+          "CMN_AHFL_NM": "단지조감도.png"
+        },
+        {
+          "LCC_NT_NM": "서울번동3 행복주택",
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhImageView2.do?fileid=45765063",
+          "LS_SPL_INF_UPL_FL_DS_CD_NM": "단지배치도",
+          "CMN_AHFL_NM": "단지배치도.png"
+        },
+        {
+          "LCC_NT_NM": "서울번동3 행복주택",
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhImageView2.do?fileid=45756531",
+          "LS_SPL_INF_UPL_FL_DS_CD_NM": "동호배치도",
+          "CMN_AHFL_NM": "동호배치도.png"
+        }
+      ],
+      "dsCtrtPlcNm": [
+        {
+          "CTRT_PLC_DTL_ADR": "접수처소재지상세주소",
+          "SIL_OFC_GUD_FCTS": "접수처안내사항",
+          "CTRT_PLC_ADR": "접수처소재지주소",
+          "TSK_ST_DTTM": "운영기간시작일시",
+          "TSK_ED_DTTM": "운영기간종료일시",
+          "SIL_OFC_TLNO": "전화번호"
+        }
+      ],
+      "dsEtcInfoNm": [
+        {
+          "ETC_CTS": "기타사항",
+          "CRC_RSN": "정정/취소사유"
+        }
+      ],
+      "dsAhflInfoNm": [
+        {
+          "AHFL_URL": "다운로드",
+          "SL_PAN_AHFL_DS_CD_NM": "파일구분명",
+          "CMN_AHFL_NM": "첨부파일명"
+        }
+      ],
+      "dsCtrtPlc": [
+        {
+          "CTRT_PLC_DTL_ADR": "관리사무소",
+          "SIL_OFC_GUD_FCTS": "상기 행복주택의 청약접수는 LH청약플러스 홈페이지(https://apply.lh.or.kr)또는 모바일(LH청약플러스)\n로 받습니다.",
+          "CTRT_PLC_ADR": "서울특별시 강북구 오현로 208(번동,번동주공아파트)",
+          "TSK_ST_DTTM": "2026.08.19",
+          "TSK_ED_DTTM": "2026.12.07",
+          "SIL_OFC_TLNO": "02-984-6152"
+        }
+      ],
+      "dsSplScdlNm": [
+        {
+          "PPR_SBM_OPE_ANC_DT": "서류제출대상자발표일",
+          "PPR_ACP_CLSG_DT": "서류접수기간종료일",
+          "PZWR_ANC_DT": "당첨자발표일",
+          "CTRT_ED_DT": "계약기간종료일",
+          "SBD_LGO_NM": "단지명",
+          "SBSC_ACP_ST_DT": "접수기간시작일",
+          "ACP_DTTM": "신청일시",
+          "SBSC_ACP_CLSG_DT": "접수기간종료일",
+          "CTRT_ST_DT": "계약기간시작일",
+          "PPR_ACP_ST_DT": "서류접수기간시작일"
+        }
+      ],
+      "resHeader": [
+        {
+          "RS_DTTM": "20261106045935",
+          "SS_CODE": "Y"
+        }
+      ]
+    }
+  ],
+  "supply": [
+    {
+      "dsSch": [
+        {
+          "PAN_ID": "2015122300020605",
+          "CCR_CNNT_SYS_DS_CD": "03",
+          "SPL_INF_TP_CD": "063",
+          "UPP_AIS_TP_CD": "06",
+          "AIS_TP_CD": "10"
+        }
+      ]
+    },
+    {
+      "dsList01Nm": [
+        {
+          "RFE": "월임대료(원)",
+          "NOW_HSH_CNT": "금회공급 세대수",
+          "HSH_CNT": "세대수",
+          "HTY_NNA": "주택형",
+          "LS_GMY": "임대보증금(원)",
+          "SBD_LGO_NM": "단지명",
+          "DDO_AR": "전용면적(㎡)",
+          "SPL_AR": "공급면적"
+        }
+      ],
+      "resHeader": [
+        {
+          "RS_DTTM": "20261106045936",
+          "SS_CODE": "Y"
+        }
+      ],
+      "dsList01": [
+        {
+          "RFE": "공고문 참조",
+          "NOW_HSH_CNT": "25",
+          "HSH_CNT": "56",
+          "HTY_NNA": "16A",
+          "LS_GMY": "공고문 참조",
+          "SBD_LGO_NM": "서울번동3 행복주택",
+          "DDO_AR": "16.99",
+          "SPL_AR": "25.4883"
+        },
+        {
+          "RFE": "공고문 참조",
+          "NOW_HSH_CNT": "25",
+          "HSH_CNT": "56",
+          "HTY_NNA": "21A",
+          "LS_GMY": "공고문 참조",
+          "SBD_LGO_NM": "서울번동3 행복주택",
+          "DDO_AR": "21.99",
+          "SPL_AR": "32.6153"
+        },
+        {
+          "RFE": "공고문 참조",
+          "NOW_HSH_CNT": "15",
+          "HSH_CNT": "56",
+          "HTY_NNA": "44A",
+          "LS_GMY": "공고문 참조",
+          "SBD_LGO_NM": "서울번동3 행복주택",
+          "DDO_AR": "44.68",
+          "SPL_AR": "64.4994"
+        }
+      ]
+    }
+  ]
+}

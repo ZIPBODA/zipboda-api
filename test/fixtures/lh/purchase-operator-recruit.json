@@ -1,0 +1,199 @@
+{
+  "queryRegion": "11",
+  "notice": {
+    "PAN_NT_ST_DT": "2026.07.30",
+    "PAN_ID": "2015122300020461",
+    "AIS_TP_CD_NM": "매입임대",
+    "CNP_CD_NM": "서울특별시",
+    "ALL_CNT": "49",
+    "SPL_INF_TP_CD": "135",
+    "AIS_TP_CD": "26",
+    "PAN_DT": "20260730",
+    "RNUM": "5",
+    "CCR_CNNT_SYS_DS_CD": "03",
+    "DTL_URL": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?panId=2015122300020461&ccrCnntSysDsCd=03&uppAisTpCd=13&aisTpCd=26&mi=1026",
+    "CLSG_DT": "2026.08.18",
+    "UPP_AIS_TP_CD": "13",
+    "PAN_NM": "2026년 하반기 매입임대 공동생활가정 운영기관 모집공고",
+    "UPP_AIS_TP_NM": "주거복지",
+    "PAN_SS": "접수마감",
+    "DTL_URL_MOB": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?panId=2015122300020461&ccrCnntSysDsCd=03&uppAisTpCd=13&aisTpCd=26&mi=1026"
+  },
+  "detail": [
+    {
+      "dsSch": [
+        {
+          "PAN_ID": "2015122300020461",
+          "CCR_CNNT_SYS_DS_CD": "03",
+          "SPL_INF_TP_CD": "135",
+          "UPP_AIS_TP_CD": "13",
+          "AIS_TP_CD": "26"
+        }
+      ]
+    },
+    {
+      "dsCtrtPlcNm": [
+        {
+          "CTRT_PLC_DTL_ADR": "접수처소재지상세주소",
+          "SIL_OFC_GUD_FCTS": "접수처안내사항",
+          "CTRT_PLC_ADR": "접수처소재지주소",
+          "TSK_ST_DTTM": "운영기간시작일시",
+          "TSK_ED_DTTM": "운영기간종료일시",
+          "SIL_OFC_TLNO": "전화번호"
+        }
+      ],
+      "dsEtcInfoNm": [
+        {
+          "ETC_CTS2": "기타사항",
+          "ARAG_RCR_HSH_CTS": "모집지역",
+          "LSC_CTS": "임대조건",
+          "ETC_CTS3": "공동생활가정운영기관",
+          "CRC_RSN": "정정/취소사유",
+          "LSTR_CTS": "임대기간",
+          "CAU_FCTS": "주의사항"
+        }
+      ],
+      "dsAhflInfoNm": [
+        {
+          "AHFL_URL": "다운로드",
+          "SL_PAN_AHFL_DS_CD_NM": "파일구분명",
+          "CMN_AHFL_NM": "첨부파일명"
+        }
+      ],
+      "dsEtcListNm": [
+        {
+          "ETC_CTS": "신청자격세부자격요건",
+          "PAN_ETC_INF_CD_NM": "신청자격구분"
+        }
+      ],
+      "dsCtrtPlc": [
+        {
+          "CTRT_PLC_DTL_ADR": "",
+          "SIL_OFC_GUD_FCTS": "",
+          "CTRT_PLC_ADR": "",
+          "TSK_ST_DTTM": "",
+          "TSK_ED_DTTM": "",
+          "SIL_OFC_TLNO": ""
+        }
+      ],
+      "dsSplScdl": [
+        {
+          "PPR_SBM_OPE_ANC_DT": "",
+          "PPR_ACP_CLSG_DT": "",
+          "PZWR_ANC_DT": "",
+          "CTRT_ED_DT": "",
+          "SBSC_ACP_ST_DT": "2026.08.10",
+          "ACP_DTTM": "~",
+          "HS_VIE_ED_DT": "",
+          "HS_VIE_ST_DT": "",
+          "SBSC_ACP_CLSG_DT": "2026.08.18",
+          "CTRT_ST_DT": "",
+          "PPR_ACP_ST_DT": ""
+        }
+      ],
+      "dsEtcList": [
+        {
+          "ETC_CTS": "1. 국가 또는 지방자치단체\n\n2. 관련법령 등에 따라 국가 또는 지방자치단체에 신고나 등록된 단체로서 최근 3년간(상기 모집기관중 노숙인 대상으로 하는 운영기관은 1년) 입주대상자의 보호 지원을 위한 운영실적이 있고, 최근 3년간 국가 또는 지방자치단체로부터 운영비(보호대상자에게 지원하는 금액은 제외) 지원을 받고 있는 법인 및 개인시설(상기 모집기관중 노숙인 관련 기관은 적용하지 아니함)\n\n3. 관계 중앙행정기관의 장이 특히 필요하다고 인정하여 매입임대주택의 지원을 요청한 단체",
+          "PAN_ETC_INF_CD_NM": ""
+        }
+      ],
+      "dsEtcInfo": [
+        {
+          "ETC_CTS2": "",
+          "ARAG_RCR_HSH_CTS": "",
+          "LSC_CTS": "시중전세가격의 30% 수준에서 보증금과 임대료로 나누어 책정(자세한 내용은 모집공고문 참조)",
+          "ETC_CTS3": "1. 국가 또는 지방자치단체\n\n2. 관련법령 등에 따라 국가 또는 지방자치단체에 신고나 등록된 단체로서 최근 3년간(상기 모집기관중 노숙인 대상으로 하는 운영기관은 1년) 입주대상자의 보호 지원을 위한 운영실적이 있고, 최근 3년간 국가 또는 지방자치단체로부터 운영비(보호대상자에게 지원하는 금액은 제외) 지원을 받고 있는 법인 및 개인시설(상기 모집기관중 노숙인 관련 기관은 적용하지 아니함)\n\n3. 관계 중앙행정기관의 장이 특히 필요하다고 인정하여 매입임대주택의 지원을 요청한 단체",
+          "CRC_RSN": "",
+          "LSTR_CTS": "최초 임대기간은 2년이며, 재계약은 서울시에서 심의를 통해 재계약 결정된 운영기관에 대하여 2년단위로 체결",
+          "CAU_FCTS": "신청접수 : 관할 구청 복지부(공고문 참조)"
+        }
+      ],
+      "dsSplScdlNm": [
+        {
+          "PPR_SBM_OPE_ANC_DT": "서류제출대상자발표일",
+          "PPR_ACP_CLSG_DT": "서류접수기간종료일",
+          "PZWR_ANC_DT": "당첨자발표일",
+          "CTRT_ED_DT": "계약기간종료일",
+          "SBSC_ACP_ST_DT": "접수기간시작일",
+          "ACP_DTTM": "접수일시",
+          "HS_VIE_ED_DT": "주택열람기간종료일",
+          "HS_VIE_ST_DT": "주택열람기간시작일",
+          "SBSC_ACP_CLSG_DT": "접수기간종료일",
+          "CTRT_ST_DT": "계약기간시작일",
+          "PPR_ACP_ST_DT": "서류접수기간시작일"
+        }
+      ],
+      "resHeader": [
+        {
+          "RS_DTTM": "20261106050245",
+          "SS_CODE": "Y"
+        }
+      ],
+      "dsAhflInfo": [
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=67907862",
+          "SL_PAN_AHFL_DS_CD_NM": "공고문(hwp)",
+          "CMN_AHFL_NM": "붙임1.2026년하반기공동생활가정운영기관모집공고문(LH).hwpx"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=67907868",
+          "SL_PAN_AHFL_DS_CD_NM": "공고문(PDF)",
+          "CMN_AHFL_NM": "붙임1.2026년하반기공동생활가정운영기관모집공고문(LH).pdf"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=67907871",
+          "SL_PAN_AHFL_DS_CD_NM": "공고문(hwp)",
+          "CMN_AHFL_NM": "붙임2.공동생활가정신청서및사업계획서.hwpx"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=67907877",
+          "SL_PAN_AHFL_DS_CD_NM": "공고문(PDF)",
+          "CMN_AHFL_NM": "붙임2.공동생활가정신청서및사업계획서.pdf"
+        }
+      ]
+    }
+  ],
+  "supply": [
+    {
+      "dsSch": [
+        {
+          "PAN_ID": "2015122300020461",
+          "CCR_CNNT_SYS_DS_CD": "03",
+          "SPL_INF_TP_CD": "135",
+          "UPP_AIS_TP_CD": "13",
+          "AIS_TP_CD": "26"
+        }
+      ]
+    },
+    {
+      "dsList01Nm": [
+        {
+          "HTY_DS_NM": "주택유형",
+          "SBD_LGO_NM": "모집지역",
+          "QUP_CNT": "모집인원",
+          "RQS_HSH_CNT": "가구원수"
+        }
+      ],
+      "resHeader": [
+        {
+          "RS_DTTM": "20261106050245",
+          "SS_CODE": "Y"
+        }
+      ],
+      "dsList01": [
+        {
+          "HTY_DS_NM": "2형",
+          "SBD_LGO_NM": "매입다가구(서울노원구)",
+          "QUP_CNT": "2",
+          "RQS_HSH_CNT": "3~4인 가구"
+        },
+        {
+          "HTY_DS_NM": "1형",
+          "SBD_LGO_NM": "매입다가구(서울은평구)",
+          "QUP_CNT": "1",
+          "RQS_HSH_CNT": "2인 이하 가구"
+        }
+      ]
+    }
+  ]
+}

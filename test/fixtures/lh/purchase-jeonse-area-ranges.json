@@ -1,0 +1,216 @@
+{
+  "queryRegion": "11",
+  "notice": {
+    "PAN_NT_ST_DT": "2026.10.01",
+    "PAN_ID": "2015122300020843",
+    "AIS_TP_CD_NM": "매입임대",
+    "CNP_CD_NM": "서울특별시",
+    "ALL_CNT": "49",
+    "SPL_INF_TP_CD": "144",
+    "AIS_TP_CD": "26",
+    "PAN_DT": "20261001",
+    "RNUM": "1",
+    "CCR_CNNT_SYS_DS_CD": "03",
+    "DTL_URL": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?panId=2015122300020843&ccrCnntSysDsCd=03&uppAisTpCd=13&aisTpCd=26&mi=1026",
+    "CLSG_DT": "2026.10.16",
+    "UPP_AIS_TP_CD": "13",
+    "PAN_NM": "[서울지역본부] 26년 2차 비분양전환형 든든전세주택 입주자 모집공고",
+    "UPP_AIS_TP_NM": "주거복지",
+    "PAN_SS": "접수마감",
+    "DTL_URL_MOB": "https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancInfo.do?panId=2015122300020843&ccrCnntSysDsCd=03&uppAisTpCd=13&aisTpCd=26&mi=1026"
+  },
+  "detail": [
+    {
+      "dsSch": [
+        {
+          "PAN_ID": "2015122300020843",
+          "CCR_CNNT_SYS_DS_CD": "03",
+          "SPL_INF_TP_CD": "144",
+          "UPP_AIS_TP_CD": "13",
+          "AIS_TP_CD": "26"
+        }
+      ]
+    },
+    {
+      "dsCtrtPlcNm": [
+        {
+          "CTRT_PLC_DTL_ADR": "접수처소재지상세주소",
+          "SIL_OFC_GUD_FCTS": "접수처안내사항",
+          "CTRT_PLC_ADR": "접수처소재지주소",
+          "TSK_ST_DTTM": "운영기간시작일시",
+          "TSK_ED_DTTM": "운영기간종료일시",
+          "SIL_OFC_TLNO": "전화번호"
+        }
+      ],
+      "dsEtcInfoNm": [
+        {
+          "ETC_CTS2": "기타사항",
+          "ARAG_RCR_HSH_CTS": "모집지역",
+          "LSC_CTS": "임대조건",
+          "ETC_CTS3": "공동생활가정운영기관",
+          "CRC_RSN": "정정/취소사유",
+          "LSTR_CTS": "임대기간",
+          "CAU_FCTS": "주의사항"
+        }
+      ],
+      "dsAhflInfoNm": [
+        {
+          "AHFL_URL": "다운로드",
+          "SL_PAN_AHFL_DS_CD_NM": "파일구분명",
+          "CMN_AHFL_NM": "첨부파일명"
+        }
+      ],
+      "dsEtcListNm": [
+        {
+          "ETC_CTS": "신청자격세부자격요건",
+          "PAN_ETC_INF_CD_NM": "신청자격구분"
+        }
+      ],
+      "dsCtrtPlc": [
+        {
+          "CTRT_PLC_DTL_ADR": "",
+          "SIL_OFC_GUD_FCTS": "",
+          "CTRT_PLC_ADR": "",
+          "TSK_ST_DTTM": "",
+          "TSK_ED_DTTM": "",
+          "SIL_OFC_TLNO": ""
+        }
+      ],
+      "dsSplScdl": [
+        {
+          "PPR_SBM_OPE_ANC_DT": "2026.10.20",
+          "PPR_ACP_CLSG_DT": "2026.10.23",
+          "PZWR_ANC_DT": "2026.11.26",
+          "CTRT_ED_DT": "",
+          "SBSC_ACP_ST_DT": "2026.10.14",
+          "ACP_DTTM": "2026.10.14 10:00 ~ 2026.10.16 16:10",
+          "HS_VIE_ED_DT": "",
+          "HS_VIE_ST_DT": "",
+          "SBSC_ACP_CLSG_DT": "2026.10.16",
+          "CTRT_ST_DT": "",
+          "PPR_ACP_ST_DT": "2026.10.21"
+        }
+      ],
+      "dsEtcList": [
+        {
+          "ETC_CTS": "입주자모집 공고일(2026.10.01.) 현재 무주택세대구성원으로 주민등록표등본상 수도권(서울·인천·경기)에 거주하고 있는 자\n * 신청자격은 입주자 모집공고일부터 입주 시까지 계속 유지하고 있어야 하며, 당첨 후 주택소유 등으로 자격요건 상실 시 당첨이 취소되거나 계약이 거절될 수 있습니다.",
+          "PAN_ETC_INF_CD_NM": "공통신청자격"
+        }
+      ],
+      "dsEtcInfo": [
+        {
+          "ETC_CTS2": "반드시 공고문을 통해 세부 내용을 숙지하신 후 신청하여 주시기 바라며, 신청자격 미숙지, 착오신청 등에 대해서 신청자 본인에게 책임이 있으니 유의하여 주시기 바랍니다.",
+          "ARAG_RCR_HSH_CTS": "강동구 ,강서구, 광진구, 금천구, 노원구, 도봉구, 동대문구, 성북구, 영등포구, 은평구, 중랑구",
+          "LSC_CTS": "시중임대료의 80~90% 이하(자세한 내용은 모집공고문 및 주택내역 확인)",
+          "ETC_CTS3": "",
+          "CRC_RSN": "",
+          "LSTR_CTS": "2년 (무주택 자격 유지 시 재계약 3회 가능, 최장 8년)",
+          "CAU_FCTS": ""
+        }
+      ],
+      "dsSplScdlNm": [
+        {
+          "PPR_SBM_OPE_ANC_DT": "서류제출대상자발표일",
+          "PPR_ACP_CLSG_DT": "서류접수기간종료일",
+          "PZWR_ANC_DT": "당첨자발표일",
+          "CTRT_ED_DT": "계약기간종료일",
+          "SBSC_ACP_ST_DT": "접수기간시작일",
+          "ACP_DTTM": "접수일시",
+          "HS_VIE_ED_DT": "주택열람기간종료일",
+          "HS_VIE_ST_DT": "주택열람기간시작일",
+          "SBSC_ACP_CLSG_DT": "접수기간종료일",
+          "CTRT_ST_DT": "계약기간시작일",
+          "PPR_ACP_ST_DT": "서류접수기간시작일"
+        }
+      ],
+      "resHeader": [
+        {
+          "RS_DTTM": "20261106045945",
+          "SS_CODE": "Y"
+        }
+      ],
+      "dsAhflInfo": [
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=68775508",
+          "SL_PAN_AHFL_DS_CD_NM": "기타 첨부파일",
+          "CMN_AHFL_NM": "26년_2차_든든전세주택_QnA.hwpx"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=68818384",
+          "SL_PAN_AHFL_DS_CD_NM": "공고문(hwp)",
+          "CMN_AHFL_NM": "26년_2차_비분양전환형_든든전세주택_입주자모집공고문(서울지역본부).hwpx"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=68818385",
+          "SL_PAN_AHFL_DS_CD_NM": "공고문(PDF)",
+          "CMN_AHFL_NM": "26년_2차_비분양전환형_든든전세주택_입주자모집공고문(서울지역본부).pdf"
+        },
+        {
+          "AHFL_URL": "https://apply.lh.or.kr/lhapply/lhFile.do?fileid=68775511",
+          "SL_PAN_AHFL_DS_CD_NM": "기타 첨부파일",
+          "CMN_AHFL_NM": "26년_2차_비분양전환형_든든전세주택_주택목록(서울지역본부).xlsx"
+        }
+      ]
+    }
+  ],
+  "supply": [
+    {
+      "dsSch": [
+        {
+          "PAN_ID": "2015122300020843",
+          "CCR_CNNT_SYS_DS_CD": "03",
+          "SPL_INF_TP_CD": "144",
+          "UPP_AIS_TP_CD": "13",
+          "AIS_TP_CD": "26"
+        }
+      ]
+    },
+    {
+      "dsList01Nm": [
+        {
+          "HTY_DS_NM": "주택형",
+          "SGG_NM": "지역명",
+          "DNG_HS_ADR": "주택정보",
+          "LTR_SPL_RMNO": "공급호수",
+          "QUP_CNT": "모집인원"
+        }
+      ],
+      "resHeader": [
+        {
+          "RS_DTTM": "20261106045945",
+          "SS_CODE": "Y"
+        }
+      ],
+      "dsList01": [
+        {
+          "HTY_DS_NM": "70~80㎡",
+          "DNG_HS_ADR": "강동둔촌동(은슬림둔촌)",
+          "SGG_NM": "서울특별시 강동구",
+          "LTR_SPL_RMNO": "1",
+          "QUP_CNT": "4"
+        },
+        {
+          "HTY_DS_NM": "70~80㎡",
+          "DNG_HS_ADR": "강서방화동(마곡노블리안)",
+          "SGG_NM": "서울특별시 강서구",
+          "LTR_SPL_RMNO": "1",
+          "QUP_CNT": "4"
+        },
+        {
+          "HTY_DS_NM": "80㎡ 이상",
+          "DNG_HS_ADR": "강서방화동(마곡노블리안)",
+          "SGG_NM": "서울특별시 강서구",
+          "LTR_SPL_RMNO": "1",
+          "QUP_CNT": "4"
+        },
+        {
+          "HTY_DS_NM": "70~80㎡",
+          "DNG_HS_ADR": "광진자양동(갤러리하우스)",
+          "SGG_NM": "서울특별시 광진구",
+          "LTR_SPL_RMNO": "1",
+          "QUP_CNT": "4"
+        }
+      ]
+    }
+  ]
+}
