@@ -21,6 +21,7 @@ import {
   LH_LINK_SYSTEM,
   LH_PREFERRED_IMAGE_KIND,
 } from './lh.constants.js';
+import { addCounts } from '../counts.js';
 import type { LhRow } from './lh-raw.js';
 
 /** 일정을 붙이고 합계를 내기 전의 칸 */
@@ -44,12 +45,6 @@ export interface ListingDrafts {
 }
 
 const field = (row: LhRow, name: string): string | null => textOrNull(row[name]);
-
-export const addCounts = (a: number | null, b: number | null): number | null => {
-  if (a === null) return b;
-  if (b === null) return a;
-  return a + b;
-};
 
 const emptyUnit = (): NormalizedUnit => ({
   label: null,
@@ -186,6 +181,16 @@ export const complexDraftsOf = (
     if (regionCode === null) {
       warn(SyncStage.NORMALIZE, 'OUT_OF_REGION', `수집 지역 밖 단지를 건너뛰었다: ${name} (${address})`);
       skippedNameKeys.add(nameKey);
+      continue;
+    }
+    // 지역만 적은 일반명에 주소도 없으면 어느 건물인지 몰라 단지로 두지 않고 공고 단위 칸에 모은다(ERD §5 규칙 6·8)
+    if (address === null && LH_GENERIC_COMPLEX_NAME.test(nameKey)) {
+      let noticeLevel = drafts.find((draft) => draft.complex === null);
+      if (noticeLevel === undefined) {
+        noticeLevel = emptyDraft(null, queryRegion, { moveInMonth: moveInOf(row, warn) });
+        drafts.push(noticeLevel);
+      }
+      noticeLevel.nameKeys.push(nameKey);
       continue;
     }
     const addressKey = address === null ? null : addressKeyOf(address);

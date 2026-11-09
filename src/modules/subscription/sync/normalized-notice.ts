@@ -50,7 +50,10 @@ export interface NormalizedUnit {
 export interface NormalizedComplex {
   name: string;
   nameKey: string;
-  /** 원천이 준 이름으로 별칭을 남겨도 되는지 — 지역만 적은 일반명이나 주소에서 지어낸 이름은 남기지 않는다(ERD §5 규칙 8) */
+  /**
+   * 원천이 준 이름으로 별칭을 남겨도 되는지 — 지역만 적은 일반명이나 주소에서 지어낸 이름은 남기지 않는다(ERD §5 규칙 8).
+   * false면 address가 꼭 있다(저장 단계가 주소로만 다시 찾을 수 있다)
+   */
   aliasable: boolean;
   sigungu: string | null;
   address: string | null;

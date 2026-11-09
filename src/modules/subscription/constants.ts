@@ -9,12 +9,23 @@ export const SUBSCRIPTION_ID_MAX_LENGTH = 100;
  * ADDRESS = 주소가 같아 이음, NAME = 이름으로만 이음, MANUAL = 관리자·시드가 확인함
  */
 export const ComplexMatch = { ADDRESS: 'ADDRESS', NAME: 'NAME', MANUAL: 'MANUAL' } as const;
+export type ComplexMatch = (typeof ComplexMatch)[keyof typeof ComplexMatch];
+
+/** 한 단지에 여러 칸이 모일 때 남길 연결 — 확인된 연결일수록 크다(평면도 노출이 갈린다) */
+export const COMPLEX_MATCH_STRENGTH: Readonly<Record<ComplexMatch, number>> = {
+  [ComplexMatch.NAME]: 0,
+  [ComplexMatch.ADDRESS]: 1,
+  [ComplexMatch.MANUAL]: 2,
+};
 
 /** 이름으로만 이은 단지는 같은 이름의 다른 건물일 수 있어 평면도를 보여 주지 않는다 */
 export const FLOORPLAN_VISIBLE_MATCHES: readonly string[] = [ComplexMatch.ADDRESS, ComplexMatch.MANUAL];
 
 /** 단지 좌표를 얻은 결과. 마이그레이션 CHECK와 같은 값이다 */
 export const GeocodeStatus = { OK: 'OK', NOT_FOUND: 'NOT_FOUND', NO_ADDRESS: 'NO_ADDRESS', MANUAL: 'MANUAL' } as const;
+
+/** 공고를 만든 경로 — 수집(SYNC)이나 관리자 등록(MANUAL). 마이그레이션 CHECK와 같은 값이다 */
+export const NoticeOrigin = { SYNC: 'SYNC', MANUAL: 'MANUAL' } as const;
 
 /** 공고 수집 분류(ERD §5 규칙 14). 마이그레이션 CHECK와 같은 값이다 */
 export const SupplyCategory = { SALE: 'SALE', PUBLIC_RENTAL: 'PUBLIC_RENTAL', PURCHASE_RENTAL: 'PURCHASE_RENTAL' } as const;
@@ -51,6 +62,18 @@ export const NoticeSourceName = {
   GH_FILE: 'GH_FILE',
 } as const;
 export type NoticeSourceName = (typeof NoticeSourceName)[keyof typeof NoticeSourceName];
+
+/**
+ * 공고 값을 정하는 원천의 순위(ERD §5 규칙 12) — 작을수록 앞선다. 기관 원천이 청약홈보다 앞서고,
+ * 같은 순위끼리는 정정 표시가 많은(나중) 공고가 앞선다(규칙 7)
+ */
+export const PRIMARY_SOURCE_RANK: Readonly<Record<NoticeSourceName, number>> = {
+  [NoticeSourceName.LH]: 0,
+  [NoticeSourceName.IH]: 0,
+  [NoticeSourceName.SH_RSS]: 0,
+  [NoticeSourceName.GH_FILE]: 0,
+  [NoticeSourceName.APPLYHOME]: 1,
+};
 
 /**
  * 면적은 값이 아니라 전용면적 구간으로 고른다(web 목록 필터와 같은 구간).
