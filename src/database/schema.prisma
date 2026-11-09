@@ -16,7 +16,7 @@ datasource db {
 
 /// 공급기관이 낸 입주자 모집공고 한 건. 정정공고는 새 행이 아니라 같은 행에 원천 참조를 더한다
 model Notice {
-  id             String    @id
+  id             String    @id @default(uuid(7))
   /// ITF-001 공급기관(1 LH · 2 SH · 3 GH · 4 IH)
   agencyCode     Int       @map("agency_code")
   /// 우선 원천의 최신 정정본 이름(정정 표시 포함)
@@ -59,6 +59,8 @@ model NoticeSource {
   sourceParams Json?     @map("source_params")
   /// 값을 정하는 원천. 공고마다 하나
   isPrimary    Boolean   @map("is_primary")
+  /// 원천 공고명의 정정 표시 수. 같은 단계의 원천이 이미 있으면 정정본이 아니라 같은 이름의 다른 공고다(ERD §5 규칙 7)
+  correctionMarks Int    @default(0) @map("correction_marks")
   /// 열로 옮기지 않은 원문까지 남겨 정규화 규칙을 바꿔도 다시 조회하지 않고 다시 처리한다
   rawPayload   Json?     @map("raw_payload")
   fetchedAt    DateTime? @map("fetched_at") @db.Timestamptz(3)
@@ -70,7 +72,7 @@ model NoticeSource {
 
 /// 평면도가 붙는 물리적 단지·건물. 같은 단지가 여러 공고·여러 이름으로 나와도 한 행이다
 model Complex {
-  id            String    @id
+  id            String    @id @default(uuid(7))
   agencyCode    Int       @map("agency_code")
   /// ITF-004 지역(1 서울 · 2 인천 · 3 경기)
   regionCode    Int       @map("region_code")
@@ -122,7 +124,7 @@ model ComplexAlias {
 
 /// 목록 한 칸 = 공고 × 단지. 단지 정보가 없는 공고는 complexId가 빈 칸 하나다
 model Subscription {
-  id                String    @id
+  id                String    @id @default(uuid(7))
   noticeId          String    @map("notice_id")
   notice            Notice    @relation(fields: [noticeId], references: [id], onDelete: Restrict)
   complexId         String?   @map("complex_id")

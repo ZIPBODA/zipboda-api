@@ -350,6 +350,20 @@ describe('LH 공고 정규화', () => {
       expect(notice.warnings).toEqual([expect.objectContaining({ code: 'COMPLEX_MERGED_BY_ADDRESS' })]);
     });
 
+    it('주소 없이 지역만 적은 일반명 단지는 단지로 두지 않고 공고 단위 칸으로 모은다', () => {
+      const notice = noticeOf(
+        normalize('permanent-multi-complex', [
+          ['"LCC_NT_NM": "서울우면"', '"LCC_NT_NM": "매입다가구(서울서초구)"'],
+          ['"LGDN_ADR": "서울특별시 서초구 바우뫼로7길 11(우면동,우면주공아파트)"', '"LGDN_ADR": ""'],
+          ['"SBD_LGO_NM": "서울우면"', '"SBD_LGO_NM": "매입다가구(서울서초구)"'],
+        ]),
+      );
+      expect(notice.listings).toHaveLength(7);
+      const noticeLevel = notice.listings.filter((listing) => listing.complex === null);
+      expect(noticeLevel).toHaveLength(1);
+      expect(noticeLevel[0].schedules.map((schedule) => schedule.kind)).toEqual([ScheduleKind.APPLY, ScheduleKind.WINNER]);
+    });
+
     it('이름이 빈 단지는 건너뛰고, 그 이름을 가리키던 일정은 모든 칸에 넣는다', () => {
       const notice = noticeOf(normalize('permanent-multi-complex', [['"LCC_NT_NM": "서울우면"', '"LCC_NT_NM": ""']]));
       expect(notice.listings).toHaveLength(6);

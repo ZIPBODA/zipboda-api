@@ -12,7 +12,9 @@ import type {
 } from '../normalized-notice.js';
 import { correctionMarksOf, parseDate, textOrNull, titleKeyOf } from '../normalize-text.js';
 import { classifyLhNotice } from './lh-classify.js';
-import { addCounts, complexDraftsOf, supplyRowDraftsOf, type ListingDraft } from './lh-listings.js';
+import { addCounts } from '../counts.js';
+import { mergeWarnings } from '../warnings.js';
+import { complexDraftsOf, supplyRowDraftsOf, type ListingDraft } from './lh-listings.js';
 import { LH_LINK_SYSTEM, LH_QUERY_REGIONS } from './lh.constants.js';
 import { datasetsOf, supplyRowsOf, type LhNoticeBundle, type LhRow } from './lh-raw.js';
 import { lhScheduleRowsOf, type LhScheduleRow } from './lh-schedules.js';
@@ -69,18 +71,6 @@ const listingOf = (draft: ListingDraft, schedules: NormalizedSchedule[], warn: W
   recruitCount: draft.units.reduce<number | null>((sum, unit) => addCounts(sum, unit.recruitCount), draft.buildingRecruitCount),
   summary: summaryOf(schedules, warn),
 });
-
-/** 같은 사정이 칸·행마다 되풀이되어도 동기화 기록(sync_failures)은 (단계, 코드)당 한 건이라 여기서 합친다 */
-const mergeWarnings = (warnings: NormalizationWarning[]): NormalizationWarning[] => {
-  const merged = new Map<string, NormalizationWarning>();
-  for (const warning of warnings) {
-    const key = `${warning.stage}:${warning.code}`;
-    const existing = merged.get(key);
-    if (existing === undefined) merged.set(key, { ...warning });
-    else if (!existing.message.split(' / ').includes(warning.message)) existing.message += ` / ${warning.message}`;
-  }
-  return [...merged.values()];
-};
 
 /**
  * LH 공고 한 건(목록 행 + 상세 + 공급정보)을 원천과 상관없는 모양으로 바꾼다. DB는 보지 않는다 —
