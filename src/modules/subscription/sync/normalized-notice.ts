@@ -45,6 +45,11 @@ export interface NormalizedUnit {
   salePriceWon: bigint | null;
   priceNote: string | null;
   note: string | null;
+  /**
+   * 신청 인원(경쟁률 분자). 이 값을 정하는 원천(청약홈 — ERD §5 규칙 12)만 채운다. 키가 없으면 저장 단계가 기존 값을
+   * 건드리지 않고, null이면 모르는 값으로 쓴다
+   */
+  applicationCount?: number | null;
 }
 
 export interface NormalizedComplex {
@@ -81,6 +86,8 @@ export interface NormalizedListing {
   supplyUnits: number | null;
   recruitCount: number | null;
   supplyNote: string | null;
+  /** 칸의 신청 인원 — 주택형과 같은 규칙(이 값을 정하는 원천만 채운다) */
+  applicationCount?: number | null;
   schedules: NormalizedSchedule[];
   units: NormalizedUnit[];
   summary: ListingSummary;

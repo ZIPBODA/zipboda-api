@@ -31,7 +31,7 @@ export interface GeocodingResult {
 }
 
 /**
- * 주소는 있는데 아직 좌표를 얻지 않은 단지(geocode_status가 null)의 좌표를 채운다. 판별 키(정리한 도로명 주소)로 먼저 찾고,
+ * 주소는 있는데 아직 좌표를 얻지 않은 단지(geocode_status가 null)의 좌표를 채운다(칸이 있는 단지만). 판별 키(정리한 도로명 주소)로 먼저 찾고,
  * 못 찾으면 원문 주소로 한 번 더 찾는다. 관리자가 고친 좌표(MANUAL)나 이미 판정한 단지는 건드리지 않는다
  */
 export const geocodePendingComplexes = async (
@@ -39,8 +39,9 @@ export const geocodePendingComplexes = async (
   geocoder: Geocoder,
   { limit, shouldStop }: GeocodingOptions,
 ): Promise<GeocodingResult> => {
+  // 칸이 없는 단지(원천이 넘겨받으며 남은 청약홈 단지 등)는 지도에 나오지 않아 카카오 호출 한도를 쓰지 않는다
   const pending = await prisma.complex.findMany({
-    where: { geocodeStatus: null, address: { not: null } },
+    where: { geocodeStatus: null, address: { not: null }, subscriptions: { some: {} } },
     select: { id: true, address: true, addressKey: true },
     orderBy: { createdAt: 'asc' },
     take: limit,

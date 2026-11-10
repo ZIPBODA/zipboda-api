@@ -63,6 +63,7 @@ describe('청약홈 API 클라이언트', () => {
       detail,
       models: [{ HOUSE_TY: '074.5900A' }],
       competitions: [{ REQ_CNT: '38' }],
+      specialApplications: [],
     });
     const paths = fetchFn.mock.calls.map(([url]) => new URL(url).pathname).sort();
     expect(paths).toEqual([
@@ -134,7 +135,29 @@ describe('청약홈 API 클라이언트', () => {
   it('공고 키가 없으면 조건 없이 전체를 묻지 않게 부르지 않는다', async () => {
     const fetchFn = fakeFetch(page([]));
     const bundle = await new ApplyhomeApiClient(SERVICE_KEY, fetchFn).bundleOf('APT', { HOUSE_NM: '키 없는 공고' });
-    expect(bundle).toEqual({ kind: 'APT', detail: { HOUSE_NM: '키 없는 공고' }, models: [], competitions: [] });
+    expect(bundle).toEqual({
+      kind: 'APT',
+      detail: { HOUSE_NM: '키 없는 공고' },
+      models: [],
+      competitions: [],
+      specialApplications: [],
+    });
     expect(fetchFn).not.toHaveBeenCalled();
+  });
+
+  it('APT는 특별공급 신청현황도 같은 공고 조건으로 받는다', async () => {
+    const fetchFn = jest.fn<FetchMock>((url) =>
+      Promise.resolve(new Response(page(url.includes('SpsplyReqstStus') ? [{ HOUSE_TY: '084.0000A' }] : []))),
+    );
+    const detail = { HOUSE_MANAGE_NO: '2026000437', PBLANC_NO: '2026000437' };
+    const bundle = await new ApplyhomeApiClient(SERVICE_KEY, fetchFn).bundleOf('APT', detail);
+    expect(bundle.specialApplications).toEqual([{ HOUSE_TY: '084.0000A' }]);
+    const special = fetchFn.mock.calls
+      .map(([url]) => new URL(url))
+      .find((url) => url.pathname.endsWith('getAPTSpsplyReqstStus'));
+    expect(special?.pathname).toBe('/api/ApplyhomeInfoCmpetRtSvc/v1/getAPTSpsplyReqstStus');
+    expect(Object.fromEntries(special?.searchParams ?? [])).toMatchObject({
+      'cond[HOUSE_MANAGE_NO::EQ]': '2026000437',
+    });
   });
 });

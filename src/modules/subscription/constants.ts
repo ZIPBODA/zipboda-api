@@ -64,6 +64,9 @@ export type SyncLevel = (typeof SyncLevel)[keyof typeof SyncLevel];
 /** 이보다 오래 RUNNING인 실행은 비정상 종료로 보고 다음 실행이 FAILED로 정리한다 — 첫 수집(약 2천 번 호출)도 이 안에 끝난다 */
 export const STALE_SYNC_RUN_MS = 3 * 60 * 60 * 1000;
 
+/** 신혼희망타운 공고 — 같은 날·같은 블록의 공공분양과 따로 올라와 원천 간 같은 공고를 가를 때 본다(ERD §5 규칙 19) */
+export const NEWLYWED_TITLE = /신혼희망/;
+
 /** 공고 원천. 마이그레이션 CHECK와 같은 값이다 */
 export const NoticeSourceName = {
   LH: 'LH',

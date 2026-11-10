@@ -30,6 +30,7 @@ import { classifyApplyhomeNotice } from './applyhome-classify.js';
 import {
   APPLYHOME_APPLY_FIELDS,
   APPLYHOME_NAME_SUFFIX,
+  APPLYHOME_SPECIAL_APPLICATION_FIELD,
   APPLYHOME_WHOLE_APPLY_FIELDS,
   ApplyhomeKind,
   WON_PER_MANWON,
@@ -75,7 +76,13 @@ const complexNameOf = (title: string): string => {
 };
 
 /** rentalDeposit: 분양전환 가능 임대는 최고 금액 열에 분양가가 아니라 임대보증금이 온다(같은 공고 LH 공급정보 LS_GMY의 만원 내림) */
-const unitOf = (kind: ApplyhomeKind, row: ApplyhomeRow, rentalDeposit: boolean, warn: Warn): NormalizedUnit => {
+const unitOf = (
+  kind: ApplyhomeKind,
+  row: ApplyhomeRow,
+  rentalDeposit: boolean,
+  applicationCount: number | undefined,
+  warn: Warn,
+): NormalizedUnit => {
   const separateArea = SEPARATE_AREA_KINDS.includes(kind);
   const typeText = field(row, separateArea ? 'TP' : 'HOUSE_TY');
   const match = separateArea ? null : typeText?.match(HOUSE_TYPE);
@@ -103,8 +110,90 @@ const unitOf = (kind: ApplyhomeKind, row: ApplyhomeRow, rentalDeposit: boolean, 
     salePriceWon: rentalDeposit ? null : price.won,
     priceNote: price.note,
     note: null,
+    applicationCount,
   };
 };
+
+/** 주택형 행의 열쇠 — 경쟁률·특별공급 신청현황은 주택형 원문(HOUSE_TY, 오피스텔은 타입 TP)으로 주택형과 맞춘다 */
+const modelTypeOf = (kind: ApplyhomeKind, row: ApplyhomeRow): string | null =>
+  field(row, SEPARATE_AREA_KINDS.includes(kind) ? 'TP' : 'HOUSE_TY');
+
+const addTo = (counts: Map<string, number>, type: string, count: number) =>
+  counts.set(type, (counts.get(type) ?? 0) + count);
+
+/** 일반공급 신청 인원 — 모든 순위·거주지역 행을 주택형별로 더한다 */
+const generalApplicationsOf = (rows: ApplyhomeRow[]): Map<string, number> => {
+  const counts = new Map<string, number>();
+  for (const row of rows) {
+    const type = field(row, 'HOUSE_TY');
+    const count = parseCount(field(row, 'REQ_CNT'));
+    if (type !== null && count !== null) addTo(counts, type, count);
+  }
+  return counts;
+};
+
+/** 특별공급 신청 인원 — 지역 × 유형별 신청 수와 기관추천 확정·이전기관을 주택형별로 더한다 */
+const specialApplicationsOf = (rows: ApplyhomeRow[]): Map<string, number> => {
+  const counts = new Map<string, number>();
+  for (const row of rows) {
+    const type = field(row, 'HOUSE_TY');
+    if (type === null) continue;
+    const count = Object.entries(row)
+      .filter(([name]) => APPLYHOME_SPECIAL_APPLICATION_FIELD.test(name))
+      .reduce((sum, [, value]) => sum + (parseCount(textOrNull(value)) ?? 0), 0);
+    addTo(counts, type, count);
+  }
+  return counts;
+};
+
+/**
+ * 주택형별 신청 인원(ERD §5 규칙 18) — 일반공급(모든 순위·거주지역) + 특별공급 신청. 공급 세대(일반 + 특별공급)와 같은 범위를
+ * 세어야 경쟁률이 맞는다. 셀 수 없으면 정하지 않는다(undefined) — 저장 단계가 알던 값을 그대로 둔다. 경쟁률이 없는 공고(기관이
+ * 직접 접수하거나 아직 접수 전), 잠시 빈 응답, 특별공급 세대가 있는데 신청현황이 없는 주택형(일반공급만 세면 낮게 나온다)이 그렇다
+ */
+const applicationCountsOf = (bundle: ApplyhomeBundle, warn: Warn): (number | undefined)[] => {
+  if (bundle.competitions.length === 0) return bundle.models.map(() => undefined);
+  const general = generalApplicationsOf(bundle.competitions);
+  const special = specialApplicationsOf(bundle.specialApplications);
+  const modelTypes = new Set(bundle.models.map((row) => modelTypeOf(bundle.kind, row)));
+  const unmatched = [...general.keys()].filter((type) => !modelTypes.has(type));
+  if (unmatched.length > 0) {
+    warn(
+      SyncStage.MATCH,
+      'COMPETITION_TYPE_UNMATCHED',
+      `경쟁률의 주택형(${unmatched.join(', ')})이 주택형 목록에 없다`,
+    );
+  }
+  return bundle.models.map((row) => {
+    const type = modelTypeOf(bundle.kind, row);
+    if (type === null) return undefined;
+    // 특별공급만 있는 주택형(일반공급 0세대)은 일반공급 경쟁률 행이 없다 — 일반공급 신청은 0명이다
+    const generalSupply = parseCount(field(row, 'SUPLY_HSHLDCO'));
+    const generalCount = general.get(type) ?? (generalSupply === 0 ? 0 : undefined);
+    if (generalCount === undefined) return undefined;
+    if ((parseCount(field(row, 'SPSPLY_HSHLDCO')) ?? 0) === 0) return generalCount;
+    const specialCount = special.get(type);
+    if (specialCount === undefined) {
+      warn(
+        SyncStage.MATCH,
+        'SPECIAL_APPLICATIONS_MISSING',
+        `주택형 ${type}의 특별공급 신청현황이 없어 신청 인원을 정하지 않았다`,
+      );
+      return undefined;
+    }
+    return generalCount + specialCount;
+  });
+};
+
+/** 주택형이 모두 신청 인원을 알 때만 칸의 신청 인원을 낸다 — 일부만 더하면 경쟁률이 낮게 나온다 */
+const listingApplicationCountOf = (counts: (number | undefined)[]): number | undefined =>
+  counts.length > 0 && counts.every((count) => count !== undefined)
+    ? counts.reduce<number>((sum, count) => sum + (count ?? 0), 0)
+    : undefined;
+
+/** 조건이 무시된 응답이면 다른 공고의 행이 섞인다 */
+const foreignRowOf = (rows: ApplyhomeRow[], houseManageNo: string, pblancNo: string): ApplyhomeRow | undefined =>
+  rows.find((row) => field(row, 'HOUSE_MANAGE_NO') !== houseManageNo || field(row, 'PBLANC_NO') !== pblancNo);
 
 /** 대상별 접수 기간이 전체 접수 기간을 다 덮는지 — 일부 대상만 오면 전체 기간도 함께 담아 마감을 잃지 않는다 */
 const coversWhole = (byTarget: NormalizedSchedule[], whole: NormalizedSchedule): boolean => {
@@ -201,10 +290,8 @@ export const normalizeApplyhomeNotice = (bundle: ApplyhomeBundle): NormalizeResu
       warning: { stage: SyncStage.FETCH, code: 'MODELS_EMPTY', message: '주택형 응답이 비었다' },
     };
   }
-  // 조건이 무시된 응답이면 다른 공고의 주택형이 섞인다 — 남의 주택형을 이 공고에 저장하지 않게 멈춘다
-  const foreignModel = bundle.models.find(
-    (row) => field(row, 'HOUSE_MANAGE_NO') !== houseManageNo || field(row, 'PBLANC_NO') !== pblancNo,
-  );
+  // 남의 주택형·신청 인원을 이 공고에 저장하지 않게 멈춘다
+  const foreignModel = foreignRowOf(bundle.models, houseManageNo, pblancNo);
   if (foreignModel !== undefined) {
     return {
       kind: 'invalid',
@@ -215,12 +302,28 @@ export const normalizeApplyhomeNotice = (bundle: ApplyhomeBundle): NormalizeResu
       },
     };
   }
+  const foreignCompetition = foreignRowOf(
+    [...bundle.competitions, ...bundle.specialApplications],
+    houseManageNo,
+    pblancNo,
+  );
+  if (foreignCompetition !== undefined) {
+    return {
+      kind: 'invalid',
+      warning: {
+        stage: SyncStage.FETCH,
+        code: 'COMPETITIONS_MISMATCH',
+        message: `경쟁률 응답에 다른 공고(${foreignCompetition.HOUSE_MANAGE_NO ?? '?'}:${foreignCompetition.PBLANC_NO ?? '?'})가 섞였다`,
+      },
+    };
+  }
 
   const warnings: NormalizationWarning[] = [];
   const warn: Warn = (stage, code, message) => warnings.push({ stage, code, message });
   const address = field(detail, 'HSSPLY_ADRES');
   const rentalDeposit = classification.category === SupplyCategory.PUBLIC_RENTAL;
-  const units = bundle.models.map((row) => unitOf(kind, row, rentalDeposit, warn));
+  const applicationCounts = applicationCountsOf(bundle, warn);
+  const units = bundle.models.map((row, index) => unitOf(kind, row, rentalDeposit, applicationCounts[index], warn));
   const schedules = schedulesOf(kind, detail, warn);
   const moveInText = field(detail, 'MVN_PREARNGE_YM');
   const moveInMonth = parseYearMonth(moveInText);
@@ -252,6 +355,7 @@ export const normalizeApplyhomeNotice = (bundle: ApplyhomeBundle): NormalizeResu
           supplyUnits: units.reduce<number | null>((sum, unit) => addCounts(sum, unit.supplyHouseholds), null),
           recruitCount: null,
           supplyNote: null,
+          applicationCount: listingApplicationCountOf(applicationCounts),
           schedules,
           units,
           summary: summaryOf(schedules, warn),

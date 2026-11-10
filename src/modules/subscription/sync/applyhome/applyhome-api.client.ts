@@ -56,14 +56,17 @@ export class ApplyhomeApiClient {
   async bundleOf(kind: ApplyhomeKind, detail: ApplyhomeRow): Promise<ApplyhomeBundle> {
     const houseManageNo = detail.HOUSE_MANAGE_NO?.trim();
     const pblancNo = detail.PBLANC_NO?.trim();
-    if (!houseManageNo || !pblancNo) return { kind, detail, models: [], competitions: [] };
+    if (!houseManageNo || !pblancNo) return { kind, detail, models: [], competitions: [], specialApplications: [] };
     const notice = { 'cond[HOUSE_MANAGE_NO::EQ]': houseManageNo, 'cond[PBLANC_NO::EQ]': pblancNo };
     const operations = APPLYHOME_OPERATIONS[kind];
-    const [models, competitions] = await Promise.all([
+    const [models, competitions, specialApplications] = await Promise.all([
       this.requestAll(APPLYHOME_API_URL.DETAIL, operations.model, notice),
       this.requestAll(APPLYHOME_API_URL.COMPETITION, operations.competition, notice),
+      operations.specialApplication === null
+        ? Promise.resolve([])
+        : this.requestAll(APPLYHOME_API_URL.COMPETITION, operations.specialApplication, notice),
     ]);
-    return { kind, detail, models, competitions };
+    return { kind, detail, models, competitions, specialApplications };
   }
 
   private async requestAll(baseUrl: string, operation: string, conditions: Record<string, string>) {

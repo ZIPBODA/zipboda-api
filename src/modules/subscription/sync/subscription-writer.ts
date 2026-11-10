@@ -26,6 +26,20 @@ const strongerMatch = (a: ComplexMatch | null, b: ComplexMatch | null): ComplexM
   return COMPLEX_MATCH_STRENGTH[a] >= COMPLEX_MATCH_STRENGTH[b] ? a : b;
 };
 
+/** 두 칸이 모두 신청 인원을 알 때만 더한다 — 한쪽이라도 모르면 합계도 모른다(일부만 더하면 경쟁률이 낮게 나온다) */
+const mergeApplicationCounts = (
+  a: number | null | undefined,
+  b: number | null | undefined,
+): number | null | undefined => {
+  if (a === undefined && b === undefined) return undefined;
+  if (a === undefined || a === null || b === undefined || b === null) return null;
+  return a + b;
+};
+
+/** 신청 인원은 그 값을 정하는 원천(청약홈, ERD §5 규칙 12)이 준 때만 쓴다 — 다른 원천이 다시 써도 청약홈 값을 지우지 않게 */
+const applicationCountData = (applicationCount: number | null | undefined) =>
+  applicationCount === undefined ? {} : { applicationCount };
+
 /**
  * 같은 단지로 판별된 칸을 하나로 합친다 — UNIQUE(notice_id, complex_id)(ERD §5 규칙 8). 공고 전체 일정이 칸마다 들어 있어
  * 같은 일정은 한 번만 남기고, 확인된 연결(평면도 노출)을 남긴다
@@ -38,7 +52,11 @@ export const mergeByComplex = (resolved: ResolvedListing[], warn: Warn): Resolve
       merged.set(entry.complexId, entry);
       continue;
     }
-    warn(SyncStage.MATCH, 'LISTINGS_MERGED', `같은 단지로 판별된 칸을 합쳤다: ${entry.listing.complex?.name ?? '공고 단위 칸'}`);
+    warn(
+      SyncStage.MATCH,
+      'LISTINGS_MERGED',
+      `같은 단지로 판별된 칸을 합쳤다: ${entry.listing.complex?.name ?? '공고 단위 칸'}`,
+    );
     const a = existing.listing;
     const b = entry.listing;
     const schedules = [...new Map([...a.schedules, ...b.schedules].map((s) => [scheduleKeyOf(s), s])).values()];
@@ -51,6 +69,7 @@ export const mergeByComplex = (resolved: ResolvedListing[], warn: Warn): Resolve
         supplyNote: a.supplyNote ?? b.supplyNote,
         supplyUnits: addCounts(a.supplyUnits, b.supplyUnits),
         recruitCount: addCounts(a.recruitCount, b.recruitCount),
+        applicationCount: mergeApplicationCounts(a.applicationCount, b.applicationCount),
         units: [...a.units, ...b.units],
         schedules,
         summary: summaryOf(schedules, warn),
@@ -61,7 +80,11 @@ export const mergeByComplex = (resolved: ResolvedListing[], warn: Warn): Resolve
 };
 
 /** 원천이 바꾸지 않는 한 같은 주택형으로 본다 — 청약홈이 채운 신청 인원을 다시 수집해도 잃지 않게 행을 갈아 끼우지 않는다 */
-const unitKeyOf = (unit: { label: string | null; exclusiveArea: { toString(): string } | number | null; unitNumber: string | null }) =>
+const unitKeyOf = (unit: {
+  label: string | null;
+  exclusiveArea: { toString(): string } | number | null;
+  unitNumber: string | null;
+}) =>
   [
     unit.label ?? '',
     unit.exclusiveArea === null
@@ -72,7 +95,6 @@ const unitKeyOf = (unit: { label: string | null; exclusiveArea: { toString(): st
     unit.unitNumber ?? '',
   ].join('|');
 
-/** application_count는 쓰지 않는다 — 청약홈이 정하는 값이다(ERD §5 규칙 12) */
 const unitDataOf = (unit: NormalizedUnit, displayOrder: number) => ({
   label: unit.label,
   sizeType: unit.sizeType,
@@ -91,6 +113,7 @@ const unitDataOf = (unit: NormalizedUnit, displayOrder: number) => ({
   salePriceWon: unit.salePriceWon,
   priceNote: unit.priceNote,
   note: unit.note,
+  ...applicationCountData(unit.applicationCount),
   displayOrder,
 });
 
@@ -113,7 +136,11 @@ const writeUnits = async (tx: Prisma.TransactionClient, subscriptionId: string, 
   if (toCreate.length > 0) await tx.subscriptionUnit.createMany({ data: toCreate });
 };
 
-const writeSchedules = async (tx: Prisma.TransactionClient, subscriptionId: string, schedules: NormalizedSchedule[]) => {
+const writeSchedules = async (
+  tx: Prisma.TransactionClient,
+  subscriptionId: string,
+  schedules: NormalizedSchedule[],
+) => {
   await tx.subscriptionSchedule.deleteMany({ where: { subscriptionId } });
   if (schedules.length === 0) return;
   await tx.subscriptionSchedule.createMany({
@@ -131,7 +158,6 @@ const writeSchedules = async (tx: Prisma.TransactionClient, subscriptionId: stri
   });
 };
 
-/** application_count는 쓰지 않는다 — 청약홈이 정하는 값이다(ERD §5 규칙 12) */
 const subscriptionDataOf = ({ complexMatch, listing }: ResolvedListing) => ({
   complexMatch,
   regionCode: listing.regionCode,
@@ -144,6 +170,7 @@ const subscriptionDataOf = ({ complexMatch, listing }: ResolvedListing) => ({
   supplyUnits: listing.supplyUnits,
   recruitCount: listing.recruitCount,
   supplyNote: listing.supplyNote,
+  ...applicationCountData(listing.applicationCount),
 });
 
 /**
@@ -163,8 +190,12 @@ export const writeSubscriptions = async (
     const existingId = idByComplex.get(entry.complexId);
     const id =
       existingId === undefined
-        ? (await tx.subscription.create({ data: { noticeId, complexId: entry.complexId, ...data }, select: { id: true } }))
-            .id
+        ? (
+            await tx.subscription.create({
+              data: { noticeId, complexId: entry.complexId, ...data },
+              select: { id: true },
+            })
+          ).id
         : (await tx.subscription.update({ where: { id: existingId }, data, select: { id: true } })).id;
     keptIds.push(id);
     await writeSchedules(tx, id, entry.listing.schedules);
