@@ -25,9 +25,16 @@ export interface LhListQuery {
 
 type FetchFn = (url: string, init: { signal: AbortSignal }) => Promise<Response>;
 
+type LhApiName = keyof typeof LH_API_URL;
+
+/** 같은 공고의 상세는 되고 공급정보만 실패하기도 해(전국 매입임대의 SS_CODE N), 어느 API인지 기록에 남긴다 */
+const LH_API_LABEL: Readonly<Record<LhApiName, string>> = { LIST: '목록', DETAIL: '상세', SUPPLY: '공급정보' };
+
 /** data.go.kr은 인증 실패 등을 JSON이 아니라 XML(returnAuthMsg)로 돌려준다 */
 const gatewayErrorOf = (text: string): string =>
-  text.match(/<returnAuthMsg>([^<]+)<\/returnAuthMsg>/)?.[1] ?? text.match(/<errMsg>([^<]+)<\/errMsg>/)?.[1] ?? 'UNKNOWN';
+  text.match(/<returnAuthMsg>([^<]+)<\/returnAuthMsg>/)?.[1] ??
+  text.match(/<errMsg>([^<]+)<\/errMsg>/)?.[1] ??
+  'UNKNOWN';
 
 export class LhApiClient {
   constructor(
@@ -38,7 +45,7 @@ export class LhApiClient {
   /** 공고 목록 한 쪽. 쪽 크기(LH_PAGE_SIZE)보다 적게 오면 마지막 쪽이다 */
   async listNotices({ region, upperType, from, to, page }: LhListQuery): Promise<LhRow[]> {
     // 공공데이터포털 화면의 이름이 아니라 활용 가이드의 이름(PAN_ST_DT·PAN_ED_DT)만 날짜 조건으로 먹는다
-    const json = await this.request(LH_API_URL.LIST, {
+    const json = await this.request('LIST', {
       PG_SZ: String(LH_PAGE_SIZE),
       PAGE: String(page),
       CNP_CD: region,
@@ -58,36 +65,34 @@ export class LhApiClient {
       UPP_AIS_TP_CD: notice.UPP_AIS_TP_CD ?? '',
       AIS_TP_CD: notice.AIS_TP_CD ?? '',
     };
-    const [detail, supply] = await Promise.all([
-      this.request(LH_API_URL.DETAIL, params),
-      this.request(LH_API_URL.SUPPLY, params),
-    ]);
+    const [detail, supply] = await Promise.all([this.request('DETAIL', params), this.request('SUPPLY', params)]);
     return { queryRegion, notice, detail, supply };
   }
 
-  private async request(url: string, params: Record<string, string>): Promise<unknown> {
+  private async request(api: LhApiName, params: Record<string, string>): Promise<unknown> {
+    const label = `LH ${LH_API_LABEL[api]} API`;
     const query = new URLSearchParams({ serviceKey: this.serviceKey, ...params });
     let text: string;
     let response: Response;
     try {
-      response = await this.fetchFn(`${url}?${query}`, { signal: AbortSignal.timeout(LH_TIMEOUT_MS) });
+      response = await this.fetchFn(`${LH_API_URL[api]}?${query}`, { signal: AbortSignal.timeout(LH_TIMEOUT_MS) });
       text = await response.text();
     } catch (error) {
       // 네트워크 오류 메시지에 요청 주소가 실릴 수 있어 오류 이름만 남긴다
-      throw new LhApiError('NETWORK', `LH API에 닿지 못했다(${error instanceof Error ? error.name : 'unknown'})`);
+      throw new LhApiError('NETWORK', `${label}에 닿지 못했다(${error instanceof Error ? error.name : 'unknown'})`);
     }
-    if (!response.ok) throw new LhApiError(`HTTP_${response.status}`, `LH API가 ${response.status}로 응답했다`);
+    if (!response.ok) throw new LhApiError(`HTTP_${response.status}`, `${label}가 ${response.status}로 응답했다`);
     let json: unknown;
     try {
       json = JSON.parse(text);
     } catch {
       const code = gatewayErrorOf(text);
-      throw new LhApiError(code, `LH API가 JSON이 아닌 오류 응답을 줬다(${code})`);
+      throw new LhApiError(code, `${label}가 JSON이 아닌 오류 응답을 줬다(${code})`);
     }
     // 원천이 처리 실패를 HTTP 200과 응답 머리(SS_CODE)로 알리면, 빈 본문을 '단지 없음'으로 읽지 않게 오류로 올린다
     const status = datasetsOf(json).get('resHeader')?.[0]?.SS_CODE;
     if (status !== undefined && status !== LH_SUCCESS_CODE) {
-      throw new LhApiError(`LH_STATUS_${status}`, `LH API가 처리 실패(SS_CODE ${status})를 알렸다`);
+      throw new LhApiError(`LH_STATUS_${status}`, `${label}가 처리 실패(SS_CODE ${status})를 알렸다`);
     }
     return json;
   }
