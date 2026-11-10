@@ -17,6 +17,7 @@ export default {
     '!src/**/*.spec.ts',
     '!src/database/generated/**',
     '!src/database/seed.ts',
+    '!src/**/*.cli.ts',
     '!src/main.ts',
   ],
 };

@@ -24,6 +24,7 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
+    "sync:lh": "tsx src/modules/subscription/sync/lh/sync-lh.cli.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {

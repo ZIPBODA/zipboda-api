@@ -33,7 +33,13 @@ describe('LH API 클라이언트', () => {
 
   it('상세·공급정보는 목록 행의 재조회 코드로 묻는다', async () => {
     const fetchFn = fakeFetch('[]');
-    const notice = { PAN_ID: 'P', CCR_CNNT_SYS_DS_CD: '03', SPL_INF_TP_CD: '062', UPP_AIS_TP_CD: '06', AIS_TP_CD: '07' };
+    const notice = {
+      PAN_ID: 'P',
+      CCR_CNNT_SYS_DS_CD: '03',
+      SPL_INF_TP_CD: '062',
+      UPP_AIS_TP_CD: '06',
+      AIS_TP_CD: '07',
+    };
     const bundle = await new LhApiClient(SERVICE_KEY, fetchFn).bundleOf(notice, '11');
     expect(bundle).toEqual({ queryRegion: '11', notice, detail: [], supply: [] });
     for (const [url] of fetchFn.mock.calls) {
@@ -57,7 +63,19 @@ describe('LH API 클라이언트', () => {
       .listNotices({ region: '11', upperType: '06', from: '20250101', to: '20261106', page: 1 })
       .catch((caught: unknown) => caught);
     expectNoKey(error);
-    expect(error).toMatchObject({ code: 'LH_STATUS_N' });
+    expect(error).toMatchObject({ code: 'LH_STATUS_N', message: 'LH 목록 API가 처리 실패(SS_CODE N)를 알렸다' });
+  });
+
+  it('상세는 되고 공급정보만 처리 실패면 어느 API인지 알린다', async () => {
+    const failed = JSON.stringify([{ dsSch: [{}] }, { resHeader: [{ SS_CODE: 'N' }] }]);
+    const fetchFn = jest.fn((url: string) =>
+      Promise.resolve(new Response(url.includes('SplInfo') ? failed : '[]', { status: 200 })),
+    );
+    const error = await new LhApiClient(SERVICE_KEY, fetchFn)
+      .bundleOf({ PAN_ID: 'P', CCR_CNNT_SYS_DS_CD: '03' }, '11')
+      .catch((caught: unknown) => caught);
+    expectNoKey(error);
+    expect(error).toMatchObject({ code: 'LH_STATUS_N', message: 'LH 공급정보 API가 처리 실패(SS_CODE N)를 알렸다' });
   });
 
   it('HTTP 오류와 네트워크 오류도 주소 없이 알린다', async () => {
@@ -69,7 +87,9 @@ describe('LH API 클라이언트', () => {
     expect(httpError).toMatchObject({ code: 'HTTP_504' });
 
     const failing = jest.fn((url: string) => Promise.reject(new TypeError(`fetch failed: ${url}`)));
-    const networkError = await new LhApiClient(SERVICE_KEY, failing).listNotices(query).catch((caught: unknown) => caught);
+    const networkError = await new LhApiClient(SERVICE_KEY, failing)
+      .listNotices(query)
+      .catch((caught: unknown) => caught);
     expectNoKey(networkError);
     expect(networkError).toMatchObject({ code: 'NETWORK' });
   });

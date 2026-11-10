@@ -53,6 +53,17 @@ export const SyncStage = {
 } as const;
 export type SyncStage = (typeof SyncStage)[keyof typeof SyncStage];
 
+/** 동기화를 시작한 경로·실행 결과·실패 수준(ERD §4.9·4.10). 마이그레이션 CHECK와 같은 값이다 */
+export const SyncTrigger = { SCHEDULE: 'SCHEDULE', MANUAL: 'MANUAL', CLI: 'CLI' } as const;
+export type SyncTrigger = (typeof SyncTrigger)[keyof typeof SyncTrigger];
+export const SyncStatus = { RUNNING: 'RUNNING', SUCCEEDED: 'SUCCEEDED', PARTIAL: 'PARTIAL', FAILED: 'FAILED' } as const;
+export type SyncStatus = (typeof SyncStatus)[keyof typeof SyncStatus];
+export const SyncLevel = { ERROR: 'ERROR', WARNING: 'WARNING' } as const;
+export type SyncLevel = (typeof SyncLevel)[keyof typeof SyncLevel];
+
+/** 이보다 오래 RUNNING인 실행은 비정상 종료로 보고 다음 실행이 FAILED로 정리한다 — 첫 수집(약 2천 번 호출)도 이 안에 끝난다 */
+export const STALE_SYNC_RUN_MS = 3 * 60 * 60 * 1000;
+
 /** 공고 원천. 마이그레이션 CHECK와 같은 값이다 */
 export const NoticeSourceName = {
   LH: 'LH',
