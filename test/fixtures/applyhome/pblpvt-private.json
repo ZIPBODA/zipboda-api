@@ -1,0 +1,32 @@
+{
+  "kind": "PBL_PVT_RENT",
+  "detail": {
+    "BSNS_MBY_NM": "신한자산신탁 주식회사",
+    "CNTRCT_CNCLS_BGNDE": "20261123",
+    "CNTRCT_CNCLS_ENDDE": "20261125",
+    "HMPG_ADRES": "https://hillstate.co.kr/SALE/1030/main/index",
+    "HOUSE_DETAIL_SECD": "03",
+    "HOUSE_DETAIL_SECD_NM": "공공지원민간임대",
+    "HOUSE_MANAGE_NO": "2026850055",
+    "HOUSE_NM": "힐스테이트 회룡역파크뷰",
+    "HOUSE_SECD": "03",
+    "HOUSE_SECD_NM": "공공지원민간임대",
+    "HSSPLY_ADRES": "경기도 의정부시 신흥로 43",
+    "HSSPLY_ZIP": "11639",
+    "MDHS_TELNO": "0318271800",
+    "MVN_PREARNGE_YM": "202701",
+    "NSPRC_NM": "문화일보",
+    "PBLANC_NO": "2026850055",
+    "PBLANC_URL": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026850055&pblancNo=2026850055&houseSecd=03",
+    "PRZWNER_PRESNATN_DE": "20261113",
+    "RCRIT_PBLANC_DE": "20261105",
+    "SEARCH_HOUSE_SECD": "0303",
+    "SUBSCRPT_AREA_CODE": "410",
+    "SUBSCRPT_AREA_CODE_NM": "경기",
+    "SUBSCRPT_RCEPT_BGNDE": "20261110",
+    "SUBSCRPT_RCEPT_ENDDE": "20261110",
+    "TOT_SUPLY_HSHLDCO": 909
+  },
+  "models": [],
+  "competitions": []
+}

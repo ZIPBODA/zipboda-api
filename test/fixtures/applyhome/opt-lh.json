@@ -1,0 +1,98 @@
+{
+  "kind": "OPT",
+  "detail": {
+    "BSNS_MBY_NM": "한국토지주택공사 경기남부지역본부",
+    "CNTRCT_CNCLS_BGNDE": "20260919",
+    "CNTRCT_CNCLS_ENDDE": "20260919",
+    "GNRL_RCEPT_BGNDE": null,
+    "GNRL_RCEPT_ENDDE": null,
+    "HMPG_ADRES": "https://www.arteragd.co.kr",
+    "HOUSE_MANAGE_NO": "2026940191",
+    "HOUSE_NM": "고덕신도시 아테라 A-63블록 공공분양주택",
+    "HOUSE_SECD": "11",
+    "HOUSE_SECD_NM": "임의공급",
+    "HSSPLY_ADRES": "경기도 평택시 고덕동, 고덕면 일원(평택고덕국제화계획지구 내 A-63BL)",
+    "HSSPLY_ZIP": "17789",
+    "MDHS_TELNO": "18336301",
+    "MVN_PREARNGE_YM": "202810",
+    "PBLANC_NO": "2026940191",
+    "PBLANC_URL": "https://www.applyhome.co.kr/ai/aia/selectAPTRemndrLttotPblancDetailView.do?houseManageNo=2026940191&pblancNo=2026940191",
+    "PRZWNER_PRESNATN_DE": "20260917",
+    "RCRIT_PBLANC_DE": "20260907",
+    "SPSPLY_RCEPT_BGNDE": null,
+    "SPSPLY_RCEPT_ENDDE": null,
+    "SUBSCRPT_AREA_CODE": "410",
+    "SUBSCRPT_AREA_CODE_NM": "경기",
+    "SUBSCRPT_RCEPT_BGNDE": "20260909",
+    "SUBSCRPT_RCEPT_ENDDE": "20260914",
+    "TOT_SUPLY_HSHLDCO": 49
+  },
+  "models": [
+    {
+      "HOUSE_MANAGE_NO": "2026940191",
+      "HOUSE_TY": "074.5900A",
+      "LTTOT_TOP_AMOUNT": "47,552",
+      "MODEL_NO": "01",
+      "PBLANC_NO": "2026940191",
+      "SUPLY_HSHLDCO": 13
+    },
+    {
+      "HOUSE_MANAGE_NO": "2026940191",
+      "HOUSE_TY": "074.7200B",
+      "LTTOT_TOP_AMOUNT": "47,635",
+      "MODEL_NO": "02",
+      "PBLANC_NO": "2026940191",
+      "SUPLY_HSHLDCO": 6
+    },
+    {
+      "HOUSE_MANAGE_NO": "2026940191",
+      "HOUSE_TY": "084.5600A",
+      "LTTOT_TOP_AMOUNT": "53,908",
+      "MODEL_NO": "03",
+      "PBLANC_NO": "2026940191",
+      "SUPLY_HSHLDCO": 12
+    },
+    {
+      "HOUSE_MANAGE_NO": "2026940191",
+      "HOUSE_TY": "084.5600B",
+      "LTTOT_TOP_AMOUNT": "53,908",
+      "MODEL_NO": "04",
+      "PBLANC_NO": "2026940191",
+      "SUPLY_HSHLDCO": 18
+    }
+  ],
+  "competitions": [
+    {
+      "CMPET_RATE": "2.92",
+      "HOUSE_MANAGE_NO": "2026940191",
+      "HOUSE_TY": "074.5900A",
+      "PBLANC_NO": "2026940191",
+      "REQ_CNT": "38",
+      "SUPLY_HSHLDCO": 13
+    },
+    {
+      "CMPET_RATE": "1.50",
+      "HOUSE_MANAGE_NO": "2026940191",
+      "HOUSE_TY": "074.7200B",
+      "PBLANC_NO": "2026940191",
+      "REQ_CNT": "9",
+      "SUPLY_HSHLDCO": 6
+    },
+    {
+      "CMPET_RATE": "2.83",
+      "HOUSE_MANAGE_NO": "2026940191",
+      "HOUSE_TY": "084.5600A",
+      "PBLANC_NO": "2026940191",
+      "REQ_CNT": "34",
+      "SUPLY_HSHLDCO": 12
+    },
+    {
+      "CMPET_RATE": "1.11",
+      "HOUSE_MANAGE_NO": "2026940191",
+      "HOUSE_TY": "084.5600B",
+      "PBLANC_NO": "2026940191",
+      "REQ_CNT": "20",
+      "SUPLY_HSHLDCO": 18
+    }
+  ]
+}
