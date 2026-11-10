@@ -1,0 +1,100 @@
+{
+  "kind": "URBTY",
+  "detail": {
+    "BSNS_MBY_NM": "한국토지주택공사",
+    "CNTRCT_CNCLS_BGNDE": "2026-03-22",
+    "CNTRCT_CNCLS_ENDDE": "2026-03-24",
+    "HMPG_ADRES": "https://www.elife.co.kr",
+    "HOUSE_DTL_SECD": "02",
+    "HOUSE_DTL_SECD_NM": "오피스텔",
+    "HOUSE_MANAGE_NO": "2026950013",
+    "HOUSE_NM": "e편한세상 동탄역 어반원",
+    "HOUSE_SECD": "02",
+    "HOUSE_SECD_NM": "도시형/오피스텔/생활숙박시설/민간임대",
+    "HSSPLY_ADRES": "경기도 화성시 동탄구 오산동 1021번지 (화성동탄2 택지개발지구 내 C14블록)",
+    "HSSPLY_ZIP": "18478",
+    "MDHS_TELNO": "0313750240",
+    "MVN_PREARNGE_YM": "202807",
+    "NSPRC_NM": "문화일보",
+    "PBLANC_NO": "2026950013",
+    "PBLANC_URL": "https://www.applyhome.co.kr/ai/aia/selectPRMOLttotPblancDetailView.do?houseManageNo=2026950013&pblancNo=2026950013&houseSecd=02",
+    "PRZWNER_PRESNATN_DE": "2026-03-20",
+    "RCRIT_PBLANC_DE": "2026-03-12",
+    "SEARCH_HOUSE_SECD": "0202",
+    "SUBSCRPT_AREA_CODE": "410",
+    "SUBSCRPT_AREA_CODE_NM": "경기",
+    "SUBSCRPT_RCEPT_BGNDE": "2026-03-17",
+    "SUBSCRPT_RCEPT_ENDDE": "2026-03-17",
+    "TOT_SUPLY_HSHLDCO": 240
+  },
+  "models": [
+    {
+      "EXCLUSE_AR": "34.5700",
+      "GP": "-",
+      "HOUSE_MANAGE_NO": "2026950013",
+      "MODEL_NO": "01",
+      "PBLANC_NO": "2026950013",
+      "SUBSCRPT_REQST_AMOUNT": "300",
+      "SUPLY_AMOUNT": "24299",
+      "SUPLY_HSHLDCO": 72,
+      "TP": "34OA"
+    },
+    {
+      "EXCLUSE_AR": "59.9800",
+      "GP": "-",
+      "HOUSE_MANAGE_NO": "2026950013",
+      "MODEL_NO": "03",
+      "PBLANC_NO": "2026950013",
+      "SUBSCRPT_REQST_AMOUNT": "300",
+      "SUPLY_AMOUNT": "42995",
+      "SUPLY_HSHLDCO": 48,
+      "TP": "59OB"
+    },
+    {
+      "EXCLUSE_AR": "59.8800",
+      "GP": "-",
+      "HOUSE_MANAGE_NO": "2026950013",
+      "MODEL_NO": "02",
+      "PBLANC_NO": "2026950013",
+      "SUBSCRPT_REQST_AMOUNT": "300",
+      "SUPLY_AMOUNT": "42995",
+      "SUPLY_HSHLDCO": 120,
+      "TP": "59OA"
+    }
+  ],
+  "competitions": [
+    {
+      "CMPET_RATE": "4.03",
+      "HOUSE_MANAGE_NO": "2026950013",
+      "HOUSE_TY": "34OA",
+      "MODEL_NO": "01",
+      "PBLANC_NO": "2026950013",
+      "REQ_CNT": "290",
+      "RESIDNT_PRIOR_AT": "N",
+      "RESIDNT_PRIOR_SENM": "전체",
+      "SUPLY_HSHLDCO": 72
+    },
+    {
+      "CMPET_RATE": "20.90",
+      "HOUSE_MANAGE_NO": "2026950013",
+      "HOUSE_TY": "59OA",
+      "MODEL_NO": "02",
+      "PBLANC_NO": "2026950013",
+      "REQ_CNT": "2508",
+      "RESIDNT_PRIOR_AT": "N",
+      "RESIDNT_PRIOR_SENM": "전체",
+      "SUPLY_HSHLDCO": 120
+    },
+    {
+      "CMPET_RATE": "5.10",
+      "HOUSE_MANAGE_NO": "2026950013",
+      "HOUSE_TY": "59OB",
+      "MODEL_NO": "03",
+      "PBLANC_NO": "2026950013",
+      "REQ_CNT": "245",
+      "RESIDNT_PRIOR_AT": "N",
+      "RESIDNT_PRIOR_SENM": "전체",
+      "SUPLY_HSHLDCO": 48
+    }
+  ]
+}
