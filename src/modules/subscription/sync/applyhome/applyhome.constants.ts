@@ -12,6 +12,28 @@ export const APPLYHOME_PAGE_SIZE = 500;
 export const APPLYHOME_MAX_DETAIL_PAGES = 20;
 export const APPLYHOME_TIMEOUT_MS = 60_000;
 
+/** 목록 한 갈래가 이 쪽 수를 넘으면 원천 이상으로 보고 멈춘다(1만 건 — 갈래마다 1년에 수백 건이다) */
+export const APPLYHOME_MAX_LIST_PAGES = 20;
+
+/**
+ * 공고를 동시에 처리하는 수. 공고마다 주택형·경쟁률(APT는 특별공급 신청현황까지)을 차례로 불러 동시 요청은 이 수를 넘지 않는다.
+ * 공고 4건에 요청을 동시에 보냈을 때 경쟁률 API가 429(요청 과다)를 돌려줬다(2026-11-11 개발 DB 수집, 66건 중 13건)
+ */
+export const APPLYHOME_SYNC_CONCURRENCY = 2;
+
+/** 429(요청 과다)를 받으면 쉬었다가 다시 부르는 횟수와 처음 쉬는 시간(두 배씩 늘린다). 원천이 Retry-After를 주면 그만큼 쉰다 */
+export const APPLYHOME_MAX_RETRIES = 3;
+export const APPLYHOME_RETRY_BASE_MS = 1_000;
+export const APPLYHOME_TOO_MANY_REQUESTS = 429;
+/** Retry-After가 이보다 길면 이 실행에서 기다리지 않는다 — 다음 실행이 다시 받는다 */
+export const APPLYHOME_MAX_RETRY_WAIT_MS = 30_000;
+
+/**
+ * 진행 중인지 볼 날짜 열 — 접수·당첨자 발표·계약 날짜 중 가장 늦은 날이 오늘 이후면 경쟁률·신청 인원이 아직 바뀐다
+ * (일반공급 경쟁률은 접수가 끝나야 생긴다)
+ */
+export const APPLYHOME_PROGRESS_DATE_FIELD = /(?:RCEPT_ENDDE|RCEPT_BGNDE|RCPTDE|ENDDE|PRZWNER_PRESNATN_DE)$/;
+
 /** 청약홈은 공고를 다섯 갈래로 나눠 주고, 갈래마다 상세·주택형·경쟁률 오퍼레이션이 따로 있다 */
 export const ApplyhomeKind = {
   APT: 'APT',

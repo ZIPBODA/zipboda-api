@@ -25,6 +25,7 @@
     "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "sync:lh": "tsx src/modules/subscription/sync/lh/sync-lh.cli.ts",
+    "sync:applyhome": "tsx src/modules/subscription/sync/applyhome/sync-applyhome.cli.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {

@@ -160,4 +160,41 @@ describe('청약홈 API 클라이언트', () => {
       'cond[HOUSE_MANAGE_NO::EQ]': '2026000437',
     });
   });
+
+  describe('429(요청 과다)', () => {
+    const query = { kind: 'APT', from: '20251101', to: '20261110', page: 1 } as const;
+    const tooMany = (headers: Record<string, string> = {}) =>
+      new Response('{"message":"Too Many Requests"}', { status: 429, headers });
+
+    it('쉬었다가 다시 불러 성공하면 결과를 준다 — 처음 1초, 두 배씩', async () => {
+      const responses = [tooMany(), tooMany(), new Response(page([{ HOUSE_MANAGE_NO: '1' }]))];
+      const fetchFn = jest.fn<FetchMock>(() => Promise.resolve(responses.shift() ?? tooMany()));
+      const sleepFn = jest.fn<(ms: number) => Promise<void>>(() => Promise.resolve());
+      const rows = await new ApplyhomeApiClient(SERVICE_KEY, fetchFn, sleepFn).listNotices(query);
+      expect(rows).toEqual([{ HOUSE_MANAGE_NO: '1' }]);
+      expect(sleepFn.mock.calls.map(([ms]) => ms)).toEqual([1000, 2000]);
+    });
+
+    it('원천이 Retry-After를 주면 그만큼 쉬고, 횟수를 넘기면 HTTP_429로 실패한다', async () => {
+      const fetchFn = jest.fn<FetchMock>(() => Promise.resolve(tooMany({ 'Retry-After': '2' })));
+      const sleepFn = jest.fn<(ms: number) => Promise<void>>(() => Promise.resolve());
+      const error = await new ApplyhomeApiClient(SERVICE_KEY, fetchFn, sleepFn)
+        .listNotices(query)
+        .catch((caught: unknown) => caught);
+      expectNoKey(error);
+      expect(error).toMatchObject({ code: 'HTTP_429' });
+      expect(sleepFn.mock.calls.map(([ms]) => ms)).toEqual([2000, 2000, 2000]);
+      expect(fetchFn).toHaveBeenCalledTimes(4);
+    });
+
+    it('오래 기다리라고 하면 이 실행에서 기다리지 않고 실패로 남겨 다음 실행에 맡긴다', async () => {
+      const fetchFn = jest.fn<FetchMock>(() => Promise.resolve(tooMany({ 'Retry-After': '600' })));
+      const sleepFn = jest.fn<(ms: number) => Promise<void>>(() => Promise.resolve());
+      const error = await new ApplyhomeApiClient(SERVICE_KEY, fetchFn, sleepFn)
+        .listNotices(query)
+        .catch((caught: unknown) => caught);
+      expect(error).toMatchObject({ code: 'HTTP_429' });
+      expect(sleepFn).not.toHaveBeenCalled();
+    });
+  });
 });
