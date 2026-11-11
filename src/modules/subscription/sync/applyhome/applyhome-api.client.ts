@@ -1,9 +1,13 @@
 import {
   APPLYHOME_API_URL,
   APPLYHOME_MAX_DETAIL_PAGES,
+  APPLYHOME_MAX_RETRIES,
+  APPLYHOME_MAX_RETRY_WAIT_MS,
   APPLYHOME_OPERATIONS,
   APPLYHOME_PAGE_SIZE,
+  APPLYHOME_RETRY_BASE_MS,
   APPLYHOME_TIMEOUT_MS,
+  APPLYHOME_TOO_MANY_REQUESTS,
   type ApplyhomeKind,
 } from './applyhome.constants.js';
 import { applyhomeErrorCodeOf, applyhomeRowsOf, type ApplyhomeBundle, type ApplyhomeRow } from './applyhome-raw.js';
@@ -28,6 +32,19 @@ export interface ApplyhomeListQuery {
 }
 
 type FetchFn = (url: string, init: { signal: AbortSignal }) => Promise<Response>;
+type SleepFn = (ms: number) => Promise<void>;
+
+const MS_PER_SECOND = 1_000;
+
+const sleep: SleepFn = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** 429를 받은 뒤 쉴 시간 — 원천이 Retry-After(초)를 주면 그만큼, 아니면 처음 1초에서 두 배씩 */
+const retryWaitOf = (response: Response, attempt: number): number => {
+  const retryAfter = Number(response.headers.get('Retry-After'));
+  return Number.isFinite(retryAfter) && retryAfter > 0
+    ? retryAfter * MS_PER_SECOND
+    : APPLYHOME_RETRY_BASE_MS * 2 ** attempt;
+};
 
 /** 갈래마다 모집공고일을 'YYYY-MM-DD'나 'YYYYMMDD'로 적고, 조건도 같은 형식의 글자로 비교한다 */
 const postDateConditionOf = (kind: ApplyhomeKind, compactDate: string): string =>
@@ -39,6 +56,7 @@ export class ApplyhomeApiClient {
   constructor(
     private readonly serviceKey: string,
     private readonly fetchFn: FetchFn = (url, init) => fetch(url, init),
+    private readonly sleepFn: SleepFn = sleep,
   ) {}
 
   /** 공고 목록 한 쪽(상세 조회가 곧 목록이다). 쪽 크기(APPLYHOME_PAGE_SIZE)보다 적게 오면 마지막 쪽이다 */
@@ -59,13 +77,13 @@ export class ApplyhomeApiClient {
     if (!houseManageNo || !pblancNo) return { kind, detail, models: [], competitions: [], specialApplications: [] };
     const notice = { 'cond[HOUSE_MANAGE_NO::EQ]': houseManageNo, 'cond[PBLANC_NO::EQ]': pblancNo };
     const operations = APPLYHOME_OPERATIONS[kind];
-    const [models, competitions, specialApplications] = await Promise.all([
-      this.requestAll(APPLYHOME_API_URL.DETAIL, operations.model, notice),
-      this.requestAll(APPLYHOME_API_URL.COMPETITION, operations.competition, notice),
+    // 차례로 부른다 — 한 공고의 요청이 겹치면 경쟁률 API가 429를 주고, 하나가 실패해도 나머지가 재시도하며 다음 공고와 겹친다
+    const models = await this.requestAll(APPLYHOME_API_URL.DETAIL, operations.model, notice);
+    const competitions = await this.requestAll(APPLYHOME_API_URL.COMPETITION, operations.competition, notice);
+    const specialApplications =
       operations.specialApplication === null
-        ? Promise.resolve([])
-        : this.requestAll(APPLYHOME_API_URL.COMPETITION, operations.specialApplication, notice),
-    ]);
+        ? []
+        : await this.requestAll(APPLYHOME_API_URL.COMPETITION, operations.specialApplication, notice);
     return { kind, detail, models, competitions, specialApplications };
   }
 
@@ -96,17 +114,24 @@ export class ApplyhomeApiClient {
     });
     let response: Response;
     let text: string;
-    try {
-      response = await this.fetchFn(`${baseUrl}${operation}?${query}`, {
-        signal: AbortSignal.timeout(APPLYHOME_TIMEOUT_MS),
-      });
-      text = await response.text();
-    } catch (error) {
-      // 네트워크 오류 메시지에 요청 주소가 실릴 수 있어 오류 이름만 남긴다
-      throw new ApplyhomeApiError(
-        'NETWORK',
-        `청약홈 ${operation}에 닿지 못했다(${error instanceof Error ? error.name : 'unknown'})`,
-      );
+    for (let attempt = 0; ; attempt += 1) {
+      try {
+        response = await this.fetchFn(`${baseUrl}${operation}?${query}`, {
+          signal: AbortSignal.timeout(APPLYHOME_TIMEOUT_MS),
+        });
+        text = await response.text();
+      } catch (error) {
+        // 네트워크 오류 메시지에 요청 주소가 실릴 수 있어 오류 이름만 남긴다
+        throw new ApplyhomeApiError(
+          'NETWORK',
+          `청약홈 ${operation}에 닿지 못했다(${error instanceof Error ? error.name : 'unknown'})`,
+        );
+      }
+      // 경쟁률 API는 요청이 겹치면 429를 준다 — 쉬었다가 다시 부르고, 횟수를 넘기거나 오래 기다리라면 실패로 남겨 다음 실행에 맡긴다
+      const wait = retryWaitOf(response, attempt);
+      const retryable = response.status === APPLYHOME_TOO_MANY_REQUESTS && attempt < APPLYHOME_MAX_RETRIES;
+      if (!retryable || wait > APPLYHOME_MAX_RETRY_WAIT_MS) break;
+      await this.sleepFn(wait);
     }
     if (!response.ok) {
       throw new ApplyhomeApiError(`HTTP_${response.status}`, `청약홈 ${operation}이 ${response.status}로 응답했다`);

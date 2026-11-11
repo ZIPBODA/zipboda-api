@@ -121,11 +121,23 @@ export class SyncRunRecorder {
     }
   }
 
-  /** 여러 원천 키의 한 단계 문제를 한 번에 닫는다(지오코딩처럼 단지마다 하나씩 남는 경고) */
-  async resolveStage(source: NoticeSourceName, sourceKeys: string[], stage: SyncStage): Promise<void> {
+  /** 여러 원천 키의 열린 문제를 한 번에 닫는다 — 목록에서 수집 범위 밖으로 걸러진 공고(청약홈 민간 분양 등)는 수가 많아 하나씩 보지 않는다 */
+  async resolveAll(source: NoticeSourceName, sourceKeys: string[]): Promise<void> {
     if (sourceKeys.length === 0) return;
     await this.prisma.syncFailure.updateMany({
-      where: { source, sourceKey: { in: sourceKeys }, stage, resolvedAt: null },
+      where: { source, sourceKey: { in: sourceKeys }, resolvedAt: null },
+      data: { resolvedAt: this.now() },
+    });
+  }
+
+  /**
+   * 여러 원천 키의 한 단계 문제를 한 번에 닫는다(지오코딩처럼 단지마다 하나씩 남는 경고). 단지 좌표는 원천과 상관없는 값이라
+   * 어느 원천의 실행이 남긴 경고든 닫는다 — LH 실행이 남긴 경고를 청약홈 실행이 좌표를 얻어 닫을 수 있게
+   */
+  async resolveStage(sourceKeys: string[], stage: SyncStage): Promise<void> {
+    if (sourceKeys.length === 0) return;
+    await this.prisma.syncFailure.updateMany({
+      where: { sourceKey: { in: sourceKeys }, stage, resolvedAt: null },
       data: { resolvedAt: this.now() },
     });
   }

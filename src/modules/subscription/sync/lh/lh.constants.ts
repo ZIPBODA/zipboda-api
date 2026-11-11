@@ -17,23 +17,10 @@ export const LH_MAX_LIST_PAGES = 100;
 /** 공고를 동시에 처리하는 수 — 상세·공급정보를 함께 불러 초당 30건 한도 안에 든다 */
 export const LH_SYNC_CONCURRENCY = 4;
 
-/**
- * 실행이 이 시간을 넘기면 남은 공고·단지는 다음 실행에 넘긴다. 오래 남은 RUNNING을 정리하는 기준(STALE_SYNC_RUN_MS, 3시간)보다
- * 짧아야 살아 있는 실행이 다음 실행에 정리되지 않는다(요청 하나가 60초까지 걸려 API가 느리면 몇 시간이 될 수 있다)
- */
-export const LH_RUN_TIME_BUDGET_MS = 2 * 60 * 60 * 1000;
-
-/**
- * 상세·공급정보는 API마다 하루 1만 건이라 바뀌지 않은 공고는 다시 부르지 않는다. 목록 행이 같아도 접수가 끝나지 않은
- * 공고는 일정·세대가 바뀔 수 있어 이 시간이 지나면 다시 부른다
- */
-export const LH_REFRESH_ACTIVE_MS = 20 * 60 * 60 * 1000;
+/** 접수가 끝난 공고의 상태 — 목록 행이 같으면 다시 부르지 않는다(그 밖은 SYNC_REFRESH_ACTIVE_MS마다 다시) */
 export const LH_CLOSED_STATUS = '접수마감';
 /** 목록 행이 바뀌었는지 볼 열 — 순번(RNUM)·전체 건수(ALL_CNT)는 조회마다 달라 빼고 본다 */
 export const LH_LIST_COMPARED_FIELDS = ['PAN_NM', 'PAN_SS', 'PAN_DT', 'PAN_NT_ST_DT', 'CLSG_DT', 'DTL_URL', 'SPL_INF_TP_CD', 'AIS_TP_CD'] as const;
-
-/** 한 실행에서 좌표를 얻는 단지 수 상한 — 첫 수집 뒤 쌓인 단지는 다음 실행이 이어서 한다 */
-export const GEOCODE_BATCH_SIZE = 2_000;
 
 /** 목록을 조회하는 지역(CNP_CD). 단지 정보가 없는 공고 단위 칸은 조회한 지역으로 보인다 */
 export const LH_QUERY_REGIONS: Readonly<Record<string, StoredRegionCode>> = {

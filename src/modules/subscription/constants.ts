@@ -64,6 +64,21 @@ export type SyncLevel = (typeof SyncLevel)[keyof typeof SyncLevel];
 /** 이보다 오래 RUNNING인 실행은 비정상 종료로 보고 다음 실행이 FAILED로 정리한다 — 첫 수집(약 2천 번 호출)도 이 안에 끝난다 */
 export const STALE_SYNC_RUN_MS = 3 * 60 * 60 * 1000;
 
+/**
+ * 실행이 이 시간을 넘기면 남은 공고·단지는 다음 실행에 넘긴다. 오래 남은 RUNNING을 정리하는 기준(STALE_SYNC_RUN_MS, 3시간)보다
+ * 짧아야 살아 있는 실행이 다음 실행에 정리되지 않는다(요청 하나가 60초까지 걸려 API가 느리면 몇 시간이 될 수 있다)
+ */
+export const SYNC_RUN_TIME_BUDGET_MS = 2 * 60 * 60 * 1000;
+
+/**
+ * 원천 API는 하루 호출 한도가 있어 바뀌지 않은 공고는 다시 부르지 않는다. 목록 행이 같아도 접수·계약이 끝나지 않은 공고는
+ * 일정·세대·신청 인원이 바뀔 수 있어 이 시간이 지나면 다시 부른다(하루 한 번 도는 수집이 매번 다시 받게)
+ */
+export const SYNC_REFRESH_ACTIVE_MS = 20 * 60 * 60 * 1000;
+
+/** 한 실행에서 좌표를 얻는 단지 수 상한 — 첫 수집 뒤 쌓인 단지는 다음 실행이 이어서 한다 */
+export const GEOCODE_BATCH_SIZE = 2_000;
+
 /** 신혼희망타운 공고 — 같은 날·같은 블록의 공공분양과 따로 올라와 원천 간 같은 공고를 가를 때 본다(ERD §5 규칙 19) */
 export const NEWLYWED_TITLE = /신혼희망/;
 
