@@ -12,6 +12,8 @@ export interface ApplyhomeBundle {
   models: ApplyhomeRow[];
   /** 주택형·순위·거주지역별 경쟁률(사업주체가 청약홈으로 접수받은 공고만 있다) */
   competitions: ApplyhomeRow[];
+  /** 주택형별 특별공급 신청현황(APT만) */
+  specialApplications: ApplyhomeRow[];
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -52,5 +54,6 @@ export const applyhomeBundleOf = (json: unknown): ApplyhomeBundle => {
     detail: toApplyhomeRow(json.detail),
     models: rowsOf(json.models),
     competitions: rowsOf(json.competitions),
+    specialApplications: rowsOf(json.specialApplications),
   };
 };

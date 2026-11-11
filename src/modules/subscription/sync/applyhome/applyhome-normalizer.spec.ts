@@ -327,6 +327,72 @@ describe('청약홈 공고 정규화', () => {
     });
   });
 
+  describe('신청 인원(ERD §5 규칙 18)', () => {
+    it('주택형마다 일반공급(모든 순위·거주지역) + 특별공급 신청을 더하고, 칸은 주택형 합이다', () => {
+      const [listing] = noticeOf(normalize('apt-ih-consortium')).listings;
+      // 060.9495A: 일반 1순위 해당 179 + 기타 84 + 2순위 해당 30 + 기타 10 = 303, 특별공급 지역 × 유형 + 기관추천 확정 = 163
+      expect(listing.units[0]).toMatchObject({ label: '60.9495A', applicationCount: 466, supplyHouseholds: 25 });
+      expect(listing.applicationCount).toBe(3537);
+    });
+
+    it('특별공급 세대가 없는 무순위·임의공급·오피스텔은 경쟁률의 신청 인원만 더한다', () => {
+      expect(noticeOf(normalize('opt-lh')).listings[0].units[0]).toMatchObject({ applicationCount: 38 });
+      expect(noticeOf(normalize('urbty-lh-officetel')).listings[0]).toMatchObject({ applicationCount: 3043 });
+    });
+
+    it('경쟁률이 없는 공고(기관이 직접 접수하는 LH 공공분양·접수 전)는 신청 인원을 정하지 않는다 — 알던 값을 지우지 않게', () => {
+      const [listing] = noticeOf(normalize('apt-lh-public-sale')).listings;
+      expect(listing.applicationCount).toBeUndefined();
+      expect(listing.units.map((unit) => unit.applicationCount)).toEqual([undefined, undefined, undefined]);
+    });
+
+    it('특별공급 세대가 있는데 신청현황이 없으면 일반공급만으로 세지 않고 정하지 않는다', () => {
+      const notice = noticeOf(normalizeApplyhomeNotice({ ...bundleOf('apt-ih-consortium'), specialApplications: [] }));
+      expect(notice.listings[0].applicationCount).toBeUndefined();
+      expect(notice.listings[0].units.every((unit) => unit.applicationCount === undefined)).toBe(true);
+      expect(notice.warnings).toEqual([
+        {
+          stage: SyncStage.MATCH,
+          code: 'SPECIAL_APPLICATIONS_MISSING',
+          message: expect.stringContaining('특별공급 신청현황이 없어') as string,
+        },
+      ]);
+    });
+
+    it('특별공급만 있는 주택형(일반공급 0세대)은 일반공급 경쟁률 행이 없어도 특별공급 신청만 센다', () => {
+      const bundle = bundleOf('apt-ih-consortium');
+      const [first, ...rest] = bundle.models;
+      const notice = noticeOf(
+        normalizeApplyhomeNotice({
+          ...bundle,
+          models: [{ ...first, SUPLY_HSHLDCO: '0' }, ...rest],
+          competitions: bundle.competitions.filter((row) => row.HOUSE_TY !== first.HOUSE_TY),
+        }),
+      );
+      // 060.9495A의 특별공급 신청 163명(일반공급 행을 지웠다)
+      expect(notice.listings[0].units[0]).toMatchObject({ label: '60.9495A', applicationCount: 163 });
+      expect(notice.listings[0].applicationCount).toBe(3537 - 303);
+    });
+
+    it('주택형 목록에 없는 경쟁률 주택형은 경고하고, 다른 공고의 경쟁률이 섞이면 저장하지 않는다', () => {
+      const bundle = bundleOf('opt-lh');
+      const stray = { ...bundle.competitions[0], HOUSE_TY: '099.9999Z' };
+      const notice = noticeOf(normalizeApplyhomeNotice({ ...bundle, competitions: [...bundle.competitions, stray] }));
+      expect(notice.warnings).toEqual([
+        {
+          stage: SyncStage.MATCH,
+          code: 'COMPETITION_TYPE_UNMATCHED',
+          message: '경쟁률의 주택형(099.9999Z)이 주택형 목록에 없다',
+        },
+      ]);
+      const foreign = { ...bundle.competitions[0], HOUSE_MANAGE_NO: '2026000001' };
+      expect(normalizeApplyhomeNotice({ ...bundle, competitions: [...bundle.competitions, foreign] })).toMatchObject({
+        kind: 'invalid',
+        warning: { code: 'COMPETITIONS_MISMATCH' },
+      });
+    });
+  });
+
   describe('믿을 수 없는 응답(ERD §5 규칙 13)', () => {
     it('주택형이 비면 기존 주택형을 지우지 않게 저장하지 않는다', () => {
       expect(normalizeApplyhomeNotice({ ...bundleOf('remndr-gh-national'), models: [] })).toEqual({

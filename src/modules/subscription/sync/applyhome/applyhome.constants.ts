@@ -30,6 +30,8 @@ interface ApplyhomeOperations {
   detail: string;
   model: string;
   competition: string;
+  /** 특별공급 신청현황 — APT만 있다. 신청 인원에 특별공급 신청을 더해 공급 세대(일반 + 특별공급)와 맞춘다 */
+  specialApplication: string | null;
   /** 모집공고일 조건의 형식 — 임의공급·공공지원 민간임대만 YYYYMMDD로 적고 나머지는 YYYY-MM-DD다 */
   compactPostDate: boolean;
 }
@@ -39,30 +41,35 @@ export const APPLYHOME_OPERATIONS: Readonly<Record<ApplyhomeKind, ApplyhomeOpera
     detail: 'getAPTLttotPblancDetail',
     model: 'getAPTLttotPblancMdl',
     competition: 'getAPTLttotPblancCmpet',
+    specialApplication: 'getAPTSpsplyReqstStus',
     compactPostDate: false,
   },
   REMNDR: {
     detail: 'getRemndrLttotPblancDetail',
     model: 'getRemndrLttotPblancMdl',
     competition: 'getRemndrLttotPblancCmpet',
+    specialApplication: null,
     compactPostDate: false,
   },
   OPT: {
     detail: 'getOPTLttotPblancDetail',
     model: 'getOPTLttotPblancMdl',
     competition: 'getOPTLttotPblancCmpet',
+    specialApplication: null,
     compactPostDate: true,
   },
   URBTY: {
     detail: 'getUrbtyOfctlLttotPblancDetail',
     model: 'getUrbtyOfctlLttotPblancMdl',
     competition: 'getUrbtyOfctlLttotPblancCmpet',
+    specialApplication: null,
     compactPostDate: false,
   },
   PBL_PVT_RENT: {
     detail: 'getPblPvtRentLttotPblancDetail',
     model: 'getPblPvtRentLttotPblancMdl',
     competition: 'getPblPvtRentLttotPblancCmpet',
+    specialApplication: null,
     compactPostDate: true,
   },
 };
@@ -140,3 +147,10 @@ export const APPLYHOME_WHOLE_APPLY_FIELDS: Readonly<Record<ApplyhomeKind, readon
   URBTY: ['SUBSCRPT_RCEPT_BGNDE', 'SUBSCRPT_RCEPT_ENDDE'],
   PBL_PVT_RENT: ['SUBSCRPT_RCEPT_BGNDE', 'SUBSCRPT_RCEPT_ENDDE'],
 };
+
+/**
+ * 특별공급 신청현황의 신청 수 열 — 지역(해당지역·시도·기타지역) × 유형(생애최초·다자녀·신생아·신혼부부·노부모부양·청년)과
+ * 기관추천 확정·이전기관. 기관추천 예비(INSTT_RECOMEND_PREPAR_CNT)는 신청이 아니라 뺀다
+ */
+export const APPLYHOME_SPECIAL_APPLICATION_FIELD =
+  /^(?:CRSPAREA|CTPRVN|ETC_AREA)_[A-Z_]+_CNT$|^INSTT_RECOMEND_DCSN_CNT$|^TRANSR_INSTT_ENFSN_CNT$/;
