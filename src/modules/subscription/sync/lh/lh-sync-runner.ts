@@ -22,6 +22,7 @@ import {
 } from '../sync-run-steps.js';
 import { LhApiError, type LhListQuery } from './lh-api.client.js';
 import { classifyLhNotice } from './lh-classify.js';
+import { lhImageStep, type LhImagePageSource } from './lh-complex-images.js';
 import { normalizeLhNotice } from './lh-normalizer.js';
 import {
   LH_CLOSED_STATUS,
@@ -42,7 +43,7 @@ const KNOWN_LINK_SYSTEMS: readonly string[] = Object.values(LH_LINK_SYSTEM);
 const NO_LISTING_IN_REGION = 'NO_LISTING_IN_REGION';
 
 /** 수집기가 쓰는 LH API — 테스트는 저장해 둔 실제 응답으로 바꿔 끼운다 */
-export interface LhSource {
+export interface LhSource extends LhImagePageSource {
   listNotices(query: LhListQuery): Promise<LhRow[]>;
   bundleOf(notice: LhRow, queryRegion: string): Promise<LhNoticeBundle>;
 }
@@ -112,6 +113,8 @@ export class LhSyncRunner {
         { concurrency: LH_SYNC_CONCURRENCY, overBudget, log },
         (candidate) => this.process(candidate, summary),
       );
+      // 새로 만든 단지의 사진도 이번 실행에서 바꾸도록 공고를 모두 저장한 뒤에 돈다
+      await lhImageStep(this.deps, this.deps.lh, summary, overBudget);
       await geocodeStep(this.deps, SOURCE, summary, overBudget);
       summary.status = statusOf(summary, listFailures);
       await finishRun(

@@ -130,6 +130,14 @@ export class SyncRunRecorder {
     });
   }
 
+  /** 한 키의 한 단계에서 지금 남길 코드 밖의 문제를 닫는다 — 같은 키의 다른 단계(단지 좌표 등) 경고는 건드리지 않는다 */
+  async resolveStageExcept(sourceKey: string, stage: SyncStage, stillOpenCode: string): Promise<void> {
+    await this.prisma.syncFailure.updateMany({
+      where: { sourceKey, stage, errorCode: { not: stillOpenCode }, resolvedAt: null },
+      data: { resolvedAt: this.now() },
+    });
+  }
+
   /**
    * 여러 원천 키의 한 단계 문제를 한 번에 닫는다(지오코딩처럼 단지마다 하나씩 남는 경고). 단지 좌표는 원천과 상관없는 값이라
    * 어느 원천의 실행이 남긴 경고든 닫는다 — LH 실행이 남긴 경고를 청약홈 실행이 좌표를 얻어 닫을 수 있게

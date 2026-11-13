@@ -8,6 +8,7 @@ import {
   addressOf,
   agencyCodeOf,
   displayTitleOf,
+  imageUrlOf,
   isFloorplanVisible,
   isoDateOrNull,
   regionCodeOf,
@@ -71,7 +72,7 @@ export const toSubscriptionDetailResponse = (
     applicationCount: record.applicationCount,
     moveIn: record.moveInMonth,
     competition: competitionOf(record.applicationCount, record.supplyUnits),
-    imageUrl: complex?.imageUrl ?? null,
+    imageUrl: imageUrlOf(complex),
     units: [...record.units].sort(byAreaThenTypeThenUnit).map((unit) => ({
       size: unit.sizeType,
       type: unit.unitType,

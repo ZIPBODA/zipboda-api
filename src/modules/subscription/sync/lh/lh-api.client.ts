@@ -1,4 +1,4 @@
-import { LH_API_URL, LH_PAGE_SIZE, LH_SUCCESS_CODE, LH_TIMEOUT_MS } from './lh.constants.js';
+import { LH_API_URL, LH_IMAGE_TIMEOUT_MS, LH_PAGE_SIZE, LH_SUCCESS_CODE, LH_TIMEOUT_MS } from './lh.constants.js';
 import { datasetsOf, type LhNoticeBundle, type LhRow } from './lh-raw.js';
 
 /** 요청 주소에 인증키가 들어 있어, 오류에는 주소·원문 대신 원천이 준 오류 코드만 싣는다 */
@@ -67,6 +67,26 @@ export class LhApiClient {
     };
     const [detail, supply] = await Promise.all([this.request('DETAIL', params), this.request('SUPPLY', params)]);
     return { queryRegion, notice, detail, supply };
+  }
+
+  /** 단지 사진 보기 페이지(HTML). 공공데이터포털 API가 아니라 청약센터 페이지라 서비스 키를 붙이지 않는다 */
+  async imagePageOf(url: string): Promise<string> {
+    let response: Response;
+    let text: string;
+    try {
+      response = await this.fetchFn(url, { signal: AbortSignal.timeout(LH_IMAGE_TIMEOUT_MS) });
+      text = await response.text();
+    } catch (error) {
+      throw new LhApiError(
+        'NETWORK',
+        `LH 단지 사진 보기 페이지에 닿지 못했다(${error instanceof Error ? error.name : 'unknown'})`,
+      );
+    }
+    if (!response.ok)
+      throw new LhApiError(`HTTP_${response.status}`, `LH 단지 사진 보기 페이지가 ${response.status}로 응답했다`);
+    // 점검·차단·로그인 화면으로 넘어간 응답은 보기 페이지가 아니다
+    if (response.redirected) throw new LhApiError('REDIRECTED', 'LH 단지 사진 보기 페이지가 다른 페이지로 넘겼다');
+    return text;
   }
 
   private async request(api: LhApiName, params: Record<string, string>): Promise<unknown> {

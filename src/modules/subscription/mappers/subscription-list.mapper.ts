@@ -11,6 +11,7 @@ import {
   addressOf,
   agencyCodeOf,
   displayTitleOf,
+  imageUrlOf,
   isFloorplanVisible,
   regionCodeOf,
   scheduleOf,
@@ -53,7 +54,7 @@ export const toListItemResponse = (record: SubscriptionListRecord, today: string
     deadline: schedule.applyEndDate,
     dday: ddayOf(schedule, today),
     statusCode: statusCodeOf(schedule, today),
-    imageUrl: complex?.imageUrl ?? null,
+    imageUrl: imageUrlOf(complex),
   };
 };
 

@@ -59,6 +59,8 @@ export interface SyncSummary {
   warnings: number;
   geocoded: number;
   notFound: number;
+  /** 보기 페이지 주소에서 실제 사진 주소로 바꾼 단지(LH만) */
+  imagesResolved: number;
   /** 좌표 찾기를 남은 단지를 두고 멈춘 까닭(호출 한도 초과 등). 끝까지 했으면 null */
   geocodeStopped: string | null;
 }
@@ -79,6 +81,7 @@ export const emptySummaryOf = (runId: string): SyncSummary => ({
   warnings: 0,
   geocoded: 0,
   notFound: 0,
+  imagesResolved: 0,
   geocodeStopped: null,
 });
 
@@ -216,7 +219,10 @@ export const normalizeAndSave = async (
 };
 
 /** 지오코딩 경고는 공고가 아니라 단지에 남는다 */
-const complexKeyOf = (complexId: string): string => `complex:${complexId}`;
+/** 공고가 아닌 단지 문제(좌표·사진)의 sync_failures 키 접두어 */
+export const COMPLEX_KEY_PREFIX = 'complex:';
+
+export const complexKeyOf = (complexId: string): string => `${COMPLEX_KEY_PREFIX}${complexId}`;
 
 /** 주소가 있고 아직 좌표가 없는 단지의 좌표를 채운다(ERD §5 규칙 17). 경고는 이 실행의 원천으로 남긴다 */
 export const geocodeStep = async (
