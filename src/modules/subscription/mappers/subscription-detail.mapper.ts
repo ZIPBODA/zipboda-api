@@ -13,6 +13,7 @@ import {
   regionCodeOf,
   scheduleOf,
 } from './subscription-fields.js';
+import { toFloorplanResponse } from './floorplan.mapper.js';
 import { unitPriceOf } from './unit-price.js';
 
 type UnitRecord = SubscriptionDetailRecord['units'][number];
@@ -78,19 +79,11 @@ export const toSubscriptionDetailResponse = (
       label: unit.label,
       floor: unit.floorLabel,
       unitNumber: unit.unitNumber,
+      exclusiveArea: unit.exclusiveArea === null ? null : unit.exclusiveArea.toNumber(),
       households: unit.supplyHouseholds ?? unit.totalHouseholds,
       price: unitPriceOf(unit),
     })),
     applyUrl: notice.applyUrl,
-    floorplans: floorplans.map((plan) => ({
-      id: plan.id,
-      size: plan.sizeType,
-      type: plan.unitType,
-      floor: plan.floor,
-      unitNumber: plan.unitNumber,
-      exclusiveArea: plan.exclusiveArea === null ? null : plan.exclusiveArea.toNumber(),
-      has2d: plan.image2dUrl !== null,
-      has3d: plan.has3d,
-    })),
+    floorplans: floorplans.map(toFloorplanResponse),
   };
 };

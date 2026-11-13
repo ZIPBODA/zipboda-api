@@ -32,19 +32,16 @@ export interface SubscriptionListResponse {
   totalCount: number;
 }
 
-/** API-012 지도 핀 한 개. 이름표에 쓰도록 목록과 같은 이름(단지명)을 함께 준다 */
-export interface SubscriptionMapMarkerResponse {
-  id: string;
-  title: string;
+/** API-012 지도 핀 한 개. web 지도 옆 목록이 핀마다 카드를 그려 목록 한 칸과 같은 모양이고, 좌표가 늘 있다 */
+export interface SubscriptionMapMarkerResponse extends SubscriptionListItemResponse {
   lat: number;
   lng: number;
-  dday: number | null;
-  agencyCode: StoredAgencyCode;
-  statusCode: SubscriptionStatusCode | null;
 }
 
 export interface SubscriptionMapResponse {
   markers: SubscriptionMapMarkerResponse[];
+  /** 영역·좌표와 상관없이 같은 조건에 맞는 칸 수(목록 totalCount와 같다). web이 좌표가 없어 핀이 없는 공고 수를 알린다 */
+  totalCount: number;
 }
 
 /** 지금 목록에 있는 칸으로 만든 필터 선택지. 눌러도 늘 0건인 선택지는 주지 않는다 */

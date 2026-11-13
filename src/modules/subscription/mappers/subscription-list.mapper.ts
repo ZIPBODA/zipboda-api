@@ -2,11 +2,7 @@ import { competitionOf } from '../competition.js';
 import type { SubscriptionListItemResponse, SubscriptionMapMarkerResponse } from '../dto/subscription-list.response.js';
 import type { SearchCandidate } from '../list-rules.js';
 import { ddayOf, statusCodeOf } from '../schedule.js';
-import type {
-  SubscriptionListRecord,
-  SubscriptionMarkerRow,
-  SubscriptionSearchRow,
-} from '../subscription.repository.js';
+import type { SubscriptionListRecord, SubscriptionSearchRow } from '../subscription.repository.js';
 import {
   addressOf,
   agencyCodeOf,
@@ -16,11 +12,16 @@ import {
   scheduleOf,
 } from './subscription-fields.js';
 
-export const toSearchCandidate = (row: SubscriptionSearchRow, today: string): SearchCandidate => ({
-  id: row.id,
-  title: row.title,
-  dday: ddayOf(scheduleOf(row, row.cancelledAt), today),
-});
+export const toSearchCandidate = (row: SubscriptionSearchRow, today: string): SearchCandidate => {
+  const schedule = scheduleOf(row, row.cancelledAt);
+  return {
+    id: row.id,
+    title: row.title,
+    statusCode: statusCodeOf(schedule, today),
+    applyStartDate: schedule.applyStartDate,
+    applyEndDate: schedule.applyEndDate,
+  };
+};
 
 /** 주택형의 전용면적과 보여 주는 평면도의 전용면적. 구간으로만 온 주택형("70~80㎡")은 값이 없어 넣지 않는다 */
 export const sizesOf = (record: SubscriptionListRecord): number[] => {
@@ -57,20 +58,6 @@ export const toListItemResponse = (record: SubscriptionListRecord, today: string
   };
 };
 
-/** 좌표가 없는 칸은 지도에 올리지 않는다 */
-export const toMapMarkerResponse = (
-  row: SubscriptionMarkerRow,
-  today: string,
-): SubscriptionMapMarkerResponse | null => {
-  if (row.lat === null || row.lng === null) return null;
-  const schedule = scheduleOf(row, row.cancelledAt);
-  return {
-    id: row.id,
-    title: row.title,
-    lat: row.lat,
-    lng: row.lng,
-    dday: ddayOf(schedule, today),
-    agencyCode: agencyCodeOf(row.agencyCode),
-    statusCode: statusCodeOf(schedule, today),
-  };
-};
+/** 좌표는 단지에 있다 — 핀 id를 고른 뒤 다시 읽는 사이에 좌표가 지워진 칸은 핀에서 뺀다 */
+export const toMapMarkerResponse = (item: SubscriptionListItemResponse): SubscriptionMapMarkerResponse[] =>
+  item.lat === null || item.lng === null ? [] : [{ ...item, lat: item.lat, lng: item.lng }];

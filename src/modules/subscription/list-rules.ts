@@ -3,10 +3,18 @@ import {
   REGION_NAME,
   STORED_AGENCY_CODES,
   STORED_REGION_CODES,
+  SubscriptionStatusCode,
   type StoredAgencyCode,
   type StoredRegionCode,
 } from '@/common/constants/interface-codes.js';
-import { BOUNDS_PATTERN, MAX_LATITUDE, MAX_LONGITUDE, SIZE_RANGES, type SizeRange } from './constants.js';
+import {
+  BOUNDS_PATTERN,
+  DEADLINE_GROUP,
+  MAX_LATITUDE,
+  MAX_LONGITUDE,
+  SIZE_RANGES,
+  type SizeRange,
+} from './constants.js';
 
 export const sizeRangeOf = (value: string | undefined): SizeRange | undefined =>
   SIZE_RANGES.find((range) => range.value === value);
@@ -60,7 +68,10 @@ export const parseBounds = (text: string): GeoBounds => {
 export interface SearchCandidate {
   id: string;
   title: string;
-  dday: number | null;
+  statusCode: SubscriptionStatusCode | null;
+  /** YYYY-MM-DD */
+  applyStartDate: string | null;
+  applyEndDate: string | null;
 }
 
 /**
@@ -78,14 +89,39 @@ export const compareCodePoints = (a: string, b: string): number => {
   return left.length - right.length;
 };
 
+const deadlineGroupOf = (statusCode: SubscriptionStatusCode | null): number => {
+  switch (statusCode) {
+    case SubscriptionStatusCode.OPEN:
+      return DEADLINE_GROUP.OPEN;
+    case SubscriptionStatusCode.UPCOMING:
+      return DEADLINE_GROUP.UPCOMING;
+    case SubscriptionStatusCode.CLOSED:
+      return DEADLINE_GROUP.CLOSED;
+    default:
+      return DEADLINE_GROUP.OTHER;
+  }
+};
+
+/** 날짜는 YYYY-MM-DD라 글자 순이 날짜 순이다 */
+const compareDates = (a: string | null, b: string | null): number => {
+  if (a === b) return 0;
+  if (a === null) return 1;
+  if (b === null) return -1;
+  return a < b ? -1 : 1;
+};
+
+/** 같은 상태 묶음 안의 순서 — 접수 중은 마감이 가까운 순, 접수 예정은 접수가 빠른 순, 마감은 최근에 마감한 순 */
+const compareWithinGroup = (group: number, a: SearchCandidate, b: SearchCandidate): number => {
+  if (group === DEADLINE_GROUP.OPEN) return compareDates(a.applyEndDate, b.applyEndDate);
+  if (group === DEADLINE_GROUP.UPCOMING) return compareDates(a.applyStartDate, b.applyStartDate);
+  if (group === DEADLINE_GROUP.CLOSED) return compareDates(b.applyEndDate, a.applyEndDate);
+  return 0;
+};
+
 /** 목록 기본 정렬(마감 임박순)의 JS 판 — 목록 SQL(ORDER_BY.DEADLINE, id COLLATE "C")과 같은 순서다 */
 const compareDeadline = (a: SearchCandidate, b: SearchCandidate): number => {
-  if (a.dday !== b.dday) {
-    if (a.dday === null) return 1;
-    if (b.dday === null) return -1;
-    return a.dday - b.dday;
-  }
-  return compareCodePoints(a.id, b.id);
+  const group = deadlineGroupOf(a.statusCode);
+  return group - deadlineGroupOf(b.statusCode) || compareWithinGroup(group, a, b) || compareCodePoints(a.id, b.id);
 };
 
 /** web 통합 검색과 같은 순위 — 제목이 검색어와 같은 공고, 검색어로 시작하는 공고, 검색어를 품은 공고, 다른 필드로만 맞은 공고 순 */

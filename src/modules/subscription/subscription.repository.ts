@@ -6,7 +6,13 @@ import {
 } from '@/common/constants/interface-codes.js';
 import { PrismaService } from '@/database/prisma.service.js';
 import { Prisma } from '@/database/generated/client.js';
-import { FLOORPLAN_VISIBLE_MATCHES, SIZE_RANGES, type SizeRange, type SubscriptionSort } from './constants.js';
+import {
+  DEADLINE_GROUP,
+  FLOORPLAN_VISIBLE_MATCHES,
+  SIZE_RANGES,
+  type SizeRange,
+  type SubscriptionSort,
+} from './constants.js';
 import type { GeoBounds } from './list-rules.js';
 
 const NOTICE_SUMMARY_SELECT = {
@@ -45,7 +51,10 @@ const LIST_INCLUDE = {
   units: { select: { exclusiveArea: true } },
 } satisfies Prisma.SubscriptionInclude;
 
+const FLOORPLAN_INCLUDE = { complex: { select: { name: true } } } satisfies Prisma.FloorplanInclude;
+
 export type SubscriptionDetailRecord = Prisma.SubscriptionGetPayload<{ include: typeof DETAIL_INCLUDE }>;
+export type FloorplanRecord = Prisma.FloorplanGetPayload<{ include: typeof FLOORPLAN_INCLUDE }>;
 export type SubscriptionListRecord = Prisma.SubscriptionGetPayload<{ include: typeof LIST_INCLUDE }>;
 
 /** 검색 순위에 필요한 열만 — 검색어에 맞는 칸 전체를 읽는 단계라 도면·긴 글자는 싣지 않는다 */
@@ -55,12 +64,6 @@ export interface SubscriptionSearchRow {
   applyStartDate: Date | null;
   applyEndDate: Date | null;
   cancelledAt: Date | null;
-}
-
-export interface SubscriptionMarkerRow extends SubscriptionSearchRow {
-  lat: number | null;
-  lng: number | null;
-  agencyCode: number;
 }
 
 export interface SubscriptionListFilter {
@@ -190,10 +193,23 @@ const whereSql = (filter: SubscriptionListFilter): Prisma.Sql => {
   return Prisma.join(conditions, ' AND ');
 };
 
-/** web 목록과 같은 정렬. D-day는 접수 중인 칸만 있다(ddayOf), 경쟁률은 공급 호수를 모르면 없다(competitionRatioOf) */
+/**
+ * 마감 임박순은 상태로 먼저 나눈다 — 접수 중(마감이 가까운 순) → 접수 예정(접수가 빠른 순) → 마감(최근에 마감한 순) → 취소·일정 없음.
+ * 수집한 칸 대부분이 마감이라, D-day만으로 세우면 접수 예정이 마감 사이에 id 순으로 묻힌다.
+ * JS 판(list-rules.ts compareDeadline)이 같은 순서를 따른다. 경쟁률은 공급 호수를 모르면 없다(competitionRatioOf)
+ */
 const ORDER_BY: Record<SubscriptionSort, (today: string) => Prisma.Sql> = {
-  DEADLINE: (today) =>
-    Prisma.sql`CASE WHEN ${statusSql(SubscriptionStatusCode.OPEN, today)} THEN s.apply_end_date - ${today}::date END ASC NULLS LAST`,
+  DEADLINE: (today) => {
+    const open = statusSql(SubscriptionStatusCode.OPEN, today);
+    const upcoming = statusSql(SubscriptionStatusCode.UPCOMING, today);
+    const closed = statusSql(SubscriptionStatusCode.CLOSED, today);
+    // 묶음 값은 타입 없이 넘어가 글자로 비교된다('10' < '2') — 정수로 못 박는다
+    return Prisma.sql`CASE WHEN ${open} THEN ${DEADLINE_GROUP.OPEN}::int WHEN ${upcoming} THEN ${DEADLINE_GROUP.UPCOMING}::int
+        WHEN ${closed} THEN ${DEADLINE_GROUP.CLOSED}::int ELSE ${DEADLINE_GROUP.OTHER}::int END,
+      CASE WHEN ${open} THEN s.apply_end_date END ASC NULLS LAST,
+      CASE WHEN ${upcoming} THEN s.apply_start_date END ASC NULLS LAST,
+      CASE WHEN ${closed} THEN s.apply_end_date END DESC NULLS LAST`;
+  },
   COMPETITION: () =>
     Prisma.sql`CASE WHEN s.application_count IS NOT NULL AND s.supply_units > 0 THEN s.application_count::float8 / s.supply_units END ASC NULLS LAST`,
   HOUSEHOLDS: () => Prisma.sql`c.households DESC NULLS LAST`,
@@ -206,7 +222,7 @@ const splitByLengths = <T>(values: readonly T[], lengths: readonly number[]): T[
     return values.slice(start, start + length);
   });
 
-/** 검색·지도 행이 함께 쓰는 열. 이름은 응답 매퍼가 읽는 필드 이름과 같다 */
+/** 검색 행의 열. 이름은 응답 매퍼가 읽는 필드 이름과 같다 */
 const SUMMARY_COLUMNS = Prisma.sql`s.id, ${DISPLAY_TITLE} AS "title", s.apply_start_date AS "applyStartDate",
   s.apply_end_date AS "applyEndDate", n.cancelled_at AS "cancelledAt"`;
 
@@ -240,6 +256,20 @@ export class SubscriptionRepository {
     return { ids: [], totalCount: total };
   }
 
+  findFloorplanById(id: string): Promise<FloorplanRecord | null> {
+    return this.prisma.floorplan.findUnique({ where: { id }, include: FLOORPLAN_INCLUDE });
+  }
+
+  /** 이름으로만 이은 칸은 도면을 보여 주지 않으므로(ERD §5 규칙 8) 고르지 않는다. 고르는 순서는 목록 마감 임박순이다 */
+  async findFloorplanSubscriptionId(complexId: string, today: string): Promise<string | null> {
+    const rows = await this.prisma.$queryRaw<{ id: string }[]>`
+      SELECT s.id FROM ${LISTING_FROM}
+      WHERE s.complex_id = ${complexId} AND ${floorplanVisible}
+      ORDER BY ${ORDER_BY.DEADLINE(today)}, s.id COLLATE "C"
+      LIMIT 1`;
+    return rows[0]?.id ?? null;
+  }
+
   findSearchRows(filter: SubscriptionListFilter): Promise<SubscriptionSearchRow[]> {
     return this.prisma.$queryRaw<SubscriptionSearchRow[]>`
       SELECT ${SUMMARY_COLUMNS} FROM ${LISTING_FROM} WHERE ${whereSql(filter)}`;
@@ -256,11 +286,18 @@ export class SubscriptionRepository {
     });
   }
 
-  findMarkerRows(filter: SubscriptionListFilter): Promise<SubscriptionMarkerRow[]> {
-    return this.prisma.$queryRaw<SubscriptionMarkerRow[]>`
-      SELECT ${SUMMARY_COLUMNS}, c.lat, c.lng, n.agency_code AS "agencyCode" FROM ${LISTING_FROM}
+  async findMarkerIds(filter: SubscriptionListFilter, sort: SubscriptionSort, today: string): Promise<string[]> {
+    const rows = await this.prisma.$queryRaw<{ id: string }[]>`
+      SELECT s.id FROM ${LISTING_FROM}
       WHERE ${whereSql(filter)} AND c.lat IS NOT NULL AND c.lng IS NOT NULL
-      ORDER BY s.id COLLATE "C"`;
+      ORDER BY ${ORDER_BY[sort](today)}, s.id COLLATE "C"`;
+    return rows.map((row) => row.id);
+  }
+
+  async countListed(filter: SubscriptionListFilter): Promise<number> {
+    const [{ total }] = await this.prisma.$queryRaw<{ total: number }[]>`
+      SELECT count(*)::int AS total FROM ${LISTING_FROM} WHERE ${whereSql(filter)}`;
+    return total;
   }
 
   /**
