@@ -45,6 +45,8 @@ export interface SubscriptionUnitResponse {
   label: string | null;
   floor: string | null;
   unitNumber: string | null;
+  /** 전용면적(㎡). 구간으로만 왔으면 null — size(주택형)는 반올림한 이름이라 web이 면적을 보일 때는 이 값을 쓴다 */
+  exclusiveArea: number | null;
   /** 이번 공급 세대(없으면 총세대) */
   households: number | null;
   /** 보증금·월임대료·분양가를 읽은 한 줄, 금액 대신 안내만 왔으면 그 원문 */
@@ -59,6 +61,8 @@ export interface SubscriptionFloorplanResponse {
   unitNumber: string | null;
   /** 전용면적(㎡) */
   exclusiveArea: number | null;
+  /** 2D 도면 이미지 주소. has2d가 false면 null */
+  image2dUrl: string | null;
   has2d: boolean;
   has3d: boolean;
 }

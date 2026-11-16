@@ -15,7 +15,7 @@ interface ListBody {
   data: { items: { id: string; sizes: number[]; statusCode: number | null }[]; totalCount: number };
 }
 interface MapBody {
-  data: { markers: { id: string }[] };
+  data: { markers: { id: string }[]; totalCount: number };
 }
 interface ErrorBody {
   error: { code: string; message: string };
@@ -303,10 +303,20 @@ describe('청약 공고 API (e2e)', () => {
               label: '39A',
               floor: null,
               unitNumber: null,
+              exclusiveArea: 39.5,
               households: 20,
               price: '보증금 3,000만 원',
             },
-            { size: '114', type: 'B', label: '114B', floor: null, unitNumber: null, households: 4, price: null },
+            {
+              size: '114',
+              type: 'B',
+              label: '114B',
+              floor: null,
+              unitNumber: null,
+              exclusiveArea: 114.97,
+              households: 4,
+              price: null,
+            },
           ],
           applyUrl: 'https://www.i-sh.co.kr',
           floorplans: [
@@ -317,6 +327,7 @@ describe('청약 공고 API (e2e)', () => {
               floor: '2-3',
               unitNumber: '201',
               exclusiveArea: 39.5,
+              image2dUrl: '/plans/a.png',
               has2d: true,
               has3d: true,
             },
@@ -327,6 +338,7 @@ describe('청약 공고 API (e2e)', () => {
               floor: '3',
               unitNumber: '302',
               exclusiveArea: 39.98,
+              image2dUrl: null,
               has2d: false,
               has3d: false,
             },
@@ -366,9 +378,10 @@ describe('청약 공고 API (e2e)', () => {
   });
 
   describe('API-010 목록', () => {
-    const ALL = ['e2e-open', 'e2e-name', 'e2e-nocoord', 'e2e-notice', 'e2e-upcoming'];
+    // 마감 임박순 — 접수 중 → 접수 예정 → 마감 → 일정 없음(id 순)
+    const ALL = ['e2e-open', 'e2e-upcoming', 'e2e-nocoord', 'e2e-name', 'e2e-notice'];
 
-    it('평면도가 없는 칸·공고 단위 칸도 올리고, 마감 임박순으로 접수 중이 아닌 칸은 뒤로 보낸다', async () => {
+    it('평면도가 없는 칸·공고 단위 칸도 올리고, 마감 임박순은 접수 중 → 접수 예정 → 마감 → 일정 없음이다', async () => {
       const response = await get('/api/subscriptions').expect(200);
       expect(dataOf(response)).toMatchObject({ page: 1, pageSize: 20, totalCount: 5 });
       expect(listOf(response).items.map((item) => item.id)).toEqual(ALL);
@@ -396,8 +409,8 @@ describe('청약 공고 API (e2e)', () => {
     });
 
     it.each([
-      ['?agency=1', ['e2e-name', 'e2e-nocoord', 'e2e-notice', 'e2e-upcoming']],
-      ['?region=3', ['e2e-notice', 'e2e-upcoming']],
+      ['?agency=1', ['e2e-upcoming', 'e2e-nocoord', 'e2e-name', 'e2e-notice']],
+      ['?region=3', ['e2e-upcoming', 'e2e-notice']],
       ['?status=2', ['e2e-open']],
       ['?status=3', ['e2e-nocoord']],
       ['?size=30-', ['e2e-open']],
@@ -405,8 +418,8 @@ describe('청약 공고 API (e2e)', () => {
       // 이름으로만 이은 단지의 평면도(17㎡)는 면적 조건에 쓰지 않는다
       ['?size=15-20', []],
       ['?keyword=%ED%96%89%EB%B3%B5', ['e2e-open']],
-      ['?keyword=lh', ['e2e-name', 'e2e-nocoord', 'e2e-notice', 'e2e-upcoming']],
-      ['?keyword=%EA%B2%BD%EA%B8%B0', ['e2e-notice', 'e2e-upcoming']],
+      ['?keyword=lh', ['e2e-upcoming', 'e2e-nocoord', 'e2e-name', 'e2e-notice']],
+      ['?keyword=%EA%B2%BD%EA%B8%B0', ['e2e-upcoming', 'e2e-notice']],
       // 주소(세종대로)·시군구(노원)·공고명(선착순)으로도 찾는다
       ['?keyword=%EC%84%B8%EC%A2%85%EB%8C%80%EB%A1%9C', ['e2e-open']],
       ['?keyword=%EB%85%B8%EC%9B%90', ['e2e-name']],
@@ -439,7 +452,7 @@ describe('청약 공고 API (e2e)', () => {
         'e2e-notice',
       ]);
       const page = await get('/api/subscriptions?page=2&pageSize=2').expect(200);
-      expect(listOf(page).items.map((item) => item.id)).toEqual(['e2e-nocoord', 'e2e-notice']);
+      expect(listOf(page).items.map((item) => item.id)).toEqual(['e2e-nocoord', 'e2e-name']);
       expect(listOf(page).totalCount).toBe(5);
     });
 
@@ -523,6 +536,34 @@ describe('청약 공고 API (e2e)', () => {
       expect(await inIncheon()).toEqual(['e2e-sort-c', 'e2e-sort-B', 'e2e-sort-a', 'e2e-sort-d', 'e2e-sort-e']);
       const response = await get('/api/subscriptions?region=2').expect(200);
       expect(listOf(response).items.find((item) => item.id === 'e2e-sort-d')?.statusCode).toBe(4);
+    });
+
+    // 수집한 칸 대부분이 마감이라 접수 예정이 마감 사이에 묻히지 않게 상태로 먼저 나눈다. 검색 순위(JS)도 같은 순서다
+    it('마감 임박순: 접수 예정은 접수가 빠른 순, 마감은 최근에 마감한 순이고, 검색도 같은 순서다', async () => {
+      const groups = [
+        { id: 'e2e-group-closed-old', applyStartDate: day('2026-03-01'), applyEndDate: day('2026-03-05') },
+        { id: 'e2e-group-upcoming-late', applyStartDate: day('2026-10-01'), applyEndDate: day('2026-10-05') },
+        { id: 'e2e-group-closed-recent', applyStartDate: day('2026-09-01'), applyEndDate: day('2026-09-07') },
+        { id: 'e2e-group-upcoming-soon', applyStartDate: day('2026-09-09'), applyEndDate: day('2026-09-30') },
+        { id: 'e2e-group-open', applyStartDate: day('2026-09-08'), applyEndDate: day('2026-09-30') },
+      ];
+      for (const fixture of groups) {
+        await createListing({ ...fixture, title: `상태묶음 ${fixture.id}`, agencyCode: 4, regionCode: 2 });
+      }
+      try {
+        const expected = [
+          'e2e-group-open',
+          'e2e-group-upcoming-soon',
+          'e2e-group-upcoming-late',
+          'e2e-group-closed-recent',
+          'e2e-group-closed-old',
+        ];
+        expect(await listIds(`?keyword=${encodeURIComponent('상태묶음')}`)).toEqual(expected);
+        const search = await get(`/api/search?q=${encodeURIComponent('상태묶음')}`).expect(200);
+        expect(searchOf(search).subscriptions.items.map((item) => item.id)).toEqual(expected);
+      } finally {
+        await removeListings('e2e-group-');
+      }
     });
 
     it('경쟁률순: 낮은 순, 공급 호수가 0이거나 신청 인원을 모르면 뒤', async () => {
@@ -635,18 +676,45 @@ describe('청약 공고 API (e2e)', () => {
   });
 
   describe('API-012 지도', () => {
-    it('좌표가 있는 단지의 칸만 핀으로 주고, 고정 경로가 공고 id로 잡히지 않는다', async () => {
+    it('좌표가 있는 단지의 칸만 목록 한 칸과 같은 모양의 핀으로 주고, 고정 경로가 공고 id로 잡히지 않는다', async () => {
       const response = await get('/api/subscriptions/map').expect(200);
       expect(markersOf(response).map((marker) => marker.id)).toEqual(['e2e-open', 'e2e-upcoming']);
-      expect(markersOf(response)[0]).toEqual({
-        id: 'e2e-open',
-        title: '테스트 행복주택',
-        lat: 37.5663,
-        lng: 126.9779,
-        dday: 3,
-        agencyCode: 2,
-        statusCode: 2,
-      });
+      const listed = listOf(await get('/api/subscriptions?status=2').expect(200)).items[0];
+      expect(markersOf(response)[0]).toEqual(listed);
+      expect(markersOf(response)[0]).toMatchObject({ id: 'e2e-open', lat: 37.5663, lng: 126.9779, dday: 3 });
+    });
+
+    it('지도도 목록과 같은 조건으로 거르고, 건수는 좌표가 없는 칸까지 영역과 상관없이 센다', async () => {
+      const response = await get('/api/subscriptions/map?agency=1').expect(200);
+      expect(markersOf(response).map((marker) => marker.id)).toEqual(['e2e-upcoming']);
+      // LH 칸 4개 중 좌표가 있는 것은 e2e-upcoming뿐이다 — web은 나머지를 '목록에서 보라'고 알린다
+      expect((response.body as MapBody).data.totalCount).toBe(4);
+      const seoul = await get('/api/subscriptions/map?bounds=37.4,126.8,37.7,127.2').expect(200);
+      expect((seoul.body as MapBody).data.totalCount).toBe(5);
+    });
+
+    // web 지도 옆 목록은 핀을 받은 순서대로 카드로 그리고 목록과 같은 '결과 정렬'을 단다.
+    // id 순과 정렬 순이 갈리도록 id가 앞서는 칸을 마감·세대 수 적음으로 둔다
+    it('핀은 목록과 같은 정렬로 준다', async () => {
+      const pins = [
+        { id: 'e2e-pin-a', households: 5, applyStartDate: day('2026-08-01'), applyEndDate: day('2026-08-05') },
+        { id: 'e2e-pin-b', households: 50, applyStartDate: day('2026-09-20'), applyEndDate: day('2026-09-25') },
+        { id: 'e2e-pin-c', households: 20, applyStartDate: day('2026-09-01'), applyEndDate: day('2026-09-10') },
+      ];
+      for (const pin of pins) {
+        await createListing({ ...pin, title: `핀정렬 ${pin.id}`, agencyCode: 4, regionCode: 2, lat: 37.45, lng: 126.7 });
+      }
+      try {
+        const keyword = `keyword=${encodeURIComponent('핀정렬')}`;
+        const deadline = markersOf(await get(`/api/subscriptions/map?${keyword}`).expect(200)).map((pin) => pin.id);
+        expect(deadline).toEqual(['e2e-pin-c', 'e2e-pin-b', 'e2e-pin-a']);
+        for (const sort of ['DEADLINE', 'HOUSEHOLDS']) {
+          const map = await get(`/api/subscriptions/map?${keyword}&sort=${sort}`).expect(200);
+          expect([sort, markersOf(map).map((pin) => pin.id)]).toEqual([sort, await listIds(`?${keyword}&sort=${sort}`)]);
+        }
+      } finally {
+        await removeListings('e2e-pin-');
+      }
     });
 
     it('영역(남,서,북,동) 안의 핀만 주고, 형식이 틀리거나 뒤집힌 영역은 ERR-005다', async () => {
@@ -690,7 +758,7 @@ describe('청약 공고 API (e2e)', () => {
         },
         products: { items: [], totalCount: 0 },
       });
-      expect(await searchIds('?q=lh')).toEqual(['e2e-name', 'e2e-nocoord', 'e2e-notice', 'e2e-upcoming']);
+      expect(await searchIds('?q=lh')).toEqual(['e2e-upcoming', 'e2e-nocoord', 'e2e-name', 'e2e-notice']);
       expect(await searchIds(`?q=${encodeURIComponent('선착순')}`)).toEqual(['e2e-notice']);
       expect(await searchIds(`?q=${encodeURIComponent('없는 건물')}`)).toEqual([]);
     });
@@ -777,6 +845,12 @@ describe('청약 공고 API (e2e)', () => {
       // 시작이 미래라도 마감을 모르면 접수예정이 아니다(앱 계산과 같게)
       { id: 'st-future-start-only', start: '2026-09-20', end: null, expected: null },
       { id: 'st-cancelled', start: '2026-09-07', end: '2026-09-11', cancelled: true, expected: 4 },
+      // 날짜로는 마감·접수예정이지만 취소된 칸 — 마감 임박순에서 마감·예정 묶음에 끼지 않는다
+      { id: 'st-cancelled-closed', start: '2026-08-01', end: '2026-08-05', cancelled: true, expected: 4 },
+      { id: 'st-cancelled-upcoming', start: '2026-09-20', end: '2026-09-25', cancelled: true, expected: 4 },
+      // 같은 묶음 안에서 기준 날짜가 같은 칸 — id 순으로 갈린다
+      { id: 'st-start-tomorrow-2', start: '2026-09-09', end: '2026-09-30', expected: 1 },
+      { id: 'st-end-yesterday-2', start: '2026-08-20', end: '2026-09-07', expected: 3 },
     ];
 
     beforeAll(async () => {
@@ -811,6 +885,27 @@ describe('청약 공고 API (e2e)', () => {
           .sort();
         expect([code, filtered]).toEqual([code, computed]);
       }
+    });
+
+    // 목록(SQL ORDER_BY.DEADLINE)과 검색 순위(JS compareDeadline)는 따로 구현돼 있다 — 경계 칸 전부로 순서를 맞대 본다
+    it('마감 임박순은 목록과 검색이 같은 순서다', async () => {
+      const listed = await listIds('?keyword=st-&pageSize=100');
+      expect(listed).toEqual([
+        'st-end-today',
+        'st-start-today',
+        'st-start-tomorrow',
+        'st-start-tomorrow-2',
+        'st-end-yesterday',
+        'st-end-yesterday-2',
+        'st-cancelled',
+        'st-cancelled-closed',
+        'st-cancelled-upcoming',
+        'st-future-start-only',
+        'st-no-schedule',
+        'st-start-only',
+      ]);
+      const searched = searchOf(await get('/api/search?q=st-&pageSize=100').expect(200)).subscriptions.items;
+      expect(searched.map((item) => item.id)).toEqual(listed);
     });
 
     it('필터 선택지의 상태도 같은 규칙으로 센다', async () => {
@@ -855,10 +950,10 @@ describe('청약 공고 API (e2e)', () => {
       expect(dataOf(response)).toMatchObject({ page: 1, pageSize: 20, totalCount: 5 });
       expect(listOf(response).items.map((item) => item.id)).toEqual([
         'e2e-open',
-        'e2e-name',
-        'e2e-nocoord',
-        'e2e-notice',
         'e2e-upcoming',
+        'e2e-nocoord',
+        'e2e-name',
+        'e2e-notice',
       ]);
       expect(markersOf(await get('/api/subscriptions/map?bounds=').expect(200))).toHaveLength(2);
       await get('/api/subscriptions?region=%20').expect(422);
@@ -875,9 +970,92 @@ describe('청약 공고 API (e2e)', () => {
       await get(`/api/subscriptions/map?bounds=${bounds}`).expect(status);
     });
 
-    it('목록 전용 조건(정렬·페이지)은 지도에서 받지 않는다', async () => {
-      await get('/api/subscriptions/map?sort=DEADLINE').expect(422);
+    it('목록 전용 조건(페이지)은 지도에서 받지 않고, 정렬은 목록과 같은 값만 받는다', async () => {
+      await get('/api/subscriptions/map?sort=DEADLINE').expect(200);
+      await get('/api/subscriptions/map?sort=POPULAR').expect(422);
       await get('/api/subscriptions/map?page=1').expect(422);
+      await get('/api/subscriptions/map?pageSize=10').expect(422);
+    });
+  });
+
+  describe('API-031 평면도 상세', () => {
+    it('도면과 단지 이름, 들어갈 칸을 준다', async () => {
+      const response = await get('/api/floorplans/e2e-open-a').expect(200);
+      expect(response.body).toEqual({
+        success: true,
+        data: {
+          id: 'e2e-open-a',
+          size: '39',
+          type: null,
+          floor: '2-3',
+          unitNumber: '201',
+          exclusiveArea: 39.5,
+          image2dUrl: '/plans/a.png',
+          has2d: true,
+          has3d: true,
+          complexName: '테스트 행복주택',
+          subscriptionId: 'e2e-open',
+        },
+        error: null,
+      });
+    });
+
+    it('이름으로만 이은 칸에는 도면을 보여 주지 않아 들어갈 칸이 없다', async () => {
+      const detail = dataOf(await get('/api/floorplans/e2e-name-a').expect(200));
+      expect(detail).toMatchObject({ id: 'e2e-name-a', subscriptionId: null });
+    });
+
+    // 매입임대 건물은 차수마다 다시 공고돼 한 단지에 칸이 여럿이다 — 목록 마감 임박순의 첫 칸으로 들어간다
+    it('단지에 칸이 여럿이면 접수 중 → 접수 예정 → 최근 마감 순으로 고른다', async () => {
+      await createListing({
+        id: 'e2e-pick-old',
+        title: '여러 차수 건물',
+        agencyCode: 1,
+        regionCode: 1,
+        applyStartDate: day('2026-03-01'),
+        applyEndDate: day('2026-03-05'),
+        floorplans: [{ id: 'e2e-pick-plan', exclusiveArea: 20 }],
+      });
+      const addCell = async (id: string, applyStartDate: Date, applyEndDate: Date) => {
+        await prisma.notice.create({
+          data: {
+            id: `${id}-notice`,
+            agencyCode: 1,
+            title: id,
+            titleKey: id,
+            supplyCategory: 'PUBLIC_RENTAL',
+            origin: 'SYNC',
+          },
+        });
+        await prisma.subscription.create({
+          data: {
+            id,
+            noticeId: `${id}-notice`,
+            complexId: 'e2e-pick-old-complex',
+            complexMatch: 'MANUAL',
+            regionCode: 1,
+            applyStartDate,
+            applyEndDate,
+          },
+        });
+      };
+      const pick = async () => dataOf(await get('/api/floorplans/e2e-pick-plan').expect(200));
+      try {
+        await addCell('e2e-pick-recent', day('2026-08-01'), day('2026-08-05'));
+        await expect(pick()).resolves.toMatchObject({ subscriptionId: 'e2e-pick-recent' });
+        await addCell('e2e-pick-upcoming', day('2026-09-20'), day('2026-09-25'));
+        await expect(pick()).resolves.toMatchObject({ subscriptionId: 'e2e-pick-upcoming' });
+        await addCell('e2e-pick-open', day('2026-09-07'), day('2026-09-11'));
+        await expect(pick()).resolves.toMatchObject({ subscriptionId: 'e2e-pick-open' });
+      } finally {
+        await removeListings('e2e-pick-');
+      }
+    });
+
+    it('없는 도면은 ERR-008, 지나치게 긴 id는 ERR-005다', async () => {
+      const missing = await get('/api/floorplans/missing-plan').expect(404);
+      expect((missing.body as ErrorBody).error.message).toBe('NOT_FOUND');
+      await get(`/api/floorplans/${'a'.repeat(101)}`).expect(422);
     });
   });
 

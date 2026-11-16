@@ -9,7 +9,6 @@ import { SubscriptionListQuery, SubscriptionMapQuery } from './dto/subscription-
 import type {
   SubscriptionListFilter,
   SubscriptionListRecord,
-  SubscriptionMarkerRow,
   SubscriptionRepository,
   SubscriptionSearchRow,
 } from './subscription.repository.js';
@@ -67,7 +66,8 @@ const serviceWith = (page: { ids: string[]; totalCount: number } = { ids: [], to
     findSearchRows: jest
       .fn<(filter: SubscriptionListFilter) => Promise<SubscriptionSearchRow[]>>()
       .mockResolvedValue([]),
-    findMarkerRows: jest.fn<(filter: SubscriptionListFilter) => Promise<SubscriptionMarkerRow[]>>(),
+    findMarkerIds: jest.fn<SubscriptionRepository['findMarkerIds']>(),
+    countListed: jest.fn<SubscriptionRepository['countListed']>().mockResolvedValue(0),
     findFilterOptionSources: jest.fn<SubscriptionRepository['findFilterOptionSources']>(),
   };
   const clock: Clock = { now: () => new Date(`${TODAY}T03:00:00Z`) };
@@ -211,35 +211,47 @@ describe('통합 검색(API-095)', () => {
 });
 
 describe('지도 핀(API-012)', () => {
-  it('핀마다 상태·D-day를 붙이고, 좌표가 없는 행은 빼며, 영역은 남·서·북·동으로 풀어 넘긴다', async () => {
+  it('핀은 목록 한 칸과 같은 모양으로 고른 순서대로 주고, 영역은 남·서·북·동으로 풀어 넘긴다', async () => {
     const { service, repository } = serviceWith();
-    const marker = (id: FixtureId, lat: number | null): SubscriptionMarkerRow => ({
-      id,
-      title: `공고 ${id}`,
-      lat,
-      lng: lat === null ? null : 127,
-      agencyCode: AgencyCode.SH,
-      ...SCHEDULES[id],
-      cancelledAt: null,
-    });
-    repository.findMarkerRows.mockResolvedValue([marker('open', 37.5), marker('closed', null)]);
+    repository.findMarkerIds.mockResolvedValue(['upcoming', 'open']);
+    repository.countListed.mockResolvedValue(7);
     const result = await service.mapMarkers(
-      Object.assign(new SubscriptionMapQuery(), { bounds: '37.4,126.8,37.7,127.2' }),
+      Object.assign(new SubscriptionMapQuery(), { bounds: '37.4,126.8,37.7,127.2', sort: 'HOUSEHOLDS' }),
     );
-    expect(result.markers).toEqual([
-      {
-        id: 'open',
-        title: '공고 open',
-        lat: 37.5,
-        lng: 127,
-        dday: 3,
-        agencyCode: AgencyCode.SH,
-        statusCode: SubscriptionStatusCode.OPEN,
-      },
-    ]);
-    expect(repository.findMarkerRows).toHaveBeenCalledWith(
-      expect.objectContaining({ bounds: { south: 37.4, west: 126.8, north: 37.7, east: 127.2 } }),
+    // 건수는 영역을 빼고 센다 — 좌표가 없어 핀이 없는 공고까지 세어야 web이 '목록에서 보라'고 알린다
+    expect(result.totalCount).toBe(7);
+    expect(repository.countListed).toHaveBeenCalledWith(expect.objectContaining({ bounds: undefined }));
+
+    expect(result.markers.map((marker) => marker.id)).toEqual(['upcoming', 'open']);
+    expect(result.markers[1]).toMatchObject({
+      id: 'open',
+      title: '단지 open',
+      noticeTitle: '공고 open',
+      lat: 37.5,
+      lng: 127,
+      sizes: [28.81, 31.99],
+      dday: 3,
+      statusCode: SubscriptionStatusCode.OPEN,
+    });
+    const bounds = { south: 37.4, west: 126.8, north: 37.7, east: 127.2 };
+    expect(repository.findMarkerIds).toHaveBeenCalledWith(expect.objectContaining({ bounds }), 'HOUSEHOLDS', TODAY);
+    // 다시 읽을 때도 같은 조건으로 걸러, 두 번 읽는 사이에 조건에서 벗어난 칸이 핀으로 나오지 않게 한다
+    expect(repository.findListedByIds).toHaveBeenCalledWith(['upcoming', 'open'], expect.objectContaining({ bounds }));
+  });
+
+  it('고른 뒤 다시 읽는 사이에 좌표가 지워진 칸은 핀에서 뺀다', async () => {
+    const { service, repository } = serviceWith();
+    repository.findMarkerIds.mockResolvedValue(['open', 'closed']);
+    repository.findListedByIds.mockImplementation((ids) =>
+      Promise.resolve(
+        ids.filter(isFixtureId).map((id) => {
+          const record = listRecord(id);
+          return id === 'closed' && record.complex ? { ...record, complex: { ...record.complex, lat: null } } : record;
+        }),
+      ),
     );
+    const result = await service.mapMarkers(new SubscriptionMapQuery());
+    expect(result.markers.map((marker) => marker.id)).toEqual(['open']);
   });
 });
 

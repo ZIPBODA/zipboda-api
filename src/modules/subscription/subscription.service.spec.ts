@@ -3,7 +3,7 @@ import { AppException } from '@/common/errors/app.exception.js';
 import { SubscriptionStatusCode } from '@/common/constants/interface-codes.js';
 import type { Clock } from '@/common/time/clock.js';
 import { Prisma } from '@/database/generated/client.js';
-import type { SubscriptionDetailRecord, SubscriptionRepository } from './subscription.repository.js';
+import type { FloorplanRecord, SubscriptionDetailRecord, SubscriptionRepository } from './subscription.repository.js';
 import { SubscriptionService } from './subscription.service.js';
 
 type DetailComplex = NonNullable<SubscriptionDetailRecord['complex']>;
@@ -138,8 +138,9 @@ describe('청약 공고 상세', () => {
     });
   });
 
-  it('도면은 2D 이미지 여부와 3D 여부를 함께 알린다', async () => {
-    const { service } = serviceWith(record({ complex: complex({ floorplans: [plan] }) }), NOW);
+  it('도면은 2D 이미지 주소·여부와 3D 여부를 함께 알린다', async () => {
+    const drawn = { ...plan, id: 'p2', image2dUrl: '/housing/gangnam-gaepo/p2.png' };
+    const { service } = serviceWith(record({ complex: complex({ floorplans: [plan, drawn] }) }), NOW);
     const detail = await service.getDetail('gangnam-gaepo-26-3');
     expect(detail.floorplans).toEqual([
       {
@@ -149,9 +150,11 @@ describe('청약 공고 상세', () => {
         floor: '2-3',
         unitNumber: '01',
         exclusiveArea: null,
+        image2dUrl: null,
         has2d: false,
         has3d: true,
       },
+      expect.objectContaining({ id: 'p2', image2dUrl: '/housing/gangnam-gaepo/p2.png', has2d: true }),
     ]);
   });
 
@@ -215,19 +218,69 @@ describe('청약 공고 상세', () => {
         label: '59A',
         floor: '4층',
         unitNumber: '402',
+        exclusiveArea: 59.98,
         households: null,
         price: '보증금 3,000만 원 · 월 15만 원',
       },
-      { size: '59', type: 'A', label: null, floor: null, unitNumber: '1001', households: 4, price: null },
-      { size: '59', type: null, label: null, floor: null, unitNumber: '101', households: null, price: null },
-      { size: null, type: null, label: '70~80㎡', floor: null, unitNumber: null, households: 2, price: null },
-      { size: '74', type: 'A', label: '74.9500A', floor: null, unitNumber: null, households: null, price: null },
-      { size: null, type: null, label: '2형', floor: null, unitNumber: null, households: null, price: '공고문 참조' },
+      expect.objectContaining({ size: '59', type: 'A', unitNumber: '1001', exclusiveArea: 59.98, households: 4 }),
+      expect.objectContaining({ size: '59', type: null, unitNumber: '101', exclusiveArea: 59.98 }),
+      // 구간으로만 온 주택형은 전용면적이 없다
+      expect.objectContaining({ size: null, label: '70~80㎡', exclusiveArea: null, households: 2 }),
+      expect.objectContaining({ size: '74', label: '74.9500A', exclusiveArea: 74.95 }),
+      expect.objectContaining({ size: null, label: '2형', exclusiveArea: null, price: '공고문 참조' }),
     ]);
   });
 
   it('정의서에 없는 기관 코드가 저장돼 있으면 응답을 지어내지 않고 실패한다', async () => {
     const { service } = serviceWith(record({ notice: { ...record().notice, agencyCode: 9 } }), NOW);
     await expect(service.getDetail('gangnam-gaepo-26-3')).rejects.toThrow(/공급기관 코드/);
+  });
+});
+
+describe('평면도 상세(API-031)', () => {
+  const floorplanServiceWith = (found: FloorplanRecord | null, subscriptionId: string | null) => {
+    const repository = {
+      findFloorplanById: jest.fn<SubscriptionRepository['findFloorplanById']>().mockResolvedValue(found),
+      findFloorplanSubscriptionId: jest
+        .fn<SubscriptionRepository['findFloorplanSubscriptionId']>()
+        .mockResolvedValue(subscriptionId),
+    };
+    const clock: Clock = { now: () => new Date(NOW) };
+    return { repository, service: new SubscriptionService(repository as unknown as SubscriptionRepository, clock) };
+  };
+  const stored: FloorplanRecord = {
+    ...plan,
+    exclusiveArea: new Prisma.Decimal(28.81),
+    image2dUrl: '/housing/gangnam-gaepo/p1.png',
+    complex: { name: '강남개포동(T&K개포)' },
+  };
+
+  it('도면과 단지 이름, 들어갈 칸을 준다 — 칸은 단지와 오늘(한국 날짜)로 고른다', async () => {
+    const { service, repository } = floorplanServiceWith(stored, 'gangnam-gaepo-26-3');
+    await expect(service.getFloorplan('p1')).resolves.toEqual({
+      id: 'p1',
+      size: '28',
+      type: null,
+      floor: '2-3',
+      unitNumber: '01',
+      exclusiveArea: 28.81,
+      image2dUrl: '/housing/gangnam-gaepo/p1.png',
+      has2d: true,
+      has3d: true,
+      complexName: '강남개포동(T&K개포)',
+      subscriptionId: 'gangnam-gaepo-26-3',
+    });
+    expect(repository.findFloorplanSubscriptionId).toHaveBeenCalledWith('gangnam-gaepo', '2026-09-08');
+  });
+
+  it('보여 줄 칸이 없으면 subscriptionId가 null이다', async () => {
+    const { service } = floorplanServiceWith(stored, null);
+    await expect(service.getFloorplan('p1')).resolves.toMatchObject({ subscriptionId: null });
+  });
+
+  it('없는 도면은 NOT_FOUND로 알리고 칸을 고르지 않는다', async () => {
+    const { service, repository } = floorplanServiceWith(null, null);
+    await expect(service.getFloorplan('missing')).rejects.toEqual(new AppException('NOT_FOUND'));
+    expect(repository.findFloorplanSubscriptionId).not.toHaveBeenCalled();
   });
 });

@@ -1,4 +1,4 @@
-import { AgencyCode, RegionCode } from '@/common/constants/interface-codes.js';
+import { AgencyCode, RegionCode, SubscriptionStatusCode } from '@/common/constants/interface-codes.js';
 import {
   codesMatchingKeyword,
   isGeoBoundsText,
@@ -52,7 +52,27 @@ describe('목록 조건', () => {
 });
 
 describe('통합 검색 순위', () => {
-  const titled = (id: string, title: string, dday: number | null = null): SearchCandidate => ({ id, title, dday });
+  const NO_SCHEDULE = { statusCode: null, applyStartDate: null, applyEndDate: null };
+  const titled = (id: string, title: string, schedule: Omit<SearchCandidate, 'id' | 'title'> = NO_SCHEDULE) => ({
+    id,
+    title,
+    ...schedule,
+  });
+  const open = (applyEndDate: string) => ({
+    statusCode: SubscriptionStatusCode.OPEN,
+    applyStartDate: '2026-09-01',
+    applyEndDate,
+  });
+  const upcoming = (applyStartDate: string) => ({
+    statusCode: SubscriptionStatusCode.UPCOMING,
+    applyStartDate,
+    applyEndDate: '2026-12-31',
+  });
+  const closed = (applyEndDate: string) => ({
+    statusCode: SubscriptionStatusCode.CLOSED,
+    applyStartDate: '2026-01-01',
+    applyEndDate,
+  });
 
   it('제목 일치 → 제목 앞부분 → 제목 포함 → 다른 필드 순이고, 같은 순위는 마감 임박순이다', () => {
     const results = sortSearchResults(
@@ -60,7 +80,7 @@ describe('통합 검색 순위', () => {
         titled('field', '청년 주택'),
         titled('inside-late', '서울 매입임대'),
         titled('prefix', '매입임대 2차'),
-        titled('inside-soon', '경기 매입임대', 2),
+        titled('inside-soon', '경기 매입임대', open('2026-09-10')),
         titled('same', '매입임대'),
       ],
       '매입임대',
@@ -78,7 +98,34 @@ describe('통합 검색 순위', () => {
   });
 
   // 목록 SQL이 id를 COLLATE "C"로 가르는 것과 같은 순서 — 대문자(0x42)가 소문자(0x61)보다 앞이다
-  it('순위와 D-day가 같으면 id를 문자 코드 순으로 가른다', () => {
+  // 목록 SQL(ORDER_BY.DEADLINE)과 같은 순서 — 수집한 칸 대부분이 마감이라 접수 예정이 마감 사이에 묻히지 않게 상태로 먼저 나눈다
+  it('같은 순위 안은 접수 중(마감 가까운 순) → 접수 예정(접수 빠른 순) → 마감(최근 마감 순) → 취소·일정 없음이다', () => {
+    const results = sortSearchResults(
+      [
+        titled('none', '행복주택'),
+        titled('cancelled', '행복주택', { ...open('2026-09-09'), statusCode: SubscriptionStatusCode.CANCELLED }),
+        titled('closed-old', '행복주택', closed('2026-03-01')),
+        titled('closed-recent', '행복주택', closed('2026-08-30')),
+        titled('upcoming-late', '행복주택', upcoming('2026-10-20')),
+        titled('upcoming-soon', '행복주택', upcoming('2026-09-20')),
+        titled('open-late', '행복주택', open('2026-09-30')),
+        titled('open-soon', '행복주택', open('2026-09-09')),
+      ],
+      '행복주택',
+    );
+    expect(results.map((item) => item.id)).toEqual([
+      'open-soon',
+      'open-late',
+      'upcoming-soon',
+      'upcoming-late',
+      'closed-recent',
+      'closed-old',
+      'cancelled',
+      'none',
+    ]);
+  });
+
+  it('순위와 마감 임박순이 같으면 id를 문자 코드 순으로 가른다', () => {
     const results = sortSearchResults([titled('e2e-a', '행복주택 1'), titled('e2e-B', '행복주택 2')], '행복');
     expect(results.map((item) => item.id)).toEqual(['e2e-B', 'e2e-a']);
   });

@@ -5,7 +5,7 @@
 | 항목 | 내용 |
 |------|------|
 | 문서명 | 집보다(Zipboda) ERD 및 스키마 정의서 |
-| 버전 | v0.3.10 |
+| 버전 | v0.3.11 |
 | 작성일 | 2026-10-22 |
 | 기반 문서 | /docs/ZIPBODA_development-plan_v0.1.md, /src/database/schema.prisma, /docs/ZIPBODA_api-contract-delta.md, /docs/ZIPBODA_public-data-sources_v0.1.md, /docs/ZIPBODA_erd-draft_v0.1.md, ../zipboda-web/docs/ZIPBODA_API 및 인터페이스 정의서_v0.1.xlsx, ../zipboda-web/src/entities/subscription/model/types.ts |
 
@@ -30,6 +30,7 @@
 | v0.3.8 | 2026-11-10 | Claude | PR 3b(원천이 다른 같은 공고 잇기·신청 인원) 반영 — §5 규칙 19 신설: 원천 키·정정 묶음으로 찾지 못한 공고는 기관·게시일·분류·신혼희망 여부가 같고 공고명·단지 이름·주소에서 뽑은 '지구\|블록' 열쇠가 겹치는, 그 원천 참조가 아직 없는 다른 원천의 수집 공고가 하나뿐이면 같은 공고로 잇는다(후보가 여럿이면 CROSS_SOURCE_AMBIGUOUS로 새 공고). 실데이터 확인: 청약홈 66건 중 36건이 개발 DB의 LH 공고와 하나씩 이어지고 후보가 여럿인 공고는 없다(미결 9 해결). 규칙 13에 기관·게시일 잠금 키 추가(LH·청약홈 수집이 동시에 같은 공고를 따로 만들지 않게). 규칙 18에 신청 인원 = 일반공급 신청(모든 순위·거주지역) + 특별공급 신청현황(APT, getAPTSpsplyReqstStus — 지역 × 유형 신청 수 + 기관추천 확정·이전기관), 특별공급 세대가 있는데 신청현황이 없으면 비움, 다른 공고의 경쟁률이 섞이면 저장하지 않음(COMPETITIONS_MISMATCH). 규칙 12에 신청 인원은 그 값을 정하는 원천(청약홈)이 준 때만 쓰고 다른 원천이 다시 써도 지우지 않음, 청약홈이 보조 원천인 공고는 신청 인원을 옮기지 않음. §4.5·4.7 application_count 근거 보강. v0.3.7의 'GH 공공분양은 청약홈 경쟁률이 없다'를 바로잡음 — GH 광교 A17은 일반공급 접수 중이라 경쟁률이 아직 없었고 특별공급 신청현황은 있다(LH 공공분양은 마감 공고도 0건) 독립 검토 반영 — 지구 이름에서 일반 낱말(단지·임대·주택·사업으로 끝나는 말, 공동·테크노밸리)을 빼고 어느 한쪽 공고명의 지구·블록이 겹쳐야 잇기, 다른 원천이 붙은 공고만 후보로 보고 이미 같은 원천이 이어진 같은 현장 공고가 있으면 받는 순서로 차지하지 않게 잇지 않음(CROSS_SOURCE_TAKEN), 잠금을 기관·게시일 전체에서 지구·블록 단위로 좁힘, 신청 인원을 정하지 않는 원천이 다른 원천의 공고를 넘겨받으면 신청 인원을 비움, 보조 원천인 청약홈의 신청 인원은 경고(APPLICATION_COUNT_NOT_APPLIED)로 남김, 셀 수 없는 신청 인원은 비우지 않고 정하지 않음(알던 값 유지)·특별공급만 있는 주택형은 일반공급 0명, 칸이 없는 단지는 지오코딩하지 않음 |
 | v0.3.9 | 2026-11-11 | Claude | 미결 13 해결 — 사용자 결정(2026-11-11): 든든전세(매입임대 13-26, 공급정보 유형 144)를 수집 범위에 넣는다. 지금 분류표(규칙 14)가 이미 매입임대로 수집하고 있어 코드 변경은 없다(개발 DB에 공고 19건·칸 218개, 2026-11-11). 규칙 14 매입임대 줄에 결정을 적는다 |
 | v0.3.10 | 2026-11-11 | Claude | PR 3c(청약홈 수집 실행) 반영 — §5 규칙 17을 LH·청약홈 수집 실행으로 넓힘: 정규화 뒤 저장·실패 기록·결과 판정·시간 한도·좌표 단계는 두 수집기가 함께 쓰고(sync-run-steps.ts), 청약홈은 다섯 갈래 목록을 모집공고일 범위로 받아 기관·지역·분류로 거른 뒤(민간 분양 1,100여 건은 주택형·경쟁률을 부르지 않는다) 상세 행이 바뀌었거나 진행 중(접수·당첨자 발표·계약 중 가장 늦은 날이 오늘 이후)이고 20시간이 지난 공고, 미해결 ERROR 공고만 다시 받는다. 경쟁률 API는 요청이 겹치면 429를 줘 공고 2건씩 처리하고 429는 쉬었다가 3번까지 다시 부른다. 좌표 경고는 원천과 상관없이 좌표를 얻으면 닫는다. 첫 실제 수집 기록(2026-11-11: 목록 1,231건 → 공공 4기관 66건, LH 공고에 이어짐 36·새 공고 30, 신청 인원 27칸). §4.9 CLI 실행에 `pnpm sync:applyhome` 추가 독립 검토 반영 — 끝났지만 끝나기 전에 받은 공고는 한 번 더 받기, 공고마다 요청을 차례로 보내기(겹친 요청의 재시도가 다음 공고와 겹치지 않게), 목록 단계 경고를 실행 요약의 경고 수에 넣기, §4.9·4.10에 청약홈 원천 키·payload |
+| v0.3.11 | 2026-11-11 | Claude | web 실제 API 연결 준비 — §7 미결 6에 실데이터 지도 핀(1,324개, 목록 한 칸 모양으로 바꾼 응답 771KB·0.16초)과 web이 지금 전체 핀을 한 번 받는다는 점 기록. §4.8 floorplans 근거에 API-031 `subscriptionId`(도면을 보여 주는 칸 가운데 목록 마감 임박순 첫 칸)·`image2dUrl` 추가, §4.11 응답 대응표에 `units[].exclusiveArea`·`floorplans[].image2dUrl`·API-031·API-012 `totalCount` 추가, 미결 6에 파라미터 상한·응답 압축 메모 |
 
 ---
 
@@ -413,14 +414,14 @@ CHECK: area_min ≤ area_max, 금액 ≥ 0. 인덱스 `(subscription_id, display
 
 | 컬럼 | 타입 | NULL | 설명 | 근거 |
 |------|------|:---:|------|------|
-| id | text | N | 도면 식별자 | API-011 `floorplans.id`, API-031 |
+| id | text | N | 도면 식별자. API-031은 도면을 보여 주는 칸(§5 규칙 8) 가운데 목록 마감 임박순 첫 칸을 `subscriptionId`로 함께 준다 | API-011 `floorplans.id`, API-031 |
 | complex_id | text | N | 단지·건물. v0.2까지는 공고(subscription_id)에 붙였다 | §2.1 |
 | floor | text | Y | 같은 도면을 쓰는 층 범위(예: "2-3") | — |
 | unit_number | text | Y | 호수 | — |
 | unit_type | text | Y | 타입 | `floorplans.type` |
 | exclusive_area | decimal(9,4) | Y | 전용면적(㎡). 매입임대는 소수 넷째 자리까지 있다 | — |
 | size_type | text | Y | 주택형 | ITF-003, `floorplans.size` |
-| image_2d_url | text | Y | 2D 도면 이미지 | `has2d` |
+| image_2d_url | text | Y | 2D 도면 이미지 | `has2d`, API-011 `floorplans[].image2dUrl`, API-031 `image2dUrl` |
 | has_3d | bool | N | 3D 집구경 제공 여부 | `has3d` |
 | display_order | int | N | 상세가 보여 주는 순서(첫째가 기본 도면) | — |
 | created_at·updated_at | timestamp | N | 생성·수정 시각 | — |
@@ -482,8 +483,10 @@ web 화면 모델(/zipboda-web/src/entities/subscription/model/types.ts) 기준�
 | `postDate` | notices.post_date |
 | `applyUrl` | notices.apply_url |
 | `supplyUnits`·`recruitCount` | subscriptions.supply_units·recruit_count |
-| `units[]` | subscription_units — `size` = size_type, `type` = unit_type, `label`, `floor` = floor_label, `unitNumber` = unit_number(API 평면도와 같은 이름 — web `unit`으로는 web 매퍼가 바꾼다), `households` = supply_households(없으면 total_households), `price` = 보증금·월임대료·분양가를 읽은 한 줄(없으면 price_note). 값이 없으면 null |
-| `floorplans`(상세) | complex_match가 ADDRESS·MANUAL인 칸의 단지 floorplans. NAME이거나 공고 단위 칸이면 빈 배열 |
+| `units[]` | subscription_units — `size` = size_type, `type` = unit_type, `label`, `floor` = floor_label, `exclusiveArea` = exclusive_area(구간만 있으면 null), `unitNumber` = unit_number(API 평면도와 같은 이름 — web `unit`으로는 web 매퍼가 바꾼다), `households` = supply_households(없으면 total_households), `price` = 보증금·월임대료·분양가를 읽은 한 줄(없으면 price_note). 값이 없으면 null |
+| `floorplans`(상세) | complex_match가 ADDRESS·MANUAL인 칸의 단지 floorplans. NAME이거나 공고 단위 칸이면 빈 배열. `image2dUrl` = image_2d_url |
+| API-031 `complexName`·`subscriptionId` | complexes.name. 칸은 그 단지에서 complex_match가 ADDRESS·MANUAL인 subscriptions 가운데 목록 마감 임박순(접수 중 → 접수 예정 → 최근 마감 → 취소·일정 없음) 첫 칸, 없으면 null |
+| API-012 `totalCount` | 지도와 같은 조건(영역·좌표 조건 빼고)에 맞는 subscriptions 수 |
 | 검색어(API-010 `q`, API-095) | complexes.name·address·sigungu, notices.title·supply_type |
 
 대상별 일정표(subscription_schedules 전체)는 지금 web 화면에 자리가 없어 응답에 넣지 않는다. 화면이 생기면 계약 차이 문서에 더하고 낸다.
@@ -609,7 +612,7 @@ web 화면 모델(/zipboda-web/src/entities/subscription/model/types.ts) 기준�
 | 3 | 3D 자산 형식 | 정의서(API-032)는 glTF/GLB URL, web은 평면도 JSON으로 3D를 생성한다. floorplan_assets 설계 전 결정 필요. 초안 D9는 평면도 모델 JSON을 DB(jsonb, floorplan_models)에 두고 파일은 미디어로 관리하기를 권장한다 | S4 착수 전 |
 | 4 | 정의서에 없는 응답 필드 | recruitCount·contractDate·image 등은 web 기준으로 API 응답에 먼저 넣었다. v0.3에서 `noticeTitle`이 더해지고 `units[].size`가 null일 수 있게 된다. 차이는 /docs/ZIPBODA_api-contract-delta.md에 모은다 | 정의서 일괄 갱신 시 |
 | 5 | ~~목록 정렬을 SQL로~~ **해결(v0.2.3)** | 목록은 조건·정렬(D-day·경쟁률은 SQL 식으로 계산)·LIMIT/OFFSET·건수까지 DB가 하고, id 동순위는 `COLLATE "C"`(문자 코드 순)로 가른다. 측정(2026-10-23, 로컬, /test/perf, 동시 10, 필터 없는 목록 P95): 1만 건 540~578ms → **39~43ms**, 5만 건 177~211ms. **v0.3 재측정(2026-11-02, PR 1)**: 합성 데이터를 공고×단지 구조로 바꿔(공고당 칸 2, 칸당 주택형 2, 공고 단위 칸 5%, 이름 연결 70%, 단지 20%에 평면도) 같은 도구·조건(동시 10, 측정 DB만 병렬 쿼리 끔)으로 잼 — 목록 시나리오 8종 P95 1만 칸 58~133ms, 5만 칸 39~222ms(가장 느린 것은 검색어·지역+기관+면적). 필터 선택지는 처음 모양에서 5만 칸 P95 506ms였다 — 면적 구간 확인을 EXISTS로 감싸면 플래너가 주택형 전체로 해시를 만든 뒤에야 첫 행을 봐서, 맞는 행에서 바로 멈추는 모양으로 따로 두고 선택지 16개를 한 쿼리로 물어 **31ms**(1만 칸 32ms) | — |
-| 6 | 지도 핀 개수 | API-012는 영역 안의 핀을 모두 준다. 합성 공고로 서울 영역 핀 4,049개(1만 건)에서 P95 426ms, 19,877개(5만 건)에서 1.8초 — 응답 크기가 핀 수에 비례한다. 확대 단계별 상한이나 서버 클러스터링(격자로 묶은 개수)을 둘지 web 지도와 함께 정한다. v0.3에서는 같은 단지가 여러 공고에 나와 핀이 겹치므로 핀을 단지 단위로 묶을지, 좌표 인덱스를 GiST로 바꿀지도 함께 정한다. v0.3 합성 데이터(좌표 있는 단지 30%)에서 서울 영역 핀 1,238개(1만 칸) P95 170ms, 6,027개(5만 칸) P95 556ms(2026-11-02). 참고: Docker로 띄운 Postgres는 /dev/shm 기본 64MB라 shm_size를 넉넉히 준다 | API-114 연계로 실제 건수가 들어올 때 |
+| 6 | 지도 핀 개수 | API-012는 영역 안의 핀을 모두 준다. 합성 공고로 서울 영역 핀 4,049개(1만 건)에서 P95 426ms, 19,877개(5만 건)에서 1.8초 — 응답 크기가 핀 수에 비례한다. 확대 단계별 상한이나 서버 클러스터링(격자로 묶은 개수)을 둘지 web 지도와 함께 정한다. v0.3에서는 같은 단지가 여러 공고에 나와 핀이 겹치므로 핀을 단지 단위로 묶을지, 좌표 인덱스를 GiST로 바꿀지도 함께 정한다. v0.3 합성 데이터(좌표 있는 단지 30%)에서 서울 영역 핀 1,238개(1만 칸) P95 170ms, 6,027개(5만 칸) P95 556ms(2026-11-02). 참고: Docker로 띄운 Postgres는 /dev/shm 기본 64MB라 shm_size를 넉넉히 준다. **실데이터(2026-11-11)**: 좌표 있는 칸 1,324개(전체 3,276칸) — web 지도 옆 목록이 핀마다 카드를 그려 핀을 목록 한 칸 모양으로 바꿨고, web은 영역 없이 전체 핀을 한 번 받는다(응답 771KB·0.2~0.6초, API 압축 없음). 핀이 늘면 영역별 조회·단지 단위 핀으로 옮긴다. 핀 id를 다시 읽을 때 칸마다 bind 파라미터를 하나씩 써서 핀이 6.5만 개를 넘으면 PostgreSQL 파라미터 상한(65,535)에 걸린다 — 그 전에 배열 파라미터(`= ANY`)·영역 조회로 바꾼다. 배포할 때 응답 압축(리버스 프록시나 압축 미들웨어)을 켠다 | API-114 연계로 실제 건수가 들어올 때 |
 | 7 | 정정공고 판별 규칙 검증 | §5 규칙 7은 LH 공고 999건 표본의 정정 묶음으로 세웠다. 이 표본은 이름만으로 묶었고 지역별 조회에서 생긴 같은 PAN_ID 중복을 빼지 않아 묶음 수(175개)가 부풀었을 수 있다. 수집 후 ① 같은 날 같은 이름의 정정이 아닌 다른 공고, ② 정정본 게시일이 원 공고와 다른 사례, ③ 예비자 포함 공급 세대와 신청 인원이 함께 있는 공고가 있는지 확인한다 | PR 2(LH 수집기) |
 | 8 | 매입임대 건물 위치 | 대부분 건물 이름·시군구만 있어 지도 핀이 없다. 일부 공고(인천 일반 매입임대)는 호별 주소를 주므로 그 주소로 단지를 판별하고 지오코딩한다. 이름으로 지오코딩(카카오 키워드 검색)할지는 정확도를 보고 정한다 주소가 있는 단지는 수집 뒤 카카오 주소 검색으로 좌표를 채운다(규칙 17). 첫 수집(2026-11-10)에서 단지 2,058곳 중 주소가 있는 곳은 953곳이고, 100곳(OK 85·NOT_FOUND 15)을 찾은 직후 카카오가 호출 한도 초과(HTTP 400, code -10)를 돌려줬다 — 카카오 개발자 콘솔에서 이 앱의 로컬 API 일일 한도를 확인하고, 모자라면 실행당 단지 수(2,000)를 한도에 맞춘다 | PR 2 |
 | 9 | ~~LH·청약홈 같은 공고 잇기~~ **해결(v0.3.8)** | §5 규칙 19 — 기관·게시일·분류·신혼희망 여부가 같고 지구·블록 열쇠가 겹치는 다른 원천의 공고가 하나뿐이면 잇는다. 실데이터에서 청약홈 66건 중 36건이 LH 공고와 하나씩 이어지고 후보가 여럿인 공고는 없다. 청약홈은 정정을 같은 공고번호에 덮어써 정정 표시가 없어(규칙 18) 정정본이 새 공고로 갈리는 문제는 없다. LH 공공분양은 청약홈 경쟁률이 없다(기관이 직접 접수) | — |

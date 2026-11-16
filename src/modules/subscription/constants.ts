@@ -3,6 +3,8 @@ export const SERVICE_TIME_ZONE = 'Asia/Seoul';
 
 /** 공고 식별자 길이 상한. 기관 공고번호가 들어와도 넉넉한 길이로, 비정상적으로 긴 경로는 검증에서 막는다 */
 export const SUBSCRIPTION_ID_MAX_LENGTH = 100;
+/** 평면도 식별자 길이 상한. 시드 도면 id(단지-층-호)보다 넉넉하게 두고, 비정상적으로 긴 경로는 검증에서 막는다 */
+export const FLOORPLAN_ID_MAX_LENGTH = 100;
 
 /**
  * 공고×단지 칸이 단지를 정한 방법이자 단지 별칭이 생긴 방법(ERD §5 규칙 8). 마이그레이션 CHECK와 같은 값이다.
@@ -123,6 +125,9 @@ export const SIZE_RANGE_VALUES: readonly string[] = SIZE_RANGES.map((range) => r
 export const SUBSCRIPTION_SORTS = ['DEADLINE', 'COMPETITION', 'HOUSEHOLDS'] as const;
 export type SubscriptionSort = (typeof SUBSCRIPTION_SORTS)[number];
 export const DEFAULT_SUBSCRIPTION_SORT: SubscriptionSort = 'DEADLINE';
+
+/** 마감 임박순에서 상태 묶음의 순서. 목록 SQL(ORDER_BY.DEADLINE)과 검색 순위(compareDeadline)가 함께 쓴다 */
+export const DEADLINE_GROUP = { OPEN: 0, UPCOMING: 1, CLOSED: 2, OTHER: 3 } as const;
 
 export const DEFAULT_PAGE_SIZE = 20;
 /** web 지도 첫 화면은 목록 데이터로 핀까지 그려 한 번에 많이 받는다. 그보다 많으면 페이지를 나눠 받게 한다 */
