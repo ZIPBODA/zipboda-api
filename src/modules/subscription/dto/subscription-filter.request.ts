@@ -59,12 +59,15 @@ export class SubscriptionFilterQuery {
   keyword?: string;
 }
 
-export class SubscriptionListQuery extends SubscriptionFilterQuery {
+/** 목록과 지도가 같은 정렬을 쓴다 — web 지도 옆 목록이 핀을 받은 순서대로 카드로 그리고, 같은 '결과 정렬'을 단다 */
+class SubscriptionSortedQuery extends SubscriptionFilterQuery {
   @IsOptional()
   @Transform(emptyAs(DEFAULT_SUBSCRIPTION_SORT))
   @IsIn(SUBSCRIPTION_SORTS)
   sort: SubscriptionSort = DEFAULT_SUBSCRIPTION_SORT;
+}
 
+export class SubscriptionListQuery extends SubscriptionSortedQuery {
   @IsOptional()
   @Transform(toIntegerOr(1))
   @IsInt()
@@ -81,7 +84,7 @@ export class SubscriptionListQuery extends SubscriptionFilterQuery {
 }
 
 /** 지도 영역 "남,서,북,동"(위도·경도). 없으면 영역 조건을 걸지 않는다 */
-export class SubscriptionMapQuery extends SubscriptionFilterQuery {
+export class SubscriptionMapQuery extends SubscriptionSortedQuery {
   @IsOptional()
   @Transform(emptyAsUndefined)
   @IsGeoBoundsText()

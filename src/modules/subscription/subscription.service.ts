@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { AgencyCode, RegionCode, SubscriptionStatusCode } from '@/common/constants/interface-codes.js';
 import { AppException } from '@/common/errors/app.exception.js';
 import { Clock } from '@/common/time/clock.js';
+import type { FloorplanDetailResponse } from './dto/floorplan-detail.response.js';
 import type { SearchQuery } from './dto/search.request.js';
 import type { SearchResponse } from './dto/search.response.js';
 import type { SubscriptionDetailResponse } from './dto/subscription-detail.response.js';
@@ -24,6 +25,7 @@ import {
   sortSearchResults,
   type GeoBounds,
 } from './list-rules.js';
+import { toFloorplanDetailResponse } from './mappers/floorplan.mapper.js';
 import { toSubscriptionDetailResponse } from './mappers/subscription-detail.mapper.js';
 import { agencyCodeOf, regionCodeOf } from './mappers/subscription-fields.js';
 import { toListItemResponse, toMapMarkerResponse, toSearchCandidate } from './mappers/subscription-list.mapper.js';
@@ -43,6 +45,13 @@ export class SubscriptionService {
     const record = await this.repository.findDetailById(id);
     if (!record) throw new AppException('NOT_FOUND');
     return toSubscriptionDetailResponse(record, this.today());
+  }
+
+  async getFloorplan(id: string): Promise<FloorplanDetailResponse> {
+    const record = await this.repository.findFloorplanById(id);
+    if (!record) throw new AppException('NOT_FOUND');
+    const subscriptionId = await this.repository.findFloorplanSubscriptionId(record.complexId, this.today());
+    return toFloorplanDetailResponse(record, subscriptionId);
   }
 
   /** 도면까지 담은 행은 무거워서, DB가 정렬·페이지로 고른 id 몫만 다시 읽는다 */
@@ -84,16 +93,17 @@ export class SubscriptionService {
     };
   }
 
+  /** web 지도 옆 목록이 핀마다 카드를 그려, 핀도 목록 한 칸과 같은 모양·같은 정렬로 준다 */
   async mapMarkers(query: SubscriptionMapQuery): Promise<SubscriptionMapResponse> {
     const today = this.today();
     const bounds = query.bounds ? parseBounds(query.bounds) : undefined;
-    const rows = await this.repository.findMarkerRows(this.filterOf(query, today, bounds));
-    return {
-      markers: rows.flatMap((row) => {
-        const marker = toMapMarkerResponse(row, today);
-        return marker ? [marker] : [];
-      }),
-    };
+    const filter = this.filterOf(query, today, bounds);
+    const [ids, totalCount] = await Promise.all([
+      this.repository.findMarkerIds(filter, query.sort, today),
+      this.repository.countListed(this.filterOf(query, today)),
+    ]);
+    const items = await this.listItemsInOrder(ids, filter, today);
+    return { markers: items.flatMap(toMapMarkerResponse), totalCount };
   }
 
   /** 걸린 조건과 상관없이 목록 전체로 센다 — 지금 조건으로 세면 선택지가 누를 때마다 사라져 되돌아갈 수 없다 */
