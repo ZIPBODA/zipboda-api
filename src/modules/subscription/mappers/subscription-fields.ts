@@ -7,6 +7,7 @@ import {
 } from '@/common/constants/interface-codes.js';
 import { FLOORPLAN_VISIBLE_MATCHES } from '../constants.js';
 import { toIsoDate, type ApplySchedule } from '../schedule.js';
+import { isLhImageViewerUrl } from '../sync/lh/lh-image-url.js';
 
 export const isoDateOrNull = (date: Date | null): string | null => (date ? toIsoDate(date) : null);
 
@@ -51,3 +52,9 @@ export const addressOf = (
 /** 이름으로만 이은 단지는 같은 이름의 다른 건물일 수 있어 평면도를 보여 주지 않는다(ERD §5 규칙 8) */
 export const isFloorplanVisible = (complexMatch: string | null): boolean =>
   complexMatch !== null && FLOORPLAN_VISIBLE_MATCHES.includes(complexMatch);
+
+/** 아직 사진 주소로 바꾸지 못한 LH 보기 페이지 주소는 <img>로 그리면 깨져 내보내지 않는다(ERD §5 규칙 16) */
+export const imageUrlOf = (complex: { imageUrl: string | null } | null): string | null => {
+  const url = complex?.imageUrl ?? null;
+  return url !== null && isLhImageViewerUrl(url) ? null : url;
+};

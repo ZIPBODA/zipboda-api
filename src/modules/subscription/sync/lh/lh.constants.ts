@@ -77,3 +77,23 @@ export const LH_GENERIC_COMPLEX_NAME = /^매입[^()]*\([^()]+\)$/;
 /** 대표 이미지로 쓸 수 있는 첨부(ERD §5 규칙 16). 단지조감도라도 PDF면 첨부로만 둔다 */
 export const LH_IMAGE_FILE = /\.(jpe?g|png|webp)$/i;
 export const LH_PREFERRED_IMAGE_KIND = '조감도';
+
+/**
+ * 단지 첨부의 AHFL_URL은 사진 파일이 아니라 사진 한 장을 감싼 보기 페이지(HTML)다 — <img>로 그리면 깨진다.
+ * 페이지의 <img src>가 실제 사진 주소라 수집이 한 번 읽어 바꿔 둔다(ERD §5 규칙 16)
+ */
+export const LH_IMAGE_VIEWER = { host: 'apply.lh.or.kr', path: '/lhapply/lhImageView2.do' } as const;
+/** 사진 파일은 청약센터의 이 경로 아래에 있다. 오류 그림(/00_common/…)·'이미지 없음' 그림(/images/…)과 가른다 */
+export const LH_IMAGE_FILE_PATH = '/upload/';
+/**
+ * <img>의 src 속성 값. 앞에 공백이 있어야 한다 — 파일이 없는 페이지는 `<img src="" onerror="this.src='…noImg.gif'">`라
+ * onerror 안의 this.src를 사진 주소로 읽으면 안 된다. 빈 값도 받는다(파일 없음)
+ */
+export const LH_IMAGE_SRC = /<img\b[^>]*?\ssrc\s*=\s*(["'])(.*?)\1/i;
+/** 한 번의 실행에서 사진 주소를 바꾸는 단지 수. 처음 바꿀 때 400여 곳이 밀려 있다 */
+export const LH_IMAGE_BATCH_SIZE = 500;
+export const LH_IMAGE_TIMEOUT_MS = 20_000;
+/** 사진 단계가 쓰는 시간 상한 — 느린 응답이 이어져도 뒤의 좌표 단계가 실행 시간 한도를 다 빼앗기지 않게 */
+export const LH_IMAGE_TIME_BUDGET_MS = 10 * 60_000;
+/** 보기 페이지가 연달아 실패하면(LH 장애·페이지 모양 변경) 남은 단지마다 경고를 쌓지 않고 다음 실행에 넘긴다 */
+export const LH_IMAGE_MAX_CONSECUTIVE_FAILURES = 5;

@@ -52,10 +52,12 @@ describe('수집 명령 인자', () => {
       warnings: 2,
       geocoded: 3,
       notFound: 1,
+      imagesResolved: 4,
       geocodeStopped: 'QUOTA_EXCEEDED',
     });
     expect(lines[0]).toBe('결과 PARTIAL (실행 run-1)');
     expect(lines[2]).toBe('새 공고 30건 · 갱신 0건 · 다른 공고에 참조로 이음 36건');
     expect(lines[4]).toBe('좌표 3건 · 주소로 못 찾음 1건 · 좌표 찾기 멈춤(QUOTA_EXCEEDED)');
+    expect(lines[5]).toBe('단지 사진 주소 바꿈 4건');
   });
 });

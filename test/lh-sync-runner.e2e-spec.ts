@@ -44,6 +44,15 @@ const keyOf = (row: LhRow): string => `${row.CCR_CNNT_SYS_DS_CD}:${row.PAN_ID}`;
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const IMAGE_VIEWER = 'https://apply.lh.or.kr/lhapply/lhImageView2.do?fileid=';
+/** 실제 보기 페이지와 같은 모양 — 사진 한 장을 감싼 HTML이고 <img src>가 청약센터 안의 상대 주소다 */
+const imagePageHtml = (fileId: string) =>
+  `<html><body><img src="/upload/Files/upload_dec/2026/LSE/10/22/20261022${fileId}.jpg" alt="" onerror="this.src='/images/co/na/noImg.gif'"/></body></html>`;
+// 2026-11-12 LH가 실제로 준 '파일 없음'(없는 fileid)·오류(형식이 틀린 fileid) 페이지 — 둘 다 200으로 온다
+const imageFixture = (name: string) =>
+  readFileSync(path.join(process.cwd(), 'test', 'fixtures', 'lh', 'image-pages', `${name}.html`), 'utf8');
+const IMAGE_FILE = /^https:\/\/apply\.lh\.or\.kr\/upload\/Files\/upload_dec\/2026\/LSE\/10\/22\/20261022\d+\.jpg$/;
+
 /** LH API 대신 저장해 둔 실제 응답을 돌려준다. 목록은 쪽 크기(LH_PAGE_SIZE)로 나눠 준다 */
 class FakeLh implements LhSource {
   readonly failingLists = new Set<string>();
@@ -52,7 +61,14 @@ class FakeLh implements LhSource {
   readonly unexpectedErrors = new Map<string, Error>();
   readonly slowNotices = new Set<string>();
   readonly fetched: string[] = [];
+  readonly imagePages: string[] = [];
   listsDown = false;
+  imagePagesDown = false;
+  imagePagesMissing = false;
+  imagePagesUnexpected = false;
+  /** 이 fileid의 보기 페이지만 실패한다 */
+  readonly failingImageIds = new Set<string>();
+  beforeImagePage: () => void = () => undefined;
   beforeFetch: () => Promise<void> | void = () => undefined;
   private readonly lists = new Map<string, LhRow[]>();
   private readonly bundles = new Map<string, LhNoticeBundle>();
@@ -71,6 +87,17 @@ class FakeLh implements LhSource {
     }
     const rows = this.lists.get(listKey) ?? [];
     return Promise.resolve(rows.slice((page - 1) * LH_PAGE_SIZE, page * LH_PAGE_SIZE));
+  }
+
+  imagePageOf(url: string): Promise<string> {
+    this.imagePages.push(url);
+    this.beforeImagePage();
+    const fileId = new URL(url).searchParams.get('fileid') ?? '';
+    if (this.imagePagesDown || this.failingImageIds.has(fileId))
+      return Promise.reject(new LhApiError('HTTP_500', 'LH 단지 사진 보기 페이지가 500으로 응답했다'));
+    if (this.imagePagesMissing) return Promise.resolve(imageFixture('missing'));
+    if (this.imagePagesUnexpected) return Promise.resolve(imageFixture('error'));
+    return Promise.resolve(imagePageHtml(fileId));
   }
 
   async bundleOf(notice: LhRow, queryRegion: string): Promise<LhNoticeBundle> {
@@ -517,6 +544,156 @@ describe('LH 수집 실행 (e2e)', () => {
 
       expect(unavailable.queries).toHaveLength(5);
       expect(summary).toMatchObject({ warnings: 5, geocodeStopped: 'CONSECUTIVE_FAILURES' });
+    });
+  });
+
+  // LH 단지 첨부의 AHFL_URL은 사진 파일이 아니라 사진을 감싼 보기 페이지다(ERD §5 규칙 16)
+  describe('단지 사진', () => {
+    const saleLh = () => new FakeLh().list('28', '05', fixture('sale'));
+    const imagesOf = async () =>
+      (await prisma.complex.findMany({ where: { imageUrl: { not: null } }, select: { imageUrl: true } }))
+        .map((complex) => complex.imageUrl)
+        .sort();
+    const viewerCount = () => prisma.complex.count({ where: { imageUrl: { startsWith: IMAGE_VIEWER } } });
+    const imageWarnings = async () =>
+      (await openFailures()).filter(
+        (failure) => failure.stage === 'FETCH' && (failure.sourceKey ?? '').startsWith('complex:'),
+      );
+
+    it('수집한 단지의 보기 페이지를 읽어 실제 사진 주소로 바꾸고, 다시 받아도 보기 주소로 되돌리지 않는다', async () => {
+      const lh = saleLh();
+      const summary = await run(runnerOf(lh));
+
+      const images = await imagesOf();
+      expect(images.length).toBeGreaterThan(0);
+      for (const url of images) expect(url).toMatch(IMAGE_FILE);
+      expect(summary).toMatchObject({ imagesResolved: images.length, warnings: 0 });
+      expect(lh.imagePages).toHaveLength(images.length);
+      for (const page of lh.imagePages) expect(page.startsWith(IMAGE_VIEWER)).toBe(true);
+
+      // 공고를 다시 받아 원천이 또 보기 주소를 줘도 단지 사진은 비어 있을 때만 채운다
+      lh.imagePages.length = 0;
+      await run(runnerOf(lh, { now: hoursAfter(1) }), true);
+      expect(lh.imagePages).toEqual([]);
+      expect(await imagesOf()).toEqual(images);
+    });
+
+    it('보기 페이지를 받지 못하면 보기 주소를 남겨 경고하고, 다음 실행에서 바꾸면 경고를 닫는다', async () => {
+      const lh = saleLh();
+      lh.imagePagesDown = true;
+      const first = await run(runnerOf(lh));
+
+      const pending = await viewerCount();
+      expect(pending).toBeGreaterThan(0);
+      expect(first).toMatchObject({ status: 'SUCCEEDED', imagesResolved: 0 });
+      const warnings = await imageWarnings();
+      expect(warnings).toHaveLength(Math.min(pending, 5));
+      for (const warning of warnings) expect(warning).toMatchObject({ level: 'WARNING', errorCode: 'HTTP_500' });
+
+      lh.imagePagesDown = false;
+      const second = await run(runnerOf(lh, { now: hoursAfter(1) }));
+      expect(second.imagesResolved).toBe(pending);
+      expect(await viewerCount()).toBe(0);
+      expect(await imageWarnings()).toEqual([]);
+    });
+
+    // LH는 없는 파일에도 200으로 `<img src="" onerror="this.src='…noImg.gif'">`를 준다 — '이미지 없음' 그림을 사진으로 저장하지 않는다
+    it('LH가 파일이 없다고 알리면 사진 없음으로 두고, 지난 실행의 다시 시도 경고는 닫는다', async () => {
+      const lh = saleLh();
+      lh.imagePagesDown = true;
+      await run(runnerOf(lh));
+      const tried = (await imageWarnings()).map((warning) => warning.sourceKey);
+      expect(tried.length).toBeGreaterThan(0);
+
+      lh.imagePagesDown = false;
+      lh.imagePagesMissing = true;
+      lh.imagePages.length = 0;
+      const summary = await run(runnerOf(lh, { now: hoursAfter(1) }));
+
+      expect(await imagesOf()).toEqual([]);
+      expect(summary.imagesResolved).toBe(0);
+      const warnings = await imageWarnings();
+      expect(warnings).toHaveLength(lh.imagePages.length);
+      for (const warning of warnings) expect(warning.errorCode).toBe('IMAGE_NOT_IN_PAGE');
+    });
+
+    // 사진 없음으로 둔 단지는 공고를 다시 받을 때 원천이 보기 주소를 다시 채워 한 번 더 확인한다 — 경고는 한 줄로 retry_count만 오른다
+    it('사진 없음으로 둔 단지는 공고를 다시 받으면 한 번 더 확인하고, 경고는 늘지 않는다', async () => {
+      const lh = saleLh();
+      lh.imagePagesMissing = true;
+      await run(runnerOf(lh));
+      const first = await imageWarnings();
+
+      lh.imagePages.length = 0;
+      await run(runnerOf(lh, { now: hoursAfter(1) }), true);
+
+      expect(lh.imagePages).toHaveLength(first.length);
+      const again = await imageWarnings();
+      expect(again.map((warning) => warning.id).sort()).toEqual(first.map((warning) => warning.id).sort());
+      for (const warning of again) expect(warning.retryCount).toBe(1);
+    });
+
+    it('오류·점검 페이지처럼 모양을 모르는 페이지는 사진 없음으로 단정하지 않고 보기 주소를 남긴다', async () => {
+      const lh = saleLh();
+      lh.imagePagesUnexpected = true;
+      await run(runnerOf(lh));
+
+      const pending = await viewerCount();
+      expect(pending).toBeGreaterThan(0);
+      expect(await imagesOf()).toHaveLength(pending);
+      const warnings = await imageWarnings();
+      expect(warnings).toHaveLength(Math.min(pending, 5));
+      for (const warning of warnings) expect(warning.errorCode).toBe('IMAGE_PAGE_UNEXPECTED');
+    });
+
+    const createViewerComplexes = async (count: number) => {
+      // 칸이 없어도 사진은 바꾼다 — 단지는 공고가 다시 나올 때 칸을 얻는다
+      for (let index = 0; index < count; index++) {
+        await prisma.complex.create({
+          data: {
+            id: `img-${index}`,
+            agencyCode: 1,
+            regionCode: 1,
+            name: `사진 단지 ${index}`,
+            imageUrl: `${IMAGE_VIEWER}${9000 + index}`,
+          },
+        });
+      }
+    };
+
+    it('보기 페이지가 연달아 5번 실패하면 멈추고, 다음 실행은 실패했던 단지를 뒤로 미뤄 나머지를 먼저 바꾼다', async () => {
+      await createViewerComplexes(7);
+      const lh = new FakeLh();
+      for (let index = 0; index < 5; index++) lh.failingImageIds.add(String(9000 + index));
+      const logs: string[] = [];
+      const first = await run(runnerOf(lh, { logs }));
+
+      expect(lh.imagePages).toHaveLength(5);
+      expect(first.warnings).toBe(5);
+      expect(logs.some((line) => line.includes('CONSECUTIVE_FAILURES'))).toBe(true);
+      expect(await viewerCount()).toBe(7);
+
+      // 계속 실패하는 단지가 앞을 막지 않는다
+      lh.imagePages.length = 0;
+      const second = await run(runnerOf(lh, { now: hoursAfter(1) }));
+      expect(lh.imagePages.slice(0, 2)).toEqual([`${IMAGE_VIEWER}9005`, `${IMAGE_VIEWER}9006`]);
+      expect(second.imagesResolved).toBe(2);
+      expect(await viewerCount()).toBe(5);
+    });
+
+    it('사진 단계는 따로 시간 상한(10분)이 있어 남은 단지를 다음 실행에 넘긴다', async () => {
+      await createViewerComplexes(3);
+      let current = NOW;
+      const lh = new FakeLh();
+      lh.beforeImagePage = () => {
+        current = new Date(current.getTime() + 11 * 60_000);
+      };
+      const logs: string[] = [];
+      const summary = await run(runnerOf(lh, { clock: () => current, logs }));
+
+      expect(lh.imagePages).toHaveLength(1);
+      expect(summary.imagesResolved).toBe(1);
+      expect(logs.some((line) => line.includes('TIME_BUDGET'))).toBe(true);
     });
   });
 });

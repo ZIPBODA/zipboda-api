@@ -5,7 +5,7 @@
 | 항목 | 내용 |
 |------|------|
 | 문서명 | 집보다(Zipboda) 공공데이터 연계 원천 조사 — LH·SH·GH·IH·청약홈 공고 API와 테이블 매핑 |
-| 버전 | v0.2.3 |
+| 버전 | v0.2.4 |
 | 작성일 | 2026-10-26 |
 | 기반 문서 | /docs/ZIPBODA_development-plan_v0.1.md, /docs/ZIPBODA_erd_v0.1.md, /docs/ZIPBODA_erd-draft_v0.1.md, /src/database/schema.prisma |
 
@@ -18,6 +18,7 @@
 | v0.2.1 | 2026-10-27 | Claude | ERD v0.3.1 구조와 맞춤 — §5 열 매핑이 v0.2 테이블 기준 조사 결과임을 밝히고 ERD §4 근거 열·§4.6 일정 대응표를 대표로 지정. §7 설계 영향 1(원천 키를 notice_sources PK(source, source_key)로, 정정본 PAN_ID도 같은 공고의 원천 참조로)·2(값별 정하는 원천은 ERD 규칙 12·13, 매칭 실패는 sync_failures WARNING)·3(금액은 원 단위 정수 열 + price_note)·5(geocode_method → complexes.geocode_status)의 근거를 ERD 초안 §5.2에서 ERD v0.3으로 바꿈 |
 | v0.2.2 | 2026-11-10 | Claude | §10.1에 청약홈 실데이터 조사 추가(모집공고일 2025-11-01 이후 다섯 갈래, 사업주체가 공공 4기관이고 서울·인천·경기인 공고 66건 — SH는 법인 이름 '서울주택도시개발공사'로 옴, LH 민간참여형은 LH API에 없음). §10.2 미확인 3(청약홈 공공분양 경쟁률) 확인 — LH·GH 공공분양은 경쟁률이 없고 청약홈으로 접수받은 공고만 있다. §4.2 모집공고일 형식(임의공급·공공지원 민간임대만 YYYYMMDD) 추가 |
 | v0.2.3 | 2026-11-10 | Claude | §10.2 미확인 3 바로잡음 — GH 광교 A17은 일반공급 접수 중이라 경쟁률이 아직 없었을 뿐이고 특별공급 신청현황(getAPTSpsplyReqstStus)은 있다. 경쟁률이 없다고 확인된 것은 LH 공공분양(마감 공고 포함)이다. §4.2에 특별공급 신청현황 추가 |
+| v0.2.4 | 2026-11-12 | Claude | §(테이블 매핑) image_url — LH dsSbdAhfl AHFL_URL이 사진 파일이 아니라 사진을 감싼 보기 페이지(HTML)임을 적고, 수집이 페이지의 `<img src>`로 실제 사진 주소를 얻는다는 점 추가(ERD §5 규칙 16) |
 
 ---
 
@@ -96,7 +97,7 @@
 | contract_date | CTRT_ST_DT·CTRT_ED_DT | CNTRCT_CNCLS_BGNDE·ENDDE | 없음 |
 | move_in_month | MVIN_XPC_YM(자유형식 "2019년 12월", "2015.10") | MVN_PREARNGE_YM | 없음 |
 | apply_url | DTL_URL(_MOB) | PBLANC_URL·HMPG_ADRES | link |
-| image_url | dsSbdAhfl AHFL_URL(조감도·배치도) | 없음 | 없음 |
+| image_url | dsSbdAhfl AHFL_URL(조감도·배치도). 사진 파일이 아니라 사진을 감싼 보기 페이지(`/lhapply/lhImageView2.do?fileid=`)라 수집이 페이지의 `<img src>`(`/upload/Files/…jpg`)로 바꾼다(ERD §5 규칙 16) | 없음 | 없음 |
 | cancelled_at | 없음 — PAN_SS '정정공고중', dsEtcInfo CRC_RSN으로 추론만 | 없음 | 없음 |
 
 당첨자발표일(LH PZWR_ANC_DT, 청약홈 PRZWNER_PRESNATN_DE)과 공고 PDF(LH dsAhflInfo AHFL_URL)도 받을 수 있다 — 지금 테이블에는 열이 없다.

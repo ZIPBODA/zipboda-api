@@ -76,6 +76,7 @@ export const summaryLinesOf = (summary: SyncSummary): string[] => [
   `새 공고 ${summary.created}건 · 갱신 ${summary.updated}건 · 다른 공고에 참조로 이음 ${summary.referenced}건`,
   `수집 범위 밖 ${summary.excluded}건 · 분류표에 없음 ${summary.unclassified}건 · 실패 ${summary.failed}건 · 경고 ${summary.warnings}건`,
   `좌표 ${summary.geocoded}건 · 주소로 못 찾음 ${summary.notFound}건${summary.geocodeStopped === null ? '' : ` · 좌표 찾기 멈춤(${summary.geocodeStopped})`}`,
+  `단지 사진 주소 바꿈 ${summary.imagesResolved}건`,
 ];
 
 export interface SyncCommand {

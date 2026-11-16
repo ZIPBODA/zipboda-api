@@ -129,6 +129,16 @@ describe('청약 공고 상세', () => {
     });
   });
 
+  // LH 보기 페이지는 사진을 감싼 HTML이라 <img>로 그리면 깨진다 — 수집이 사진 주소로 바꾸기 전에는 내보내지 않는다
+  it('아직 사진 주소로 바꾸지 못한 LH 보기 페이지 주소는 대표 사진으로 주지 않는다', async () => {
+    const viewer = 'https://apply.lh.or.kr/lhapply/lhImageView2.do?fileid=69101985';
+    const photo = 'https://apply.lh.or.kr/upload/Files/upload_dec/2026/LSE/10/22/2026102269101985.jpg';
+    const pending = serviceWith(record({ complex: complex({ imageUrl: viewer }) }), NOW).service;
+    await expect(pending.getDetail('gangnam-gaepo-26-3')).resolves.toMatchObject({ imageUrl: null });
+    const resolved = serviceWith(record({ complex: complex({ imageUrl: photo }) }), NOW).service;
+    await expect(resolved.getDetail('gangnam-gaepo-26-3')).resolves.toMatchObject({ imageUrl: photo });
+  });
+
   it('공고 취소는 일정과 상관없이 취소 상태다', async () => {
     const cancelled = record({ notice: { ...record().notice, cancelledAt: new Date('2026-09-02T00:00:00Z') } });
     const { service } = serviceWith(cancelled, NOW);

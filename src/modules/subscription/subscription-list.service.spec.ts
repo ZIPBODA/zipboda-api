@@ -110,6 +110,17 @@ describe('청약 공고 목록(API-010)', () => {
     ]);
   });
 
+  it('아직 사진 주소로 바꾸지 못한 LH 보기 페이지 주소는 목록 사진으로 주지 않는다', async () => {
+    const { service, repository } = serviceWith(PAGE);
+    const viewer = {
+      ...listRecord('open'),
+      complex: { ...listRecord('open').complex!, imageUrl: 'https://apply.lh.or.kr/lhapply/lhImageView2.do?fileid=1' },
+    };
+    repository.findListedByIds.mockResolvedValueOnce([viewer]);
+    const { items } = await service.list(listQuery());
+    expect(items.find((item) => item.id === 'open')?.imageUrl).toBeNull();
+  });
+
   it('이름으로만 이은 단지의 평면도 면적은 넣지 않고, 주택형 전용면적은 넣는다', async () => {
     const { service, repository } = serviceWith(PAGE);
     repository.findListedByIds.mockResolvedValueOnce([
