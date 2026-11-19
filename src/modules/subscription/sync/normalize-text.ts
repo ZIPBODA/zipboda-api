@@ -24,6 +24,9 @@ export const MAX_WON = 9_223_372_036_854_775_807n;
 const DATE_PATTERN = /^(\d{4})[.-]?(\d{2})[.-]?(\d{2})\.?$/;
 /** 입주 시기 "2028년 07월"·"2027.02"·"202812" */
 const YEAR_MONTH_PATTERN = /^(\d{4})\s*(?:년\s*|[.-])?(\d{1,2})\s*월?$/;
+/** 자리 표시값 — 앞 네 자리가 연도이고 나머지는 숫자·구분자뿐 */
+const PLACEHOLDER_DATE_PATTERN = /^(\d{4})[\d\s.-]*$/;
+const PLACEHOLDER_YEARS: ReadonlySet<string> = new Set(['0000', '0001', '2999', '9999']);
 const TIME_PATTERN = /^(\d{1,2}):(\d{2})$/;
 const DATE_TIME_PATTERN = /^(\S+)\s+(\d{1,2}:\d{2})$/;
 const AREA_RANGE_PATTERN = /^(\d+(?:\.\d+)?)\s*~\s*(\d+(?:\.\d+)?)\s*㎡?$/;
@@ -63,6 +66,15 @@ export const parseYearMonth = (text: string | null): string | null => {
   const [year, month] = [Number(match[1]), Number(match[2])];
   const valid = MIN_YEAR <= year && year <= MAX_YEAR && MIN_MONTH <= month && month <= MAX_MONTH;
   return valid ? `${year}-${pad2(month)}` : null;
+};
+
+/**
+ * LH가 '정해지지 않음'을 날짜·연월 칸에 적는 자리 표시값인지(ERD §5 규칙 9) — 계약 시작·끝 '9999.12.31'·'99991231', 입주
+ * 예정 '0000.01'·'0001.01'·'2999.01'·'0000. 0'. 읽지 못한 값이 아니라 미정이다. 부른 쪽은 이 값이 확인된 칸에서만 경고 없이 비운다
+ */
+export const isPlaceholderDate = (text: string | null): boolean => {
+  const year = text?.match(PLACEHOLDER_DATE_PATTERN)?.[1];
+  return year !== undefined && PLACEHOLDER_YEARS.has(year);
 };
 
 const parseTime = (text: string): string | null => {

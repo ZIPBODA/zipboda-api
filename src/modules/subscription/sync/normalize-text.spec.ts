@@ -1,6 +1,7 @@
 import { RegionCode } from '@/common/constants/interface-codes.js';
 import {
   correctionMarksOf,
+  isPlaceholderDate,
   parseArea,
   parseAreaRange,
   parseCount,
@@ -40,6 +41,22 @@ describe('원천 표기 읽기', () => {
     ['미정', null],
   ])('입주 시기 %j → %j', (text, expected) => {
     expect(parseYearMonth(text)).toBe(expected);
+  });
+
+  it.each([
+    ['9999.12.31', true],
+    ['99991231', true],
+    ['0000.01', true],
+    ['0001.01', true],
+    ['2999.01', true],
+    ['0000. 0', true],
+    ['2026.10.13', false],
+    ['1899.01', false],
+    ['9999년 12월', false],
+    ['추후 공지', false],
+    [null, false],
+  ])('자리 표시값 %j → %j', (text, expected) => {
+    expect(isPlaceholderDate(text)).toBe(expected);
   });
 
   it('접수 일시는 양쪽 날짜·시각으로 나누고, "~"뿐이면 비운다', () => {
