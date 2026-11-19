@@ -181,6 +181,22 @@ describe('청약홈 수집 실행 (e2e)', () => {
     });
   });
 
+  // 같은 묶음은 한 일꾼이 원 공고 → 정정 순으로 저장해야 같은 목록이면 늘 같은 결과다(ERD §5 규칙 7)
+  it('정정본이 목록에 먼저 와도 원 공고부터 받아 저장하고 정정본을 같은 공고에 더한다', async () => {
+    const corrected = bundleOf('apt-lh-public-sale', [
+      ['"HOUSE_NM": "시흥거모지구', '"HOUSE_NM": "[정정공고]시흥거모지구'],
+      ['2026000531', '2026000599'],
+    ]);
+    const applyhome = new FakeApplyhome().add(corrected, bundleOf('apt-lh-public-sale'));
+
+    const summary = await run(runnerOf(applyhome));
+
+    expect(applyhome.fetched).toEqual(['2026000531:2026000531', '2026000599:2026000599']);
+    expect(summary).toMatchObject({ status: 'SUCCEEDED', fetched: 2, created: 1 });
+    const primary = await prisma.noticeSource.findFirstOrThrow({ where: { isPrimary: true } });
+    expect(primary.sourceKey).toBe('2026000599:2026000599');
+  });
+
   it('LH에도 있는 공고는 LH 공고에 참조로 잇고, 청약홈이 센 신청 인원은 그대로 저장한다', async () => {
     const lh = JSON.parse(fixtureText('lh', 'public-rental-6y', [])) as unknown;
     const normalized = normalizeLhNotice(lhBundleOf(lh));
