@@ -4,6 +4,7 @@ import { SyncStage } from '../../constants.js';
 import { sizeTypeOf } from '../../size-type.js';
 import type { NormalizedComplex, NormalizedUnit, Warn } from '../normalized-notice.js';
 import {
+  isPlaceholderDate,
   parseArea,
   parseAreaRange,
   parseCount,
@@ -127,7 +128,9 @@ const pricesOf = (row: LhRow, rentField: string) => {
 const moveInOf = (row: LhRow, warn: Warn): string | null => {
   const text = field(row, 'MVIN_XPC_YM');
   const month = parseYearMonth(text);
-  if (text !== null && month === null) warn(SyncStage.NORMALIZE, 'UNPARSEABLE_MONTH', `MVIN_XPC_YM: ${text}`);
+  if (text !== null && month === null && !isPlaceholderDate(text)) {
+    warn(SyncStage.NORMALIZE, 'UNPARSEABLE_MONTH', `MVIN_XPC_YM: ${text}`);
+  }
   return month;
 };
 

@@ -1,6 +1,6 @@
 import { ScheduleKind, SyncStage } from '../../constants.js';
 import type { NormalizedSchedule, Warn } from '../normalized-notice.js';
-import { parseDate, parseDateTimeRange, textOrNull } from '../normalize-text.js';
+import { isPlaceholderDate, parseDate, parseDateTimeRange, textOrNull } from '../normalize-text.js';
 import { scheduleOf } from '../schedule-of.js';
 import { LH_LINK_SYSTEM } from './lh.constants.js';
 import type { LhRow } from './lh-raw.js';
@@ -13,10 +13,16 @@ export interface LhScheduleRow {
 
 const field = (row: LhRow, name: string): string | null => textOrNull(row[name]);
 
+/** 자리 표시값(미정)을 적는 것이 확인된 칸. 다른 칸에 오면 처음 보는 값이라 경고로 남긴다(ERD §5 규칙 9) */
+const PLACEHOLDER_DATE_FIELDS: ReadonlySet<string> = new Set(['CTRT_ST_DT', 'CTRT_ED_DT']);
+
 const dateOf = (row: LhRow, name: string, warn: Warn): string | null => {
   const text = field(row, name);
   const date = parseDate(text);
-  if (text !== null && date === null) warn(SyncStage.NORMALIZE, 'UNPARSEABLE_DATE', `${name}: ${text}`);
+  const undecided = PLACEHOLDER_DATE_FIELDS.has(name) && isPlaceholderDate(text);
+  if (text !== null && date === null && !undecided) {
+    warn(SyncStage.NORMALIZE, 'UNPARSEABLE_DATE', `${name}: ${text}`);
+  }
   return date;
 };
 

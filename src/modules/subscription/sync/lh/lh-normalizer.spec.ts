@@ -383,6 +383,41 @@ describe('LH 공고 정규화', () => {
       expect(notice.warnings.map((warning) => warning.code).sort()).toEqual(['UNPARSEABLE_DATE', 'UNPARSEABLE_MONTH']);
     });
 
+    // 2026-11-10 첫 실제 수집의 경고 16건이 모두 이 값이었다(ERD §5 규칙 9)
+    it('미정을 뜻하는 자리 표시값(9999.12.31·0000. 0)은 경고 없이 비운다', () => {
+      const notice = noticeOf(
+        normalize('happy-corrected', [
+          ['"CTRT_ED_DT": "2028.12.31"', '"CTRT_ED_DT": "9999.12.31"'],
+          ['"MVIN_XPC_YM": "2023.04"', '"MVIN_XPC_YM": "0000. 0"'],
+        ]),
+      );
+      expect(notice.listings[0]).toMatchObject({
+        moveInMonth: null,
+        summary: { contractStartDate: '2027-01-01', contractEndDate: null },
+      });
+      expect(notice.warnings).toEqual([]);
+    });
+
+    it('계약 시작·끝이 모두 자리 표시값(99991231)이면 계약 일정을 만들지 않고 경고도 없다', () => {
+      const notice = noticeOf(
+        normalize('public-rental-6y', [
+          ['"CTRT_ST_DT": "20261112"', '"CTRT_ST_DT": "99991231"'],
+          ['"CTRT_ED_DT": "20261117"', '"CTRT_ED_DT": "99991231"'],
+        ]),
+      );
+      const kinds = notice.listings.flatMap((listing) => listing.schedules.map((schedule) => schedule.kind));
+      expect(kinds).not.toContain(ScheduleKind.CONTRACT);
+      expect(notice.warnings).toEqual([]);
+    });
+
+    it('자리 표시값이 확인되지 않은 칸(당첨자 발표일)에 오면 처음 보는 값이라 경고로 남긴다', () => {
+      const notice = noticeOf(
+        normalize('permanent-multi-complex', [['"PZWR_ANC_DT": "2026.03.19"', '"PZWR_ANC_DT": "9999.12.31"']]),
+      );
+      expect(notice.listings[0]).toMatchObject({ summary: { winnerDate: null } });
+      expect(notice.warnings).toEqual([expect.objectContaining({ code: 'UNPARSEABLE_DATE' })]);
+    });
+
     it('끝이 시작보다 이른 일정은 끝을 비운다', () => {
       const notice = noticeOf(
         normalize('happy-corrected', [
