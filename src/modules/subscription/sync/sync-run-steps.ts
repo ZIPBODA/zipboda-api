@@ -8,6 +8,7 @@ import {
   type SyncTrigger,
 } from '../constants.js';
 import { geocodePendingComplexes } from './geocode/complex-geocoding.js';
+import { correctionMarksOf, titleKeyOf } from './normalize-text.js';
 import type { Geocoder } from './geocode/kakao-geocoder.js';
 import type { NormalizationWarning, NormalizeResult } from './normalized-notice.js';
 import type { NoticeWriter, WriteResult } from './notice-writer.js';
@@ -111,16 +112,45 @@ export const finishRun = async (deps: SyncDependencies, summary: SyncSummary, er
   }
 };
 
+export interface CorrectionKey {
+  /** 원천이 준 공고명(정정 표시 포함) */
+  title: string | undefined;
+  sourceKey: string;
+}
+
+const compareText = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
+
 /**
- * 일꾼 여럿이 공고를 나눠 처리한다. 시간 한도를 넘기면 새 공고를 시작하지 않고, 남긴 수를 돌려준다. 기록조차 못 하는
- * 오류(DB 끊김 등)가 나면 다른 일꾼은 하던 공고까지만 하고 멈춘 뒤 그 오류를 던진다 — 모두 멈춘 뒤라 닫힌 실행에 기록이
- * 이어지거나 DB 연결이 쓰는 도중에 끊기지 않는다
+ * 정정 표시를 뗀 공고명(ERD §5 규칙 7)이 같은 공고를 한 묶음으로 모아 원 공고 → 정정 단계 → 공고번호 순으로 세운다. 한
+ * 일꾼이 묶음을 차례로 저장해야 같은 목록이면 몇 번을 돌려도 같은 묶음이 된다 — 일꾼 넷이 동시에 저장하면 어느 원천이 먼저
+ * 저장되느냐에 따라 원 공고 둘·정정본 하나 같은 경우의 결과가 갈린다. 게시일은 보지 않는다 — 넉넉히 묶어 차례로 저장할 뿐,
+ * 같은 공고인지는 저장할 때 가린다. 묶음끼리는 처음 나온 자리를 지킨다
+ */
+export const correctionBatchesOf = <T>(items: readonly T[], keyOf: (item: T) => CorrectionKey): T[][] => {
+  const batches = new Map<string, { item: T; key: CorrectionKey }[]>();
+  for (const item of items) {
+    const key = keyOf(item);
+    const batchKey = key.title ? `title:${titleKeyOf(key.title)}` : `source:${key.sourceKey}`;
+    batches.set(batchKey, [...(batches.get(batchKey) ?? []), { item, key }]);
+  }
+  const marksOf = (key: CorrectionKey) => correctionMarksOf(key.title ?? '');
+  return [...batches.values()].map((batch) =>
+    batch
+      .sort((a, b) => marksOf(a.key) - marksOf(b.key) || compareText(a.key.sourceKey, b.key.sourceKey))
+      .map(({ item }) => item),
+  );
+};
+
+/**
+ * 일꾼 여럿이 일을 나눠 처리하고, 시간 한도로 시작하지 못한 일을 돌려준다. 기록조차 못 하는 오류(DB 끊김 등)가 나면 다른
+ * 일꾼은 하던 일까지만 하고 멈춘 뒤 그 오류를 던진다 — 모두 멈춘 뒤라 닫힌 실행에 기록이 이어지거나 DB 연결이 쓰는 도중에
+ * 끊기지 않는다
  */
 export const processInPool = async <T>(
   items: readonly T[],
   { concurrency, overBudget, log }: { concurrency: number; overBudget: () => boolean; log: (message: string) => void },
   work: (item: T) => Promise<void>,
-): Promise<number> => {
+): Promise<T[]> => {
   const queue = [...items];
   let done = 0;
   let aborted = false;
@@ -131,7 +161,7 @@ export const processInPool = async <T>(
         if (next === undefined) return;
         await work(next);
         done += 1;
-        if (done % PROGRESS_EVERY === 0) log(`${done}/${items.length}건 처리`);
+        if (done % PROGRESS_EVERY === 0) log(`${done}/${items.length}묶음 처리`);
       }
     } catch (error) {
       aborted = true;
@@ -143,7 +173,7 @@ export const processInPool = async <T>(
   if (failure !== undefined) {
     throw failure.reason instanceof Error ? failure.reason : new Error(String(failure.reason));
   }
-  return queue.length;
+  return queue;
 };
 
 /** 이번 경고를 남기고, 이번에 다시 나지 않은 이 공고의 문제(지난 실패 포함)는 닫는다 */

@@ -149,8 +149,10 @@ const findAcrossSources = async (
 /**
  * 이 원천 참조가 이미 있으면 그 공고, 없으면 정정 묶음(기관·정정 표시를 뗀 이름·게시일이 같은 수집 공고, ERD §5 규칙 7)에 더한다.
  * 정정 묶음 후보도 없으면 다른 원천의 같은 공고(규칙 19)에 더한다.
- * 묶음에 같은 원천의 같은 정정 단계가 이미 있으면 정정본이 아니라 같은 날 같은 이름의 다른 공고라 묶지 않는다 —
- * 묶으면 한쪽이 다른 쪽의 칸을 지운다. 후보가 둘 이상이면 어느 쪽인지 몰라 묶지 않는다
+ * 정정본은 정정 단계가 겹쳐도 공급 분류·유형이 같으면 묶는다 — LH는 정정을 거듭해도 "[정정공고]"를 한 번만 붙인다(실데이터
+ * 8묶음: 마감일·지역·공급 유형·칸이 같고 정정 게시일·공고번호만 늘어난다). 원 공고(정정 표시 없음)는 같은 원천의 원 공고가
+ * 이미 있는 묶음에 들지 않는다 — 같은 날 같은 이름의 원 공고 둘은 다른 공고이고, 묶으면 한쪽이 다른 쪽의 칸을 지운다.
+ * 후보가 둘 이상이면 어느 쪽인지 몰라 묶지 않는다
  */
 const findNoticeId = async (
   tx: Prisma.TransactionClient,
@@ -170,20 +172,40 @@ const findNoticeId = async (
       postDate: dateOf(notice.postDate),
       origin: NoticeOrigin.SYNC,
     },
-    select: { id: true, sources: { where: { source: notice.source }, select: { correctionMarks: true } } },
+    select: {
+      id: true,
+      supplyCategory: true,
+      supplyType: true,
+      sources: { where: { source: notice.source }, select: { correctionMarks: true, isPrimary: true } },
+    },
   });
   if (candidates.length === 0) return findAcrossSources(tx, notice, warn);
-  const joinable = candidates.filter(
-    (candidate) => !candidate.sources.some((row) => row.correctionMarks === notice.correctionMarks),
-  );
+  type Candidate = (typeof candidates)[number];
+  const hasStage = (candidate: Candidate, marks: number) =>
+    candidate.sources.some((row) => row.correctionMarks === marks);
+  // 공급 유형 글자는 원천마다 달라(LH '국민임대' · 청약홈 'APT·국민·분양주택') 이 원천이 값을 정한 공고와만 견준다
+  const sameSupply = (candidate: Candidate) =>
+    candidate.supplyCategory === notice.supplyCategory &&
+    (!candidate.sources.some((row) => row.isPrimary) || candidate.supplyType === notice.supplyType);
+  const canJoin = (candidate: Candidate): boolean => {
+    if (notice.correctionMarks === 0) return !hasStage(candidate, 0);
+    return !hasStage(candidate, notice.correctionMarks) || sameSupply(candidate);
+  };
+  const joinable = candidates.filter(canJoin);
   if (joinable.length === 1) return joinable[0].id;
   if (joinable.length > 1) {
     warn(SyncStage.MATCH, 'CORRECTION_AMBIGUOUS', `정정 묶음 후보가 ${joinable.length}건이라 새 공고로 두었다`);
-  } else if (candidates.length > 0) {
+  } else if (notice.correctionMarks === 0) {
     warn(
       SyncStage.MATCH,
       'SAME_TITLE_NOT_CORRECTION',
-      `같은 날 같은 이름의 공고가 이미 같은 정정 단계(${notice.correctionMarks})로 있어 다른 공고로 두었다`,
+      '같은 날 같은 이름의 원 공고(정정 표시 없음)가 이미 있어 다른 공고로 두었다',
+    );
+  } else {
+    warn(
+      SyncStage.MATCH,
+      'SAME_TITLE_NOT_CORRECTION',
+      `같은 날 같은 이름에 공급 유형이 다른 같은 정정 단계(${notice.correctionMarks})가 이미 있어 다른 공고로 두었다`,
     );
   }
   return null;

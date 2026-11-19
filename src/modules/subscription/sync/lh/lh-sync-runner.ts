@@ -13,6 +13,7 @@ import {
   geocodeStep,
   messageOf,
   normalizeAndSave,
+  correctionBatchesOf,
   processInPool,
   recordWarnings,
   statusOf,
@@ -108,11 +109,18 @@ export class LhSyncRunner {
       this.pinRegions(collectable, previous);
       const changed = options.full ? collectable : await this.selectChanged(collectable, previous, summary);
       log(`목록 ${summary.listed}건 — 받을 공고 ${changed.length}건, 바뀌지 않아 건너뜀 ${summary.skipped}건`);
-      summary.deferred = await processInPool(
-        changed,
+      const batches = correctionBatchesOf(changed, ({ key, row }) => ({
+        title: row.PAN_NM,
+        sourceKey: key,
+      }));
+      const left = await processInPool(
+        batches,
         { concurrency: LH_SYNC_CONCURRENCY, overBudget, log },
-        (candidate) => this.process(candidate, summary),
+        async (batch) => {
+          for (const candidate of batch) await this.process(candidate, summary);
+        },
       );
+      summary.deferred = left.flat().length;
       // 새로 만든 단지의 사진도 이번 실행에서 바꾸도록 공고를 모두 저장한 뒤에 돈다
       await lhImageStep(this.deps, this.deps.lh, summary, overBudget);
       await geocodeStep(this.deps, SOURCE, summary, overBudget);

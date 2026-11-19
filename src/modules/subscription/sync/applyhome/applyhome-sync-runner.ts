@@ -15,6 +15,7 @@ import {
   geocodeStep,
   messageOf,
   normalizeAndSave,
+  correctionBatchesOf,
   processInPool,
   recordWarnings,
   statusOf,
@@ -100,11 +101,18 @@ export class ApplyhomeSyncRunner {
       const collectable = await this.classify(candidates, summary);
       const changed = options.full ? collectable : await this.selectChanged(collectable, summary);
       log(`목록 ${summary.listed}건 — 받을 공고 ${changed.length}건, 바뀌지 않아 건너뜀 ${summary.skipped}건`);
-      summary.deferred = await processInPool(
-        changed,
+      const batches = correctionBatchesOf(changed, ({ key, detail }) => ({
+        title: detail.HOUSE_NM,
+        sourceKey: key,
+      }));
+      const left = await processInPool(
+        batches,
         { concurrency: APPLYHOME_SYNC_CONCURRENCY, overBudget, log },
-        (candidate) => this.process(candidate, summary),
+        async (batch) => {
+          for (const candidate of batch) await this.process(candidate, summary);
+        },
       );
+      summary.deferred = left.flat().length;
       await geocodeStep(this.deps, SOURCE, summary, overBudget);
       summary.status = statusOf(summary, listFailures);
       await finishRun(

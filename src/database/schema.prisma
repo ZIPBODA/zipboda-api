@@ -59,7 +59,7 @@ model NoticeSource {
   sourceParams Json?     @map("source_params")
   /// 값을 정하는 원천. 공고마다 하나
   isPrimary    Boolean   @map("is_primary")
-  /// 원천 공고명의 정정 표시 수. 같은 단계의 원천이 이미 있으면 정정본이 아니라 같은 이름의 다른 공고다(ERD §5 규칙 7)
+  /// 원천 공고명의 정정 표시 수. 같은 원천의 원 공고(0)가 이미 있는 묶음에 다른 원 공고는 들지 않는다(ERD §5 규칙 7)
   correctionMarks Int    @default(0) @map("correction_marks")
   /// 열로 옮기지 않은 원문까지 남겨 정규화 규칙을 바꿔도 다시 조회하지 않고 다시 처리한다
   rawPayload   Json?     @map("raw_payload")

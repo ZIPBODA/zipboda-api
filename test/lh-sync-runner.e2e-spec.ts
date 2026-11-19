@@ -467,6 +467,79 @@ describe('LH 수집 실행 (e2e)', () => {
     });
   });
 
+  // LH 목록은 최신순이라 정정본이 원 공고보다 먼저 온다. 같은 정정 묶음 키는 한 일꾼이 원 공고 → 정정 순으로 저장한다(ERD §5 규칙 7)
+  describe('정정 묶음', () => {
+    const ORIGINAL: [string, string][] = [
+      ['[정정공고]서울번동3', '서울번동3'],
+      ['2015122300020605', '2015122300020577'],
+    ];
+
+    it('원 공고와 같은 단계 정정본 둘을 한 실행에 받으면 한 공고이고 마지막 정정이 값을 정한다', async () => {
+      const lh = new FakeLh().list(
+        '11',
+        '06',
+        fixture('happy-corrected', [['2015122300020605', '2015122300020620']]),
+        fixture('happy-corrected'),
+        fixture('happy-corrected', ORIGINAL),
+      );
+      const summary = await run(runnerOf(lh));
+
+      expect(summary).toMatchObject({ status: 'SUCCEEDED', fetched: 3, created: 1, warnings: 0 });
+      expect(await prisma.notice.count()).toBe(1);
+      const primary = await prisma.noticeSource.findFirstOrThrow({ where: { isPrimary: true } });
+      expect(primary.sourceKey).toBe('03:2015122300020620');
+    });
+
+    it('원 공고 둘과 정정본 하나는 목록 순서와 상관없이 원 공고부터 저장해 정정본을 모호로 남긴다', async () => {
+      const lh = new FakeLh().list(
+        '11',
+        '06',
+        fixture('happy-corrected'),
+        fixture('happy-corrected', [...ORIGINAL, ['2015122300020577', '2015122300020599']]),
+        fixture('happy-corrected', ORIGINAL),
+      );
+      await run(runnerOf(lh));
+
+      expect(await prisma.notice.count()).toBe(3);
+      const codes = (await openFailures()).map((failure) => [failure.sourceKey, failure.errorCode]);
+      expect(codes).toEqual(
+        expect.arrayContaining([
+          ['03:2015122300020599', 'SAME_TITLE_NOT_CORRECTION'],
+          ['03:2015122300020605', 'CORRECTION_AMBIGUOUS'],
+        ]),
+      );
+    });
+
+    it('시간 한도는 묶음 사이에서만 본다 — 시작한 묶음은 원 공고부터 끝까지 저장하고 남은 묶음의 공고 수를 넘긴다', async () => {
+      let clock = NOW;
+      const nationalOriginal = fixture('national-corrected-suffix', [
+        ['[정정공고]도봉주공1단지', '도봉주공1단지'],
+        ['모집 공고(정정공고)', '모집 공고'],
+        ['2015122300018941', '2015122300018900'],
+      ]);
+      const lh = new FakeLh().list(
+        '11',
+        '06',
+        fixture('happy-corrected'),
+        fixture('happy-corrected', ORIGINAL),
+        fixture('permanent-multi-complex'),
+        fixture('national-corrected-suffix'),
+        nationalOriginal,
+      );
+      lh.beforeFetch = () => {
+        clock = hoursAfter(3);
+      };
+
+      const summary = await run(runnerOf(lh, { clock: () => clock }));
+
+      expect(lh.fetched).toEqual(['03:2015122300020577@11', '03:2015122300020605@11']);
+      expect(summary).toMatchObject({ fetched: 2, deferred: 3 });
+      expect((await prisma.syncRun.findUniqueOrThrow({ where: { id: summary.runId } })).errorMessage).toBe(
+        '시간 한도로 공고 3건을 다음 실행에 넘겼다',
+      );
+    });
+  });
+
   it('시간 한도를 넘기면 남은 공고와 단지는 다음 실행에 넘긴다', async () => {
     let clock = NOW;
     const lh = new FakeLh().list(

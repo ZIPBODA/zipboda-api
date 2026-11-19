@@ -134,7 +134,7 @@ describe('정규화한 공고 저장 (e2e)', () => {
       expect(after[0].noticeId).toBe(corrected.noticeId);
     });
 
-    it('같은 날 같은 이름이어도 같은 정정 단계가 이미 있으면 다른 공고다 — 한쪽이 다른 쪽 칸을 지우지 않는다', async () => {
+    it('같은 날 같은 이름의 원 공고 둘은 다른 공고다 — 한쪽이 다른 쪽 칸을 지우지 않는다', async () => {
       const first = await write(fixtureOf('permanent-multi-complex'));
       const other = await write(
         fixtureOf('permanent-multi-complex', [
@@ -178,6 +178,92 @@ describe('정규화한 공고 저장 (e2e)', () => {
       const result = await write(input);
       expect(result.createdNotice).toBe(true);
       expect(result.warnings).toEqual([expect.objectContaining({ code: 'CORRECTION_AMBIGUOUS' })]);
+    });
+
+    // LH는 정정을 거듭해도 "[정정공고]"를 한 번만 붙인다 — 실데이터 8묶음(인천 일반 매입임대 2026-07-23: 원 공고 + 정정 3건,
+    // 마감일·지역·칸이 같고 공고번호만 늘어난다). 정정 단계가 같다고 다른 공고로 두면 목록에 같은 공고가 여러 번 나온다
+    const SECOND_CORRECTION: [string, string][] = [['2015122300020605', '2015122300020620']];
+    const CHAIN = {
+      원공고: () => fixtureOf('happy-corrected', ORIGINAL),
+      정정1: () => fixtureOf('happy-corrected'),
+      정정2: () => fixtureOf('happy-corrected', SECOND_CORRECTION),
+    };
+    const CHAIN_ORDERS: (keyof typeof CHAIN)[][] = [
+      ['원공고', '정정1', '정정2'],
+      ['원공고', '정정2', '정정1'],
+      ['정정1', '원공고', '정정2'],
+      ['정정1', '정정2', '원공고'],
+      ['정정2', '원공고', '정정1'],
+      ['정정2', '정정1', '원공고'],
+    ];
+
+    it.each(CHAIN_ORDERS.map((order) => [order.join(' → '), order] as const))(
+      '정정 단계가 같은 정정본이 여럿이어도 한 공고이고 나중 정정(공고번호 큰 쪽)이 값을 정한다 — %s',
+      async (_label, order) => {
+        const results = [];
+        for (const name of order) results.push(await write(CHAIN[name]()));
+        expect(new Set(results.map((result) => result.noticeId)).size).toBe(1);
+        expect(results.flatMap((result) => result.warnings.map((warning) => warning.code))).toEqual([]);
+        expect(await prisma.notice.count()).toBe(1);
+        const sources = await prisma.noticeSource.findMany({ orderBy: { sourceKey: 'asc' } });
+        expect(sources.map((source) => [source.sourceKey, source.isPrimary])).toEqual([
+          ['03:2015122300020577', false],
+          ['03:2015122300020605', false],
+          ['03:2015122300020620', true],
+        ]);
+      },
+    );
+
+    // 원 공고 둘이면 정정본이 어느 쪽 정정인지 모른다. 수집은 같은 키를 원 공고 → 정정 순으로 차례로 저장해 늘 이 결과가 된다
+    it('같은 날 같은 이름의 원 공고가 둘이면 정정본은 어느 쪽인지 몰라 새 공고로 둔다', async () => {
+      const first = await write(fixtureOf('happy-corrected', ORIGINAL));
+      const other = await write(fixtureOf('happy-corrected', [...ORIGINAL, ['2015122300020577', '2015122300020599']]));
+      const corrected = await write(fixtureOf('happy-corrected'));
+      expect(other.warnings).toEqual([expect.objectContaining({ code: 'SAME_TITLE_NOT_CORRECTION' })]);
+      expect(corrected.warnings).toEqual([expect.objectContaining({ code: 'CORRECTION_AMBIGUOUS' })]);
+      expect(new Set([first.noticeId, other.noticeId, corrected.noticeId]).size).toBe(3);
+    });
+
+    it('같은 단계 정정본이 이미 있는데 공급 유형이 다르면 다른 공고다 — 한쪽이 다른 쪽 칸을 지우지 않는다', async () => {
+      const happy = await write(fixtureOf('happy-corrected'));
+      const national = await write(
+        fixtureOf('happy-corrected', [
+          ['"AIS_TP_CD_NM": "행복주택"', '"AIS_TP_CD_NM": "국민임대"'],
+          ...SECOND_CORRECTION,
+        ]),
+      );
+      expect(national.noticeId).not.toBe(happy.noticeId);
+      expect(national.warnings).toEqual([expect.objectContaining({ code: 'SAME_TITLE_NOT_CORRECTION' })]);
+      expect(await prisma.subscription.count({ where: { noticeId: happy.noticeId } })).toBe(
+        happy.subscriptionIds.length,
+      );
+    });
+
+    // 공급 유형 글자는 원천마다 달라 막아 두는 경로다. 실데이터에서는 거의 생기지 않는다 — 다른 원천이 값을 정하면 이름 키도
+    // 그 원천 것으로 바뀌고, 청약홈은 정정을 같은 공고번호에 덮어쓴다(ERD 미결 9). 그래서 LH 자료로 모양만 만든다
+    it('다른 원천이 값을 정한 공고면 같은 단계 정정본이 있어도 공급 유형 글자는 견주지 않는다', async () => {
+      const input = fixtureOf('happy-corrected', SECOND_CORRECTION);
+      const { titleKey, postDate, supplyCategory, correctionMarks } = input.notice;
+      await prisma.notice.create({
+        data: {
+          id: 'led-by-other-source',
+          agencyCode: 1,
+          title: titleKey,
+          titleKey,
+          supplyCategory,
+          supplyType: '다른 원천의 유형 글자',
+          postDate: new Date(`${postDate}T00:00:00Z`),
+          origin: 'SYNC',
+          sources: {
+            create: [
+              { source: 'APPLYHOME', sourceKey: '2026000531:2026000531', isPrimary: true },
+              { source: 'LH', sourceKey: '03:2015122300020605', isPrimary: false, correctionMarks },
+            ],
+          },
+        },
+      });
+      const result = await write(input);
+      expect(result).toMatchObject({ noticeId: 'led-by-other-source', createdNotice: false, warnings: [] });
     });
 
     it('게시일이 없는 공고는 이름만으로 묶지 않고, 같은 원천 키로만 다시 찾는다', async () => {
