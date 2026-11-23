@@ -275,10 +275,13 @@ export class SubscriptionRepository {
       SELECT ${SUMMARY_COLUMNS} FROM ${LISTING_FROM} WHERE ${whereSql(filter)}`;
   }
 
-  /** 두 번 읽는 사이에 칸이 바뀌어 조건에서 벗어났으면 빠지도록 같은 조건으로 다시 고른 뒤 읽는다 */
+  /**
+   * 두 번 읽는 사이에 칸이 바뀌어 조건에서 벗어났으면 빠지도록 같은 조건으로 다시 고른 뒤 읽는다. id는 배열 하나로 넘긴다 —
+   * id마다 파라미터를 쓰면 지도 핀이 6.5만 개를 넘을 때 PostgreSQL 바인드 파라미터 상한(65,535)에 걸린다(ERD 미결 6)
+   */
   async findListedByIds(ids: string[], filter: SubscriptionListFilter): Promise<SubscriptionListRecord[]> {
     const listed = await this.prisma.$queryRaw<{ id: string }[]>`
-      SELECT s.id FROM ${LISTING_FROM} WHERE ${whereSql(filter)} AND s.id IN (${Prisma.join(ids)})`;
+      SELECT s.id FROM ${LISTING_FROM} WHERE ${whereSql(filter)} AND s.id = ANY(${ids})`;
     if (listed.length === 0) return [];
     return this.prisma.subscription.findMany({
       where: { id: { in: listed.map((row) => row.id) } },

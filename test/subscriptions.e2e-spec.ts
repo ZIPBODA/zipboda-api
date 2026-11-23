@@ -6,9 +6,12 @@ import { configureApp } from '../src/app.setup.js';
 import { Clock } from '../src/common/time/clock.js';
 import type { Prisma } from '../src/database/generated/client.js';
 import { PrismaService } from '../src/database/prisma.service.js';
+import { SubscriptionRepository } from '../src/modules/subscription/subscription.repository.js';
 
 // 한국 9월 8일 정오 — e2e-open의 접수 기간(9/7~9/11) 한가운데다
 const FIXED_NOW = new Date('2026-09-08T03:00:00Z');
+/** 쿼리 한 번에 넘길 수 있는 바인드 파라미터 수(PostgreSQL 프로토콜의 16비트 개수) */
+const PG_MAX_BIND_PARAMETERS = 65_535;
 const day = (iso: string) => new Date(`${iso}T00:00:00Z`);
 
 interface ListBody {
@@ -715,6 +718,12 @@ describe('청약 공고 API (e2e)', () => {
       } finally {
         await removeListings('e2e-pin-');
       }
+    });
+
+    it('핀을 다시 읽을 때 id 수가 PostgreSQL 바인드 파라미터 상한(65,535)을 넘어도 읽는다', async () => {
+      const missing = Array.from({ length: PG_MAX_BIND_PARAMETERS + 1 }, (_, index) => `e2e-missing-${index}`);
+      const records = await app.get(SubscriptionRepository).findListedByIds(['e2e-open', ...missing], {});
+      expect(records.map((record) => record.id)).toEqual(['e2e-open']);
     });
 
     it('영역(남,서,북,동) 안의 핀만 주고, 형식이 틀리거나 뒤집힌 영역은 ERR-005다', async () => {
