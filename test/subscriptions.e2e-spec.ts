@@ -644,6 +644,18 @@ describe('청약 공고 API (e2e)', () => {
         where: { id: 'e2e-area-unit-wins-complex' },
         data: { areaMin: 26, areaMax: 28 },
       });
+      // 주택형은 있지만 면적을 모른다('2형') — 주택형으로는 판정할 수 없어 단지 범위(25.5~29)로 본다
+      await createListing({
+        id: 'e2e-area-unknown-unit',
+        title: '면적 모르는 주택형',
+        agencyCode: 3,
+        regionCode: 3,
+        units: [{ label: '2형' }],
+      });
+      await prisma.complex.update({
+        where: { id: 'e2e-area-unknown-unit-complex' },
+        data: { areaMin: 25.5, areaMax: 29 },
+      });
     });
 
     afterAll(async () => {
@@ -654,7 +666,7 @@ describe('청약 공고 API (e2e)', () => {
       ['0-15', ['e2e-area-touch']],
       ['15-20', ['e2e-area-touch']],
       ['20-25', ['e2e-area-complex', 'e2e-area-range']],
-      ['25-30', []],
+      ['25-30', ['e2e-area-unknown-unit']],
       ['30-', ['e2e-area-unit-wins']],
     ])('구간 %s → %j', async (size, expected) => {
       expect(await listIds(`?agency=3&size=${size}`)).toEqual(expected);
@@ -665,7 +677,7 @@ describe('청약 공고 API (e2e)', () => {
         sizeRanges: { value: string }[];
       };
       const offered = options.sizeRanges.map((range) => range.value);
-      expect(offered).toEqual(['0-15', '15-20', '20-25', '30-']);
+      expect(offered).toEqual(['0-15', '15-20', '20-25', '25-30', '30-']);
       for (const size of ['0-15', '15-20', '20-25', '25-30', '30-']) {
         const listed = (await listIds(`?size=${size}&pageSize=100`)).length > 0;
         expect([size, listed]).toEqual([size, offered.includes(size)]);
