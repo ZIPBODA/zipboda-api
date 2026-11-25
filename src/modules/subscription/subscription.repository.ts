@@ -115,15 +115,21 @@ const areaRangeOverlaps = (low: Prisma.Sql, high: Prisma.Sql, range: SizeRange):
     : Prisma.sql`${low} < ${range.max}::numeric AND ${high} >= ${range.min}::numeric`;
 
 /**
+ * 면적을 판정할 수 있는 주택형 — 전용면적이나 면적 구간이 있다(구간 양끝은 함께 있거나 함께 없다, DB CHECK).
+ * '2형'처럼 둘 다 없는 주택형만 있는 칸은 주택형으로는 어떤 구간에도 들지 못해 단지 면적 범위로 판정한다(ERD §5 규칙 11 ④)
+ */
+const unitWithAreaSql = Prisma.sql`(u.exclusive_area IS NOT NULL OR u.area_min IS NOT NULL)`;
+
+/**
  * 면적 구간 필터(ERD §5 규칙 11): 주택형 전용면적이 구간 안이거나, 주택형 면적 구간이 겹치거나,
- * 보여 주는 평면도의 전용면적이 구간 안이거나, 주택형 행이 없을 때 단지 면적 범위가 겹치면 든다
+ * 보여 주는 평면도의 전용면적이 구간 안이거나, 면적을 아는 주택형이 없을 때 단지 면적 범위가 겹치면 든다
  */
 const sizeRangeSql = (range: SizeRange): Prisma.Sql => Prisma.sql`(
   EXISTS (SELECT 1 FROM subscription_units u WHERE u.subscription_id = s.id
     AND ((${areaInRange(Prisma.sql`u.exclusive_area`, range)}) OR (${areaRangeOverlaps(Prisma.sql`u.area_min`, Prisma.sql`u.area_max`, range)})))
   OR (${floorplanVisible} AND EXISTS (SELECT 1 FROM floorplans f WHERE f.complex_id = s.complex_id
     AND ${areaInRange(Prisma.sql`f.exclusive_area`, range)}))
-  OR (NOT EXISTS (SELECT 1 FROM subscription_units u WHERE u.subscription_id = s.id)
+  OR (NOT EXISTS (SELECT 1 FROM subscription_units u WHERE u.subscription_id = s.id AND ${unitWithAreaSql})
     AND ${areaRangeOverlaps(Prisma.sql`c.area_min`, Prisma.sql`c.area_max`, range)})
 )`;
 
@@ -138,7 +144,7 @@ const sizeRangeListedSql = (range: SizeRange): Prisma.Sql => Prisma.sql`(
   OR EXISTS (SELECT 1 FROM ${LISTING_FROM} JOIN floorplans f ON f.complex_id = s.complex_id
     WHERE ${floorplanVisible} AND ${areaInRange(Prisma.sql`f.exclusive_area`, range)})
   OR EXISTS (SELECT 1 FROM ${LISTING_FROM}
-    WHERE NOT EXISTS (SELECT 1 FROM subscription_units u WHERE u.subscription_id = s.id)
+    WHERE NOT EXISTS (SELECT 1 FROM subscription_units u WHERE u.subscription_id = s.id AND ${unitWithAreaSql})
       AND ${areaRangeOverlaps(Prisma.sql`c.area_min`, Prisma.sql`c.area_max`, range)})
 )`;
 

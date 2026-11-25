@@ -5,7 +5,7 @@
 | 항목 | 내용 |
 |------|------|
 | 문서명 | 집보다(Zipboda) API 계약 차이 기록 (구현 ↔ API 및 인터페이스 정의서) |
-| 버전 | v0.4.0 |
+| 버전 | v0.4.1 |
 | 작성일 | 2026-10-22 |
 | 기반 문서 | ../zipboda-web/docs/ZIPBODA_API 및 인터페이스 정의서_v0.1.xlsx, ../zipboda-web/src/entities/subscription/model/types.ts, ../zipboda-web/src/entities/subscription/config/constants.ts, /src/modules/subscription/dto/subscription-filter.request.ts, /src/modules/subscription/dto/subscription-list.response.ts, /src/modules/subscription/dto/subscription-detail.response.ts, /src/modules/subscription/dto/search.request.ts, /src/modules/subscription/dto/search.response.ts, /src/modules/subscription/dto/floorplan-detail.response.ts, ../zipboda-web/src/features/search/lib/search.ts, ../zipboda-web/src/features/search/lib/createSearchIndex.ts, ../zipboda-web/src/shared/lib/searchQuery.ts, /docs/ZIPBODA_erd_v0.1.md |
 
@@ -18,6 +18,7 @@
 | v0.2.0 | 2026-10-22 | Claude | §4.5 API-095 통합 검색 추가 — q 필수(중복 시 422)·type 미지원·page/pageSize 추가(목록과 같은 페이지 규칙), 응답을 page·pageSize + 종류별 {items, totalCount}로(floorplans 없음, products는 S6 전까지 비어 있음), 주택 검색 필드·순위를 web searchAll 기준으로 기록하고 동순위 id 정렬을 예외로 명시, S6 남은 일(종류를 섞는 순위) 기록. §6 체크리스트에 API-095 항목 추가. 기반 문서에 web 검색(features/search, shared/lib/searchQuery)과 검색 DTO 추가 |
 | v0.3.0 | 2026-11-02 | Claude | ERD v0.3(공고·단지·공고×단지 칸) 반영 — §3 목록 대상을 '평면도 있는 공고만'에서 '모든 칸'으로(공고 단위 칸 포함), 응답 단위가 공고×단지 칸임을 명시. §4.1 응답에 `noticeTitle` 추가, `title`은 단지명(공고 단위 칸은 공고명), `address`는 빈 값 없이 주소→'지역 시군구'→지역, `supplyType`은 공급 유형(행복주택 등), `sizes`에 주택형 전용면적 포함·이름으로만 이은 단지의 평면도 제외, `keyword` 찾는 필드에 시군구 추가, `size` 구간 규칙(주택형 구간·단지 면적 범위). §4.2 `noticeTitle`·`contractDate`(계약 시작일)·`units` 모양(size null 허용, label·floor·unitNumber 추가, households는 이번 공급 세대, price는 원 단위 금액을 읽은 한 줄)·순서(전용면적→타입→호수)·`floorplans` 노출 조건. §4.3 핀 대상·이름표. §4.5 찾는 필드·'도면이 있는 공고만' 삭제. §6 체크리스트에 web 매퍼 항목 추가. 기반 문서에 ERD 추가 |
 | v0.4.0 | 2026-11-11 | Claude | web 실제 API 연결 준비 — §4.1 마감 임박순을 상태로 먼저 나눔(접수 중 마감 가까운 순 → 접수 예정 접수 빠른 순 → 마감 최근 마감 순 → 취소·일정 없음, 실데이터 3,276칸 중 3,236칸이 마감이라 접수 예정이 마감 사이에 묻히던 문제). §4.2 `units[].exclusiveArea`·`floorplans[].image2dUrl` 추가. §4.3 핀을 목록 한 칸과 같은 모양·같은 정렬로(web 지도 옆 목록이 핀마다 카드를 그리고 '결과 정렬'을 단다 — `sort`를 받는다), `totalCount`(좌표 없는 칸까지 센 건수) 추가, `bounds` 생략 시 영역 조건 없음, 실데이터 핀 1,324개 응답 771KB. §4.5 동순위 순서를 새 마감 임박순으로. §4.6 API-031 평면도 상세 신규(dimensions·rooms 없음, complexName·subscriptionId 고르는 규칙). §6 체크리스트에 API-031 추가. 기반 문서에 평면도 DTO 추가 |
+| v0.4.1 | 2026-11-24 | Claude | §4.1 `size` 조건의 단지 면적 범위 사용을 '주택형이 없을 때'에서 '면적을 아는 주택형이 없을 때'로 고침(ERD v0.3.16 §5 규칙 11 ④, 미결 15) |
 
 ---
 
@@ -49,7 +50,7 @@
 |------|--------|----------------|
 | `region` | int(ITF-004) | 같음. 0은 전체 |
 | `agency` | int(ITF-001) | 같음. 0은 전체 |
-| `size` | string(ITF-003 주택형 39·59·84·114) | **전용면적 구간** `0-15`·`15-20`·`20-25`·`25-30`·`30-` (min ≤ 면적 < max). 매입임대 면적이 소수점이라 주택형 일치로는 못 거른다. 주택형 전용면적이 구간 안이거나, 주택형 면적 구간("70~80㎡")이 겹치거나, 보여 주는 평면도의 전용면적이 구간 안이거나, 주택형이 없을 때 단지 면적 범위가 겹치면 든다(ERD §5 규칙 11) |
+| `size` | string(ITF-003 주택형 39·59·84·114) | **전용면적 구간** `0-15`·`15-20`·`20-25`·`25-30`·`30-` (min ≤ 면적 < max). 매입임대 면적이 소수점이라 주택형 일치로는 못 거른다. 주택형 전용면적이 구간 안이거나, 주택형 면적 구간("70~80㎡")이 겹치거나, 보여 주는 평면도의 전용면적이 구간 안이거나, 면적을 아는 주택형(전용면적·면적 구간이 있는 행)이 없을 때 단지 면적 범위가 겹치면 든다('2형'처럼 면적을 모르는 주택형만 있어도 단지 범위로 본다, ERD §5 규칙 11) |
 | `status` | 없음 | **추가** int(ITF-002). 0은 전체 |
 | `sort` | ITF-010 POPULAR·LATEST·DEADLINE | **DEADLINE**(상태로 먼저 나눈다 — 접수 중은 마감이 가까운 순 → 접수 예정은 접수 시작이 빠른 순 → 마감은 최근에 마감한 순 → 취소·일정 없음. 수집한 칸 대부분이 마감이라 D-day만으로 세우면 접수 예정이 마감 사이에 묻힌다)·**COMPETITION**(경쟁률 낮은 순, 모르면 뒤)·**HOUSEHOLDS**(세대 수 많은 순, 모르면 뒤). 값이 같으면 id 순. 기본 DEADLINE |
 | `keyword` | string | 같은 이름. 단지명·주소·시군구·공고명·공급 유형·기관 약칭(LH 등)·지역 이름에서 대소문자 없이 포함 검색. 검색어의 앞뒤·연속 공백 정리, `%`·`_`·`\`는 글자로 찾는다. 최대 100자. web은 저장된 글자 쪽 공백도 정리하지만 API는 검색어만 정리한다 — 제목의 연속 공백은 적재할 때 정리한다 |
