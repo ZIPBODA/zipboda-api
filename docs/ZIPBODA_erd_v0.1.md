@@ -5,7 +5,7 @@
 | 항목 | 내용 |
 |------|------|
 | 문서명 | 집보다(Zipboda) ERD 및 스키마 정의서 |
-| 버전 | v0.3.16 |
+| 버전 | v0.3.17 |
 | 작성일 | 2026-10-22 |
 | 기반 문서 | /docs/ZIPBODA_development-plan_v0.1.md, /src/database/schema.prisma, /docs/ZIPBODA_api-contract-delta.md, /docs/ZIPBODA_public-data-sources_v0.1.md, /docs/ZIPBODA_erd-draft_v0.1.md, ../zipboda-web/docs/ZIPBODA_API 및 인터페이스 정의서_v0.1.xlsx, ../zipboda-web/src/entities/subscription/model/types.ts |
 
@@ -36,6 +36,7 @@
 | v0.3.14 | 2026-11-19 | Claude | §5 규칙 9에 LH 날짜 자리 표시값 추가 — 계약 시작·끝(CTRT_ST_DT·CTRT_ED_DT) 9999.12.31·99991231, 입주 예정(MVIN_XPC_YM) 0000.01·0001.01·2999.01·"0000. 0"(연도 0000·0001·2999·9999)은 미정이라 확인된 이 칸에서만 경고 없이 비운다. 2026-11-10 첫 실제 수집의 날짜 경고(UNPARSEABLE_DATE 8·UNPARSEABLE_MONTH 8) 16건이 모두 이 값이었고, 저장한 원천 응답을 다시 정규화하면 0건 |
 | v0.3.15 | 2026-11-19 | Claude | §7 미결 6 지도 핀 결정 — 실데이터 핀 1,087개 응답 658KB·gzip 103KB·0.14초라 영역별 조회 없이 전체를 한 번 받는 방식을 유지하고, 같은 단지 칸이 좌표가 같아 포개지는 것(121곳·297개, 한 곳 최대 12개)은 단지 단위 핀 대신 web이 가장 가까운 단계에서도 같은 자리 핀을 'N건' 배지로 묶는다. 핀 id 다시 읽기를 배열 파라미터(`= ANY`) 하나로 바꿔 바인드 파라미터 상한(65,535)을 없앴다 |
 | v0.3.16 | 2026-11-24 | Claude | §7 미결 15 해결 — §5 규칙 11 ④를 '주택형 행이 하나도 없을 때'에서 '면적을 아는 주택형(전용면적이나 면적 구간이 있는 행)이 없을 때'로 넓혔다. '2형'처럼 면적을 모르는 주택형만 있는 칸이 단지 면적 범위가 있어도 어떤 면적 구간에도 걸리지 않던 문제. 실데이터(2026-11-24): 면적 모르는 주택형만 있는 칸 69개, 그중 단지 범위가 있는 칸 0개라 지금 결과는 그대로다 |
+| v0.3.17 | 2026-11-25 | Claude | §7 미결 4 해결 — API 정의서 v0.6(2026-11-25)에 web 기준으로 먼저 넣은 응답 필드(API-010·011·012·031·095)와 필터 선택지(API-017)를 옮겼다(계약 차이 문서 v0.5.0). §4.11 `noticeTitle`의 '(신규)·계약 차이 문서에 등록' 표시를 지우고, 검색어 행의 목록 조건 이름을 `q`에서 실제 이름 `keyword`로 바로잡았다 |
 
 ---
 
@@ -472,7 +473,7 @@ web 화면 모델(/zipboda-web/src/entities/subscription/model/types.ts) 기준�
 |---|---|
 | `id` | subscriptions.id |
 | `title` | complexes.name. 공고 단위 칸은 notices.title |
-| `noticeTitle`(신규) | notices.title — 계약 차이 문서에 등록(§8) |
+| `noticeTitle` | notices.title |
 | `agency`·`agencyLabel` | notices.agency_code |
 | `supplyType` | notices.supply_type. web 목 데이터는 주택 유형(다가구주택)을 넣었지만 화면 라벨이 '공급 유형'이라 원천 공급 유형을 준다 |
 | `region` | subscriptions.region_code |
@@ -492,7 +493,7 @@ web 화면 모델(/zipboda-web/src/entities/subscription/model/types.ts) 기준�
 | `floorplans`(상세) | complex_match가 ADDRESS·MANUAL인 칸의 단지 floorplans. NAME이거나 공고 단위 칸이면 빈 배열. `image2dUrl` = image_2d_url |
 | API-031 `complexName`·`subscriptionId` | complexes.name. 칸은 그 단지에서 complex_match가 ADDRESS·MANUAL인 subscriptions 가운데 목록 마감 임박순(접수 중 → 접수 예정 → 최근 마감 → 취소·일정 없음) 첫 칸, 없으면 null |
 | API-012 `totalCount` | 지도와 같은 조건(영역·좌표 조건 빼고)에 맞는 subscriptions 수 |
-| 검색어(API-010 `q`, API-095) | complexes.name·address·sigungu, notices.title·supply_type |
+| 검색어(API-010 `keyword`, API-095 `q`) | complexes.name·address·sigungu, notices.title·supply_type |
 
 대상별 일정표(subscription_schedules 전체)는 지금 web 화면에 자리가 없어 응답에 넣지 않는다. 화면이 생기면 계약 차이 문서에 더하고 낸다.
 
@@ -625,7 +626,7 @@ web 화면 모델(/zipboda-web/src/entities/subscription/model/types.ts) 기준�
 | 1 | ~~공고 식별자 체계~~ **해결(v0.3)** | 내부 id + 원천 참조(notice_sources: LH `{연계시스템}:{PAN_ID}`, 청약홈 `{주택관리번호}:{공고번호}`). 공고 하나가 원천 참조 여러 개를 가진다(정정본 포함) | — |
 | 2 | ~~공급 주택형 원천~~ **해결(v0.3)** | LH 공급정보 API·청약홈 주택형(Mdl) → subscription_units(원문 표기·면적·구간·호수·세대·금액·가격 안내) | — |
 | 3 | 3D 자산 형식 | 정의서(API-032)는 glTF/GLB URL, web은 평면도 JSON으로 3D를 생성한다. floorplan_assets 설계 전 결정 필요. 초안 D9는 평면도 모델 JSON을 DB(jsonb, floorplan_models)에 두고 파일은 미디어로 관리하기를 권장한다 | S4 착수 전 |
-| 4 | 정의서에 없는 응답 필드 | recruitCount·contractDate·image 등은 web 기준으로 API 응답에 먼저 넣었다. v0.3에서 `noticeTitle`이 더해지고 `units[].size`가 null일 수 있게 된다. 차이는 /docs/ZIPBODA_api-contract-delta.md에 모은다 | 정의서 일괄 갱신 시 |
+| 4 | ~~정의서에 없는 응답 필드~~ **해결(v0.3.17)** | web 기준으로 API 응답에 먼저 넣은 필드(recruitCount·contractDate·noticeTitle·null을 허용한 `units[].size` 등)와 필터 선택지 API를 API 정의서 v0.6(2026-11-25)에 옮겼다 — API-010·011·012·031·095 갱신, API-017 신규, ITF-014~017 신규. 앞으로 생기는 차이는 /docs/ZIPBODA_api-contract-delta.md에 모은다 | — |
 | 5 | ~~목록 정렬을 SQL로~~ **해결(v0.2.3)** | 목록은 조건·정렬(D-day·경쟁률은 SQL 식으로 계산)·LIMIT/OFFSET·건수까지 DB가 하고, id 동순위는 `COLLATE "C"`(문자 코드 순)로 가른다. 측정(2026-10-23, 로컬, /test/perf, 동시 10, 필터 없는 목록 P95): 1만 건 540~578ms → **39~43ms**, 5만 건 177~211ms. **v0.3 재측정(2026-11-02, PR 1)**: 합성 데이터를 공고×단지 구조로 바꿔(공고당 칸 2, 칸당 주택형 2, 공고 단위 칸 5%, 이름 연결 70%, 단지 20%에 평면도) 같은 도구·조건(동시 10, 측정 DB만 병렬 쿼리 끔)으로 잼 — 목록 시나리오 8종 P95 1만 칸 58~133ms, 5만 칸 39~222ms(가장 느린 것은 검색어·지역+기관+면적). 필터 선택지는 처음 모양에서 5만 칸 P95 506ms였다 — 면적 구간 확인을 EXISTS로 감싸면 플래너가 주택형 전체로 해시를 만든 뒤에야 첫 행을 봐서, 맞는 행에서 바로 멈추는 모양으로 따로 두고 선택지 16개를 한 쿼리로 물어 **31ms**(1만 칸 32ms) | — |
 | 6 | 지도 핀 개수 | API-012는 영역 안의 핀을 모두 준다. 합성 공고로 서울 영역 핀 4,049개(1만 건)에서 P95 426ms, 19,877개(5만 건)에서 1.8초 — 응답 크기가 핀 수에 비례한다. 확대 단계별 상한이나 서버 클러스터링(격자로 묶은 개수)을 둘지 web 지도와 함께 정한다. v0.3에서는 같은 단지가 여러 공고에 나와 핀이 겹치므로 핀을 단지 단위로 묶을지, 좌표 인덱스를 GiST로 바꿀지도 함께 정한다. v0.3 합성 데이터(좌표 있는 단지 30%)에서 서울 영역 핀 1,238개(1만 칸) P95 170ms, 6,027개(5만 칸) P95 556ms(2026-11-02). 참고: Docker로 띄운 Postgres는 /dev/shm 기본 64MB라 shm_size를 넉넉히 준다. **실데이터(2026-11-11)**: 좌표 있는 칸 1,324개(전체 3,276칸) — web 지도 옆 목록이 핀마다 카드를 그려 핀을 목록 한 칸 모양으로 바꿨고, web은 영역 없이 전체 핀을 한 번 받는다(응답 771KB·0.2~0.6초, API 압축 없음). 핀이 늘면 영역별 조회·단지 단위 핀으로 옮긴다. 핀 id를 다시 읽을 때 칸마다 bind 파라미터를 하나씩 써서 핀이 6.5만 개를 넘으면 PostgreSQL 파라미터 상한(65,535)에 걸리던 것은 v0.3.15에서 배열 파라미터(`= ANY`) 하나로 바꿨다(Prisma `in`은 id 7만 개도 통과 확인). 배포할 때 응답 압축(리버스 프록시나 압축 미들웨어)을 켠다. **결정(v0.3.15, 2026-11-19)**: 좌표 있는 칸 1,087개 응답 658KB·gzip 103KB·0.14초 — 영역별 조회 없이 전체를 한 번 받는 방식을 유지한다(브라우저로는 web 서버가 페이지에 담아 압축해 보낸다). 같은 단지 칸은 좌표가 같아 121곳에 297개가 포개진다(한 곳 최대 12개, 좌표가 같으면 모두 같은 단지) — 단지 단위 핀으로 바꾸지 않고, web이 가장 가까운 확대 단계에서도 같은 자리 핀을 다른 단계와 같은 'N건' 배지로 묶어 누르면 옆 목록에 그 칸들을 보인다. 남은 것: 핀이 늘면 영역별 조회·좌표 인덱스 GiST | API-114 연계로 실제 건수가 들어올 때 |
 | 7 | 정정공고 판별 규칙 검증 | §5 규칙 7은 LH 공고 999건 표본의 정정 묶음으로 세웠다. ①·② 확인(v0.3.13, 2026-11-18 개발 DB) — ① 같은 날 같은 이름의 정정이 아닌 다른 원 공고는 없었다. 겹친 8묶음은 모두 같은 공고의 연속 정정이었고(LH가 "[정정공고]"를 한 번만 붙임) 규칙 7을 고쳤다 ② 정정본 게시일(PAN_DT)은 원 공고와 같고 정정 게시일(PAN_NT_ST_DT)만 늘어난다. 남은 것: ③ 예비자 포함 공급 세대와 신청 인원이 함께 있는 공고 | 신청 인원 화면 정비 때 |

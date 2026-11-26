@@ -107,7 +107,7 @@ export const PRIMARY_SOURCE_RANK: Readonly<Record<NoticeSourceName, number>> = {
 };
 
 /**
- * 면적은 값이 아니라 전용면적 구간으로 고른다(web 목록 필터와 같은 구간).
+ * ITF-014 전용면적 구간. 면적은 값이 아니라 구간으로 고른다(web 목록 필터와 같은 구간).
  * 매입임대의 전용면적은 14.6475㎡처럼 소수점이 붙어 값 일치로는 맞출 수 없다. 경계는 왼쪽만 포함한다(min ≤ 면적 < max)
  */
 export const SIZE_RANGES = [
@@ -121,7 +121,7 @@ export const SIZE_RANGES = [
 export type SizeRange = (typeof SIZE_RANGES)[number];
 export const SIZE_RANGE_VALUES: readonly string[] = SIZE_RANGES.map((range) => range.value);
 
-/** 정의서(ITF-010)가 아니라 web 목록의 정렬을 따른다 — docs/ZIPBODA_api-contract-delta.md §5 */
+/** ITF-015 청약 정렬. 다른 목록이 쓰는 공통 정렬(ITF-010)과 값이 다르다 */
 export const SUBSCRIPTION_SORTS = ['DEADLINE', 'COMPETITION', 'HOUSEHOLDS'] as const;
 export type SubscriptionSort = (typeof SUBSCRIPTION_SORTS)[number];
 export const DEFAULT_SUBSCRIPTION_SORT: SubscriptionSort = 'DEADLINE';

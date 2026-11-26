@@ -1,7 +1,7 @@
 import type { SubscriptionFloorplanResponse } from './subscription-detail.response.js';
 
 /**
- * API-031 평면도 상세. 정의서의 dimensions·rooms는 아직 저장하지 않아 주지 않는다(docs/ZIPBODA_api-contract-delta.md).
+ * API-031 평면도 상세. 방별 치수(dimensions·rooms)는 아직 저장하지 않아 주지 않는다 — 도면 업로드(API-122)와 함께 정한다.
  * 평면도는 단지에 붙어 여러 공고에 나오므로, 들어갈 공고는 subscriptionId 하나로 고른다
  */
 export interface FloorplanDetailResponse extends SubscriptionFloorplanResponse {
