@@ -26,7 +26,7 @@ export class SubscriptionController {
     return this.subscriptionService.mapMarkers(query);
   }
 
-  /** 목록 필터 선택지 — 정의서 미등록(docs/ZIPBODA_api-contract-delta.md) */
+  /** API-017 청약 목록 필터 선택지 */
   @Get('filter-options')
   filterOptions(): Promise<SubscriptionFilterOptionsResponse> {
     return this.subscriptionService.filterOptions();
