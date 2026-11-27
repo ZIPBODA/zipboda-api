@@ -1,6 +1,6 @@
-// 집보다 ERD — S0~S2 범위(공고·원천 참조·단지·공고×단지 칸·일정·주택형·평면도·동기화). 문서: docs/ZIPBODA_erd_v0.1.md
+// 집보다 ERD — S0~S2 범위(공고·원천 참조·단지·공고×단지 칸·일정·주택형·평면도·동기화)와 S1 회원·인증. 문서: docs/ZIPBODA_erd_v0.1.md
 // 코드성 값은 API 정의서의 공통 인터페이스(ITF-*) 정수·문자열을 그대로 저장한다.
-// CHECK·부분 UNIQUE·NULLS NOT DISTINCT는 Prisma 스키마로 쓰지 못해 마이그레이션 SQL에만 있다(20261102000000_notice_complex_structure·20261102000100_area_range_pairs)
+// CHECK·부분 UNIQUE·NULLS NOT DISTINCT·트리거는 Prisma 스키마로 쓰지 못해 마이그레이션 SQL에만 있다(20261102000000_notice_complex_structure·20261102000100_area_range_pairs·20261127000000_s1_auth)
 
 generator client {
   provider               = "prisma-client"
@@ -51,19 +51,19 @@ model Notice {
 /// 공고의 원천 참조. 같은 공고가 LH·청약홈, 원 공고·정정본으로 여러 번 올라온다
 model NoticeSource {
   /// LH · APPLYHOME · IH · SH_RSS · GH_FILE
-  source       String
+  source          String
   /// LH `{연계시스템코드}:{PAN_ID}`, 청약홈 `{주택관리번호}:{공고번호}`
-  sourceKey    String    @map("source_key")
-  noticeId     String    @map("notice_id")
-  notice       Notice    @relation(fields: [noticeId], references: [id], onDelete: Cascade)
-  sourceParams Json?     @map("source_params")
+  sourceKey       String    @map("source_key")
+  noticeId        String    @map("notice_id")
+  notice          Notice    @relation(fields: [noticeId], references: [id], onDelete: Cascade)
+  sourceParams    Json?     @map("source_params")
   /// 값을 정하는 원천. 공고마다 하나
-  isPrimary    Boolean   @map("is_primary")
+  isPrimary       Boolean   @map("is_primary")
   /// 원천 공고명의 정정 표시 수. 같은 원천의 원 공고(0)가 이미 있는 묶음에 다른 원 공고는 들지 않는다(ERD §5 규칙 7)
-  correctionMarks Int    @default(0) @map("correction_marks")
+  correctionMarks Int       @default(0) @map("correction_marks")
   /// 열로 옮기지 않은 원문까지 남겨 정규화 규칙을 바꿔도 다시 조회하지 않고 다시 처리한다
-  rawPayload   Json?     @map("raw_payload")
-  fetchedAt    DateTime? @map("fetched_at") @db.Timestamptz(3)
+  rawPayload      Json?     @map("raw_payload")
+  fetchedAt       DateTime? @map("fetched_at") @db.Timestamptz(3)
 
   @@id([source, sourceKey])
   @@index([noticeId])
@@ -72,27 +72,27 @@ model NoticeSource {
 
 /// 평면도가 붙는 물리적 단지·건물. 같은 단지가 여러 공고·여러 이름으로 나와도 한 행이다
 model Complex {
-  id            String    @id @default(uuid(7))
-  agencyCode    Int       @map("agency_code")
+  id            String   @id @default(uuid(7))
+  agencyCode    Int      @map("agency_code")
   /// ITF-004 지역(1 서울 · 2 인천 · 3 경기)
-  regionCode    Int       @map("region_code")
+  regionCode    Int      @map("region_code")
   name          String
   sigungu       String?
   address       String?
   /// 같은 단지 판별용 주소(ERD §5 규칙 8)
-  addressKey    String?   @map("address_key")
+  addressKey    String?  @map("address_key")
   lat           Float?
   lng           Float?
   /// OK · NOT_FOUND · NO_ADDRESS · MANUAL
-  geocodeStatus String?   @map("geocode_status")
+  geocodeStatus String?  @map("geocode_status")
   households    Int?
-  housingType   String?   @map("housing_type")
+  housingType   String?  @map("housing_type")
   /// 단지 전용면적 범위(㎡). 주택형 행이 없는 공고의 면적 필터에 쓴다
-  areaMin       Decimal?  @map("area_min") @db.Decimal(9, 4)
-  areaMax       Decimal?  @map("area_max") @db.Decimal(9, 4)
-  imageUrl      String?   @map("image_url")
-  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  areaMin       Decimal? @map("area_min") @db.Decimal(9, 4)
+  areaMax       Decimal? @map("area_max") @db.Decimal(9, 4)
+  imageUrl      String?  @map("image_url")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   aliases       ComplexAlias[]
   subscriptions Subscription[]
@@ -227,8 +227,8 @@ model Floorplan {
   has3d         Boolean  @default(false) @map("has_3d")
   /// 공고 상세가 처음 보여 줄 도면은 이 순서의 첫째다
   displayOrder  Int      @default(0) @map("display_order")
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   @@index([complexId, displayOrder])
   @@map("floorplans")
@@ -236,19 +236,19 @@ model Floorplan {
 
 /// 공공데이터 동기화 한 번(= API-114 jobId)
 model SyncRun {
-  id            String    @id @default(uuid()) @db.Uuid
-  source        String
+  id           String    @id @default(uuid()) @db.Uuid
+  source       String
   /// SCHEDULE · MANUAL · CLI
-  trigger       String
+  trigger      String
   /// RUNNING · SUCCEEDED · PARTIAL · FAILED
-  status        String
-  startedAt     DateTime  @default(now()) @map("started_at") @db.Timestamptz(3)
-  finishedAt    DateTime? @map("finished_at") @db.Timestamptz(3)
-  fetchedCount  Int       @default(0) @map("fetched_count")
-  createdCount  Int       @default(0) @map("created_count")
-  updatedCount  Int       @default(0) @map("updated_count")
-  failedCount   Int       @default(0) @map("failed_count")
-  errorMessage  String?   @map("error_message")
+  status       String
+  startedAt    DateTime  @default(now()) @map("started_at") @db.Timestamptz(3)
+  finishedAt   DateTime? @map("finished_at") @db.Timestamptz(3)
+  fetchedCount Int       @default(0) @map("fetched_count")
+  createdCount Int       @default(0) @map("created_count")
+  updatedCount Int       @default(0) @map("updated_count")
+  failedCount  Int       @default(0) @map("failed_count")
+  errorMessage String?   @map("error_message")
 
   failures SyncFailure[]
 
@@ -276,4 +276,163 @@ model SyncFailure {
 
   @@index([syncRunId])
   @@map("sync_failures")
+}
+
+/// 회원(S1). 이름·휴대폰은 앱이 암호화한 값만 둔다(ERD §5 규칙 21). 회원 행은 지우지 않는다
+model User {
+  id               String    @id @default(uuid(7))
+  /// 로그인 이메일 — 소문자로 바꿔 저장한다. 카카오 가입에서 인증된 이메일을 받지 못하면 비운다(다른 회원이 쓰는 이메일이면 가입을 막는다)
+  email            String?   @unique
+  /// argon2id. 카카오로만 가입한 회원은 비어 있다
+  passwordHash     String?   @map("password_hash")
+  nameEnc          Bytes?    @map("name_enc")
+  phoneEnc         Bytes?    @map("phone_enc")
+  /// 같은 번호를 찾는 HMAC. 인증하지 않은 번호라 유일하지 않다
+  phoneHash        String?   @map("phone_hash")
+  /// 휴대폰 인증 화면이 없어 지금은 늘 비어 있다
+  phoneVerifiedAt  DateTime? @map("phone_verified_at") @db.Timestamptz(3)
+  nickname         String?
+  bio              String?
+  interests        String[]  @default([])
+  avatarUrl        String?   @map("avatar_url")
+  failedLoginCount Int       @default(0) @map("failed_login_count")
+  lockedUntil      DateTime? @map("locked_until") @db.Timestamptz(3)
+  lastLoginAt      DateTime? @map("last_login_at") @db.Timestamptz(3)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  roles               UserRole[]           @relation("RoleHolder")
+  grantedRoles        UserRole[]           @relation("RoleGranter")
+  socialAccounts      SocialAccount[]
+  refreshTokens       RefreshToken[]
+  passwordResetTokens PasswordResetToken[]
+  agreements          UserAgreement[]
+
+  @@index([phoneHash])
+  @@map("users")
+}
+
+/// 회원의 역할(S1). 가입하면 CITIZEN, 운영자·관리자는 관리자가 준다
+model UserRole {
+  userId      String   @map("user_id")
+  user        User     @relation("RoleHolder", fields: [userId], references: [id], onDelete: Restrict)
+  /// ITF-012 CITIZEN · OPERATOR · ADMIN(비회원 GUEST는 저장하지 않는다)
+  role        String
+  /// 가입으로 받은 CITIZEN은 비어 있다
+  grantedById String?  @map("granted_by")
+  grantedBy   User?    @relation("RoleGranter", fields: [grantedById], references: [id], onDelete: Restrict)
+  grantedAt   DateTime @default(now()) @map("granted_at") @db.Timestamptz(3)
+
+  @@id([userId, role])
+  @@index([grantedById])
+  @@map("user_roles")
+}
+
+/// 회원에게 이은 소셜 계정(S1)
+model SocialAccount {
+  id             String   @id @default(uuid(7))
+  userId         String   @map("user_id")
+  user           User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  /// ITF-011 kakao · naver · google
+  provider       String
+  providerUserId String   @map("provider_user_id")
+  /// 제공자가 준 이메일(참고용 — 로그인 키가 아니다)
+  email          String?
+  linkedAt       DateTime @default(now()) @map("linked_at") @db.Timestamptz(3)
+
+  @@unique([provider, providerUserId])
+  @@unique([userId, provider])
+  @@map("social_accounts")
+}
+
+/// refresh 토큰(S1). 쓸 때마다 같은 family로 새로 발급하고, 이미 쓴 토큰이 다시 오면 family를 모두 폐기한다(ERD §5 규칙 23)
+model RefreshToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  familyId  String    @map("family_id") @db.Uuid
+  /// 토큰의 SHA-256. 원문은 저장하지 않는다
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(3)
+  usedAt    DateTime? @map("used_at") @db.Timestamptz(3)
+  revokedAt DateTime? @map("revoked_at") @db.Timestamptz(3)
+  userAgent String?   @map("user_agent")
+  createdIp String?   @map("created_ip") @db.Inet
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([familyId])
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+/// 비밀번호 재설정 링크(S1). 한 번만 쓴다
+model PasswordResetToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// 링크 토큰의 SHA-256
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(3)
+  usedAt    DateTime? @map("used_at") @db.Timestamptz(3)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@map("password_reset_tokens")
+}
+
+/// 약관 버전(S1). 본문은 web 페이지에 있고 여기에는 종류·버전·필수 여부·시행일만 둔다. 본문을 고치면 새 행을 더한다
+model TermsVersion {
+  id          String   @id @default(uuid()) @db.Uuid
+  /// AGE14 · TERMS · PRIVACY(개인정보 수집·이용 동의) · MARKETING
+  type        String
+  version     String
+  required    Boolean
+  /// 한국 날짜. 동의는 이날이 오늘 이전이거나 오늘인 버전 가운데 이날이 가장 늦은 버전에 남긴다 — 종류마다 하루에 하나라 그 버전이 하나로 정해진다
+  effectiveAt DateTime @map("effective_at") @db.Date
+  /// 본문이 있는 web 경로. 본문이 아직 없는 종류는 비운다
+  contentPath String?  @map("content_path")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  agreements UserAgreement[]
+
+  @@unique([type, version])
+  @@unique([type, effectiveAt])
+  @@map("terms_versions")
+}
+
+/// 약관 동의 이력(S1). append-only — UPDATE·DELETE는 트리거가 막는다
+model UserAgreement {
+  id             BigInt       @id @default(autoincrement())
+  userId         String       @map("user_id")
+  user           User         @relation(fields: [userId], references: [id], onDelete: Restrict)
+  termsVersionId String       @map("terms_version_id") @db.Uuid
+  termsVersion   TermsVersion @relation(fields: [termsVersionId], references: [id], onDelete: Restrict)
+  agreed         Boolean
+  /// EMAIL_SIGNUP · KAKAO_SIGNUP
+  channel        String
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([userId, termsVersionId, createdAt(sort: Desc)])
+  @@index([termsVersionId])
+  @@map("user_agreements")
+}
+
+/// 감사 로그(S1). append-only — UPDATE·DELETE는 트리거가 막는다. 회원은 FK로 잇지 않는다(회원 행은 지우지 않는다)
+model AuditLog {
+  id          BigInt   @id @default(autoincrement())
+  actorUserId String?  @map("actor_user_id")
+  actorRole   String?  @map("actor_role")
+  action      String
+  targetType  String?  @map("target_type")
+  targetId    String?  @map("target_id")
+  /// 바뀐 항목 이름만. 비밀번호·토큰·개인정보 값은 넣지 않는다
+  changes     Json?
+  ip          String?  @db.Inet
+  userAgent   String?  @map("user_agent")
+  requestId   String?  @map("request_id")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([actorUserId, createdAt(sort: Desc)])
+  @@index([action, createdAt(sort: Desc)])
+  @@map("audit_logs")
 }

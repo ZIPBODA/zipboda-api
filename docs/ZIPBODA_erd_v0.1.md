@@ -5,9 +5,9 @@
 | 항목 | 내용 |
 |------|------|
 | 문서명 | 집보다(Zipboda) ERD 및 스키마 정의서 |
-| 버전 | v0.3.17 |
+| 버전 | v0.4.1 |
 | 작성일 | 2026-10-22 |
-| 기반 문서 | /docs/ZIPBODA_development-plan_v0.1.md, /src/database/schema.prisma, /docs/ZIPBODA_api-contract-delta.md, /docs/ZIPBODA_public-data-sources_v0.1.md, /docs/ZIPBODA_erd-draft_v0.1.md, ../zipboda-web/docs/ZIPBODA_API 및 인터페이스 정의서_v0.1.xlsx, ../zipboda-web/src/entities/subscription/model/types.ts |
+| 기반 문서 | /docs/ZIPBODA_development-plan_v0.1.md, /src/database/schema.prisma, /docs/ZIPBODA_api-contract-delta.md, /docs/ZIPBODA_public-data-sources_v0.1.md, /docs/ZIPBODA_erd-draft_v0.1.md, ../zipboda-web/docs/ZIPBODA_API 및 인터페이스 정의서_v0.1.xlsx, ../zipboda-web/docs/ZIPBODA_요구사항정의서_v0.1.xlsx, ../zipboda-web/src/entities/subscription/model/types.ts, ../zipboda-web/src/features/auth/ui/SignupForm.tsx, ../zipboda-web/src/features/auth/config/constants.ts, ../zipboda-web/src/widgets/my-page/model/types.ts |
 
 ### 변경 이력
 
@@ -37,18 +37,23 @@
 | v0.3.15 | 2026-11-19 | Claude | §7 미결 6 지도 핀 결정 — 실데이터 핀 1,087개 응답 658KB·gzip 103KB·0.14초라 영역별 조회 없이 전체를 한 번 받는 방식을 유지하고, 같은 단지 칸이 좌표가 같아 포개지는 것(121곳·297개, 한 곳 최대 12개)은 단지 단위 핀 대신 web이 가장 가까운 단계에서도 같은 자리 핀을 'N건' 배지로 묶는다. 핀 id 다시 읽기를 배열 파라미터(`= ANY`) 하나로 바꿔 바인드 파라미터 상한(65,535)을 없앴다 |
 | v0.3.16 | 2026-11-24 | Claude | §7 미결 15 해결 — §5 규칙 11 ④를 '주택형 행이 하나도 없을 때'에서 '면적을 아는 주택형(전용면적이나 면적 구간이 있는 행)이 없을 때'로 넓혔다. '2형'처럼 면적을 모르는 주택형만 있는 칸이 단지 면적 범위가 있어도 어떤 면적 구간에도 걸리지 않던 문제. 실데이터(2026-11-24): 면적 모르는 주택형만 있는 칸 69개, 그중 단지 범위가 있는 칸 0개라 지금 결과는 그대로다 |
 | v0.3.17 | 2026-11-25 | Claude | §7 미결 4 해결 — API 정의서 v0.6(2026-11-25)에 web 기준으로 먼저 넣은 응답 필드(API-010·011·012·031·095)와 필터 선택지(API-017)를 옮겼다(계약 차이 문서 v0.5.0). §4.11 `noticeTitle`의 '(신규)·계약 차이 문서에 등록' 표시를 지우고, 검색어 행의 목록 조건 이름을 `q`에서 실제 이름 `keyword`로 바로잡았다 |
+| v0.4.0 | 2026-11-26 | Claude | **S1 회원·인증 테이블 정의 — 사용자 승인 대기.** 초안(/docs/ZIPBODA_erd-draft_v0.1.md §5.1·5.9)의 S1 테이블 가운데 이메일·카카오 가입과 로그인에 필요한 8개(users·user_roles·social_accounts·refresh_tokens·password_reset_tokens·terms_versions·user_agreements·audit_logs)를 §4.12~4.19로 정의하고 §3에 관계도, §4.20에 API 대응을 더함. §2.2 S1 결정 — 사용자 결정(2026-11-26: 발송은 개발용 구현 먼저·실제 업체는 나중에 메일만, 휴대폰은 번호만 저장, 소셜은 카카오까지)과 권장안(계정 구조, 비밀번호 재설정 이메일 링크, 이름·휴대폰 암호화, refresh 토큰 회전, 카카오 첫 로그인 두 단계 가입, 같은 이메일 자동 잇기 안 함, 로그인 잠금, 약관 버전, 공개 프로필 범위). §5 규칙 20~26(비밀번호·암호화·로그인 잠금·토큰·카카오·재설정·약관), §7 미결 16~19(개인정보처리방침 개정·보존 기간·카카오 가입 약관 화면·관리자 인증), §9 S1 PR 순서 추가. phone_verifications·media_files·admin_mfa·role_permissions·user_permissions는 뒤로 미룸(§2). 기반 문서에 요구사항정의서와 web 가입·마이페이지 파일 추가 |
+| v0.4.1 | 2026-11-27 | Claude | v0.4.0 사용자 승인 반영(2026-11-27, 권장안 그대로 '다음 작업 진행') — §2·§2.2·§3·§4.12~4.19의 '승인 대기' 표시를 지움. S1-a(스키마) 구현 반영 — 마이그레이션 `20261127000000_s1_auth`(테이블 8개·CHECK 7개·append-only 트리거·첫 약관 버전 4행, floorplans 시각을 UTC로 읽어 timestamptz로), user_agreements·audit_logs id는 Prisma가 identity를 만들지 못해 bigserial, users.interests NOT NULL은 Prisma가 배열 NULL 여부를 비교하지 않아 마이그레이션에 직접 둠, 트리거 오류 코드는 P0001(다른 코드는 Prisma가 FK 위반 등으로 바꿔 메시지가 사라진다)·행 트리거라 TRUNCATE는 막지 않음(§5 규칙 26). 독립 리뷰 반영 — 카카오 이메일 처리 문구 일치(§4.12), access JWT에 로그인 묶음 id를 담아 본문 없는 로그아웃이 그 묶음을 폐기·동시 재발급 30초 유예(S1-7·규칙 23), 첫 약관 버전의 이용약관 시행일을 web /terms의 2026-09-20으로·개인정보 수집·이용 동의는 본문이 없어 경로를 비움(/privacy는 처리방침)·terms_versions UNIQUE(type, effective_at)와 시행 버전 고르는 기준(S1-11·§4.17·규칙 26), append-only 행 삭제 방법과 권한 회수를 미루는 이유(규칙 26·미결 17), 재설정 토큰 폐기 방법(규칙 25), 카카오 가입 완료 동시 요청(규칙 24), 비밀번호 64자 상한이 이 문서의 추가임을 표시(규칙 20), 미결 16에 수집·이용 동의 본문 |
 
 ---
 
 ## 2. 범위
 
-개발계획서 §3.1의 ERD 산출물 중 **S0~S2(청약 조회·공공데이터 연계)에 필요한 테이블**을 확정한다. 아래 '정의' 행은 v0.3.1로 사용자 승인을 받았다(2026-11-02). 나머지 도메인의 초안은 /docs/ZIPBODA_erd-draft_v0.1.md에 있고, 초안의 결정(D1~D14)이 나면 해당 스테이지 착수 시 이 문서로 옮긴다. 아래 '초안' 행은 초안 §7 도입 순서와 같다.
+개발계획서 §3.1의 ERD 산출물 중 **S0~S2(청약 조회·공공데이터 연계)에 필요한 테이블**을 확정한다. 아래 '정의' 행은 v0.3.1로 사용자 승인을 받았다(2026-11-02). S1 회원·인증 '정의' 행은 v0.4.0에서 정의해 v0.4.1로 사용자 승인을 받았다(2026-11-27, 결정은 §2.2). 나머지 도메인의 초안은 /docs/ZIPBODA_erd-draft_v0.1.md에 있고, 초안의 결정(D1~D14)이 나면 해당 스테이지 착수 시 이 문서로 옮긴다. 아래 '초안' 행은 초안 §7 도입 순서와 같다.
 
 | 상태 | 도메인 | 테이블 | 스테이지 |
 |------|--------|--------|----------|
 | **정의** | 공고·원천 참조·단지·단지 별칭·목록 한 칸·일정·주택형·평면도 | `notices`, `notice_sources`, `complexes`, `complex_aliases`, `subscriptions`, `subscription_schedules`, `subscription_units`, `floorplans` | S0~S2 |
 | **정의** | 공공데이터 동기화 이력·재처리 | `sync_runs`, `sync_failures` | S2(API-114) |
-| 초안 | 회원·역할·인증·약관·미디어·감사 로그 | users, user_roles, role_permissions, user_permissions, admin_mfa, social_accounts, refresh_tokens, phone_verifications, password_reset_tokens, terms_versions, user_agreements, media_files, audit_logs | S1 |
+| **정의** | 회원·역할·소셜 계정·로그인 토큰·비밀번호 재설정·약관 동의·감사 로그 | `users`, `user_roles`, `social_accounts`, `refresh_tokens`, `password_reset_tokens`, `terms_versions`, `user_agreements`, `audit_logs` | S1 |
+| 초안 | 관리자 2차 인증·세부 권한 | admin_mfa, role_permissions, user_permissions | S1 관리자 인증(API-100·199) 착수 시(미결 19) |
+| 초안 | 휴대폰 인증 | phone_verifications | 인증 화면이 생길 때(§2.2 S1-2) |
+| 초안 | 미디어(사진 올리기) | media_files | 프로필 사진·커뮤니티 이미지 올리기가 생길 때 |
 | 초안 | 알림함·관리자 공고 관리(수정 보호·삭제) | notifications, push_devices, notices.locked_fields·deleted_at | S2(API-093·110~113) |
 | 초안 | 관심·신청함·구독·가점 | subscription_marks, subscription_follows, alert_filters, score_profiles | S3 |
 | 초안 | 평면도·3D 자산 | source_documents, floorplans 추가 열, floorplan_models, floorplan_assets | S4 |
@@ -72,6 +77,25 @@
 | 주택형 표기가 "59A"·"74.9500A"·"70~80㎡"·"전용59㎡"·"2형"으로 다양하고, 주택형 없이 건물·호수·모집 인원만 오는 공급행도 있다. 금액은 숫자 또는 "공고문 참조"다 | subscription_units에 원문 표기·면적·면적 구간·호수·층·금액(원)·가격 안내를 따로 두고, 주택형이 없는 공급행은 칸의 공급 호수·모집 인원으로 합친다 |
 | 단지 상세에 단지 전용면적 범위만 있고 주택형 행이 0건인 공고가 있다(영구임대 DDO_AR "21.78~29.43") | complexes에 전용면적 범위를 두고 면적 필터에 쓴다 |
 | 공고의 조회 지역과 행의 지역이 다를 수 있다(인천 공고 안에 경기 부천 건물) | 지역은 행(칸) 단위로 정한다(subscriptions.region_code) |
+
+### 2.2 S1 회원·인증 결정 (2026-11-26)
+
+'사용자 결정'은 2026-11-26에 정했고, '권장안'은 v0.4.1에서 사용자 승인(2026-11-27)으로 확정했다. 정의서·요구사항정의서와 다른 점은 구현 PR에서 계약 차이 문서(/docs/ZIPBODA_api-contract-delta.md)에 적는다.
+
+| # | 항목 | 결정 | 근거 | 상태 |
+|---|------|------|------|------|
+| S1-1 | 메일·문자 발송 | 발송은 인터페이스 뒤에 두고 지금은 개발용 구현(받는 사람과 내용을 서버 로그에 남김)만 만든다. 실제 업체는 나중에 메일만 붙인다 | 0원 포트폴리오 단계 | 사용자 결정 |
+| S1-2 | 휴대폰 인증 | 가입 때 번호만 저장하고 인증하지 않는다(users.phone_verified_at은 비어 있다). 인증 API(API-007)와 phone_verifications는 인증 화면이 생길 때 만든다 | web 가입(AUTH-02)·프로필 수정 화면에 인증 단계가 없다 | 사용자 결정 |
+| S1-3 | 소셜 로그인 | 카카오만 만든다. 네이버·구글은 나중이고, social_accounts.provider는 세 값(ITF-011)을 모두 받는다 | 지도용 카카오 앱이 이미 있다 | 사용자 결정 |
+| S1-4 | 계정 구조 | users 하나 + 역할(user_roles, 여러 개). 가입하면 CITIZEN을 준다. 운영자·관리자는 시민과 다른 계정에 역할을 준다(초안 D1) | API-008이 roles를 배열로 준다. REQ-AD-001 '별도 계정' | 권장안 |
+| S1-5 | 비밀번호 재설정 | 이메일 링크 — 요청하면 메일로 30분짜리 링크를 보내고, 링크에서 새 비밀번호를 정한다(초안 D2). 정의서 API-006·REQ-GU-009의 '휴대폰 본인인증 후 재설정'과 다르다 | web 비밀번호 찾기(AUTH-03)·재설정(AUTH-04)이 이메일 링크다. S1-2로 휴대폰 인증이 없다 | 권장안(web 기준) |
+| S1-6 | 개인정보 암호화 | 이름·휴대폰은 앱에서 AES-256-GCM으로 암호화해 `name_enc`·`phone_enc`에 담고, 같은 번호 찾기용으로 HMAC-SHA256 `phone_hash`를 둔다. 이메일은 로그인 키라 평문(초안 §6 규칙 5·D14) | 백엔드 규칙 B14, REQ-NF-006 '저장 시 암호화' | 권장안 |
+| S1-7 | 로그인 토큰 | access는 15분 JWT, refresh는 30일 불투명 토큰이고 쓸 때마다 새로 준다(회전). 이미 쓴 토큰이 다시 오면 그 묶음을 모두 폐기한다(여러 탭이 동시에 재발급하는 30초 안은 예외). access에 로그인 묶음 id를 담아 로그아웃(API-004, 정의서대로 본문 없음)이 그 묶음을 폐기한다. 정의서 API-005 응답에 새 `refreshToken`을 더한다 | 토큰 탈취를 알아챌 수 있다 | 권장안 |
+| S1-8 | 카카오 첫 로그인 | 두 단계 — 이어진 계정이 없으면 API-003이 계정을 만들지 않고 `isNew=true`와 10분짜리 가입 토큰을 준다. web이 약관 동의를 받아 가입 완료 API(신규)로 보내면 그때 만든다. 카카오 인가 코드는 한 번만 쓸 수 있어 카카오에서 받은 정보를 가입 토큰에 담아 둔다 | REQ-GU-008 '소셜 최초 로그인 시 필수 약관 동의', REQ-CO-009 동의 이력 | 권장안 — web에 약관 단계 필요(미결 18) |
+| S1-9 | 같은 이메일 | 카카오 이메일이 다른 회원의 이메일과 같아도 자동으로 잇지 않고 가입 완료를 ERR-004로 막는다(이메일로 로그인하도록 안내). 잇기는 화면이 생기면 로그인한 상태에서 한다 | 남의 카카오 계정으로 기존 계정에 들어가는 길을 막는다 | 권장안 |
+| S1-10 | 로그인 잠금 | 연속 5회 틀리면 30분 잠그고, 비밀번호를 재설정하면 푼다 | 정의서 API-002 '실패 5회 시 계정 잠금' — 해제 방법이 없고 관리자 해제 화면도 없다 | 권장안 |
+| S1-11 | 약관 버전 | 약관 본문은 web 페이지에 두고 DB에는 종류·버전·필수 여부·시행일·본문 경로만 둔다. 본문을 고치면 행을 고치지 않고 그 시행일로 새 버전을 더한다(종류마다 하루에 하나). 첫 버전은 마이그레이션이 넣는다 — 이용약관은 /terms(페이지 시행일 2026-09-20), 개인정보 수집·이용 동의는 본문이 아직 없다(/privacy는 처리방침이다, 미결 16) | web 가입 화면의 약관 4종(만 14세·이용약관·개인정보·마케팅) | 권장안 |
+| S1-12 | 공개 프로필 | web 프로필 수정 항목(닉네임·자기소개·관심 분야)과 사진 주소만 둔다. 공개 아이디(handle)는 커뮤니티(S5)에서, 지역(마이페이지 표시)은 입력 화면이 없어 두지 않는다. 사진 올리기는 media_files와 함께(초안 D4 일부) | web `ProfileEditData`·`MyProfile` | 권장안 |
 
 ---
 
@@ -249,11 +273,93 @@ erDiagram
   }
 ```
 
+S1 회원·인증(v0.4.1). audit_logs는 회원을 FK로 잇지 않는다(§4.19).
+
+```mermaid
+erDiagram
+  users ||--o{ user_roles : "역할"
+  users ||--o{ social_accounts : "소셜 계정"
+  users ||--o{ refresh_tokens : "로그인 토큰"
+  users ||--o{ password_reset_tokens : "재설정 링크"
+  users ||--o{ user_agreements : "동의 이력"
+  terms_versions ||--o{ user_agreements : "약관 버전"
+
+  users {
+    text id PK
+    text email UK "소문자, 카카오 가입은 null 가능"
+    text password_hash "argon2id, 카카오 가입은 null"
+    bytea name_enc
+    bytea phone_enc
+    text phone_hash
+    timestamptz phone_verified_at
+    text nickname
+    text bio
+    text_array interests
+    text avatar_url
+    int failed_login_count
+    timestamptz locked_until
+    timestamptz last_login_at
+  }
+  user_roles {
+    text user_id PK
+    text role PK "CITIZEN·OPERATOR·ADMIN"
+    text granted_by FK
+    timestamptz granted_at
+  }
+  social_accounts {
+    text id PK
+    text user_id FK
+    text provider "kakao·naver·google"
+    text provider_user_id
+    text email
+    timestamptz linked_at
+  }
+  refresh_tokens {
+    uuid id PK
+    text user_id FK
+    uuid family_id
+    text token_hash UK
+    timestamptz expires_at
+    timestamptz used_at
+    timestamptz revoked_at
+  }
+  password_reset_tokens {
+    uuid id PK
+    text user_id FK
+    text token_hash UK
+    timestamptz expires_at
+    timestamptz used_at
+  }
+  terms_versions {
+    uuid id PK
+    text type "AGE14·TERMS·PRIVACY·MARKETING"
+    text version
+    boolean required
+    date effective_at
+  }
+  user_agreements {
+    bigint id PK
+    text user_id FK
+    uuid terms_version_id FK
+    boolean agreed
+    text channel "EMAIL_SIGNUP·KAKAO_SIGNUP"
+  }
+  audit_logs {
+    bigint id PK
+    text actor_user_id
+    text action
+    text target_type
+    text target_id
+    jsonb changes
+    inet ip
+  }
+```
+
 ---
 
 ## 4. 테이블 정의
 
-새 테이블의 시각은 timestamptz다. 기존 floorplans의 created_at·updated_at(timestamp, UTC로 저장됨)은 초안 §6 규칙 2대로 S1 마이그레이션에서 timestamptz로 바꾼다. 새 행의 text id는 앱이 uuid v7로 만든다(초안 §6 규칙 1 — notices·complexes·subscriptions는 Prisma `@default(uuid(7))`로 클라이언트가 만들어 DB 기본값은 없다). FK 삭제 동작은 각 표 아래에 적고, FK 열에는 모두 인덱스를 둔다(복합 PK·UNIQUE의 첫 열이면 생략).
+새 테이블의 시각은 timestamptz다. 기존 floorplans의 created_at·updated_at(timestamp, UTC로 저장됨)은 초안 §6 규칙 2대로 S1 마이그레이션(`20261127000000_s1_auth`)에서 UTC로 읽어 timestamptz로 바꿨다. 새 행의 text id는 앱이 uuid v7로 만든다(초안 §6 규칙 1 — notices·complexes·subscriptions는 Prisma `@default(uuid(7))`로 클라이언트가 만들어 DB 기본값은 없다). FK 삭제 동작은 각 표 아래에 적고, FK 열에는 모두 인덱스를 둔다(복합 PK·UNIQUE의 첫 열이면 생략).
 
 ### 4.1 notices — 공고
 
@@ -497,6 +603,137 @@ web 화면 모델(/zipboda-web/src/entities/subscription/model/types.ts) 기준�
 
 대상별 일정표(subscription_schedules 전체)는 지금 web 화면에 자리가 없어 응답에 넣지 않는다. 화면이 생기면 계약 차이 문서에 더하고 낸다.
 
+### 4.12 users — 회원 (S1)
+
+| 컬럼 | 타입 | NULL | 설명 |
+|------|------|:---:|------|
+| id | text | N | 회원 식별자(uuid v7) |
+| email | text | Y | 로그인 이메일. 앞뒤 공백을 버리고 소문자로 바꿔 저장한다. 카카오 가입에서 인증된 이메일을 받지 못하면 비운다(다른 회원이 쓰는 이메일이면 가입을 ERR-004로 막는다, 규칙 24) |
+| password_hash | text | Y | 비밀번호 argon2id 해시(규칙 20). 카카오로만 가입한 회원은 비어 있다 |
+| name_enc | bytea | Y | 이름(가입 화면 '이름') 암호문(규칙 21). 카카오 가입은 실명을 받지 않아 비운다 |
+| phone_enc | bytea | Y | 휴대폰 번호(숫자만) 암호문 |
+| phone_hash | text | Y | 휴대폰 번호 HMAC — 같은 번호를 찾을 때 쓴다 |
+| phone_verified_at | timestamptz | Y | 휴대폰 인증 시각. 인증 화면이 없어 지금은 늘 비어 있다(§2.2 S1-2) |
+| nickname | text | Y | 프로필 닉네임. 카카오 가입은 카카오 닉네임으로 채운다 |
+| bio | text | Y | 자기소개 |
+| interests | text[] | N | 관심 분야(기본 빈 배열). Prisma는 배열 열의 NULL 여부를 비교하지 않아 NOT NULL을 마이그레이션에 직접 둔다 |
+| avatar_url | text | Y | 프로필 사진 주소. 지금은 카카오 프로필 사진만 — 직접 올리기는 media_files와 함께 |
+| failed_login_count | int | N | 연속 로그인 실패 횟수(기본 0, 로그인에 성공하면 0) |
+| locked_until | timestamptz | Y | 로그인 잠금이 풀리는 시각(규칙 22) |
+| last_login_at | timestamptz | Y | 마지막 로그인 |
+| created_at, updated_at | timestamptz | N | 생성·수정 |
+
+UNIQUE `(email)`(NULL은 여럿 허용), CHECK `email = lower(email)`, CHECK `password_hash IS NULL OR email IS NOT NULL`(비밀번호가 있으면 로그인할 이메일이 있다), CHECK `(phone_enc IS NULL) = (phone_hash IS NULL)`. 인덱스 `(phone_hash)` — 인증하지 않은 번호라 UNIQUE로 두지 않는다(남의 번호를 먼저 넣어 가입을 막을 수 있어서다). 회원은 이메일+비밀번호나 소셜 계정 가운데 하나로 로그인할 수 있어야 한다(앱이 지킨다). 탈퇴(상태·탈퇴 시각)는 탈퇴 API가 생기면 더한다 — 회원 행은 지우지 않는다(초안 §6 규칙 4).
+
+### 4.13 user_roles — 역할 (S1)
+
+| 컬럼 | 타입 | NULL | 설명 |
+|------|------|:---:|------|
+| user_id | text | N | 회원 |
+| role | text | N | CITIZEN · OPERATOR · ADMIN(ITF-012). 비회원(GUEST)은 저장하지 않는다 |
+| granted_by | text | Y | 역할을 준 관리자. 가입으로 받은 CITIZEN은 비운다 |
+| granted_at | timestamptz | N | 받은 시각 |
+
+PK `(user_id, role)`, CHECK role. FK user_id·granted_by → users(RESTRICT), 인덱스 `(granted_by)`.
+
+### 4.14 social_accounts — 소셜 계정 (S1)
+
+| 컬럼 | 타입 | NULL | 설명 |
+|------|------|:---:|------|
+| id | text | N | 식별자(uuid v7) |
+| user_id | text | N | 회원 |
+| provider | text | N | kakao · naver · google(ITF-011). 지금은 kakao만 쓴다(§2.2 S1-3) |
+| provider_user_id | text | N | 제공자의 회원 번호(카카오 회원번호) |
+| email | text | Y | 제공자가 준 이메일(참고용 — 로그인 키가 아니다) |
+| linked_at | timestamptz | N | 이은 시각 |
+
+UNIQUE `(provider, provider_user_id)`, UNIQUE `(user_id, provider)`, CHECK provider. FK user_id → users(RESTRICT).
+
+### 4.15 refresh_tokens — 로그인 토큰 (S1)
+
+| 컬럼 | 타입 | NULL | 설명 |
+|------|------|:---:|------|
+| id | uuid | N | 식별자 |
+| user_id | text | N | 회원 |
+| family_id | uuid | N | 한 번의 로그인에서 회전으로 이어진 토큰 묶음 |
+| token_hash | text | N | 토큰의 SHA-256. 원문은 저장하지 않는다 |
+| expires_at | timestamptz | N | 만료(발급 + 30일) |
+| used_at | timestamptz | Y | 재발급에 쓴 시각(규칙 23) |
+| revoked_at | timestamptz | Y | 로그아웃·재사용 감지로 폐기한 시각 |
+| user_agent | text | Y | 발급 요청의 User-Agent |
+| created_ip | inet | Y | 발급 요청 IP |
+| created_at | timestamptz | N | 발급 |
+
+UNIQUE `(token_hash)`, 인덱스 `(family_id)`·`(user_id)`. FK user_id → users(CASCADE — 토큰은 회원과 생명주기가 같다).
+
+### 4.16 password_reset_tokens — 비밀번호 재설정 링크 (S1)
+
+| 컬럼 | 타입 | NULL | 설명 |
+|------|------|:---:|------|
+| id | uuid | N | 식별자 |
+| user_id | text | N | 회원 |
+| token_hash | text | N | 링크 토큰의 SHA-256 |
+| expires_at | timestamptz | N | 만료(발급 + 30분) |
+| used_at | timestamptz | Y | 쓴 시각 — 한 번만 쓴다 |
+| created_at | timestamptz | N | 발급 |
+
+UNIQUE `(token_hash)`, 인덱스 `(user_id, created_at desc)`(요청 횟수 제한). FK user_id → users(CASCADE).
+
+### 4.17 terms_versions — 약관 버전 (S1)
+
+| 컬럼 | 타입 | NULL | 설명 |
+|------|------|:---:|------|
+| id | uuid | N | 식별자 |
+| type | text | N | AGE14(만 14세 이상) · TERMS(이용약관) · PRIVACY(개인정보 수집·이용) · MARKETING(마케팅 수신) — web 가입 화면의 4종 |
+| version | text | N | 버전 이름(예 `v1`) |
+| required | boolean | N | 필수 여부(MARKETING만 선택) |
+| effective_at | date | N | 시행일(한국 날짜). 종류마다 하루에 하나 |
+| content_path | text | Y | 본문이 있는 web 경로. 지금은 TERMS의 `/terms`뿐이고, 본문이 없는 종류(AGE14·PRIVACY·MARKETING)는 비운다 |
+| created_at | timestamptz | N | 생성 |
+
+UNIQUE `(type, version)`, UNIQUE `(type, effective_at)`(시행 중인 버전이 하나로 정해지게, 규칙 26), CHECK type. 첫 버전 4행은 마이그레이션이 넣는다(§2.2 S1-11). 본문을 고치면 행을 고치지 않고 새 버전을 더한다 — 옛 동의가 가리키는 버전이 바뀌지 않게.
+
+### 4.18 user_agreements — 약관 동의 이력 (S1)
+
+| 컬럼 | 타입 | NULL | 설명 |
+|------|------|:---:|------|
+| id | bigint(bigserial) | N | 식별자 — Prisma가 identity 열을 만들지 못해 bigserial이다 |
+| user_id | text | N | 회원 |
+| terms_version_id | uuid | N | 동의한 약관 버전 |
+| agreed | boolean | N | 동의(true)·거부(false). 마케팅 수신을 바꾸면 행을 더한다 |
+| channel | text | N | 동의 경로 — EMAIL_SIGNUP · KAKAO_SIGNUP. 마케팅 수신 설정 화면이 생기면 값을 더한다 |
+| created_at | timestamptz | N | 동의 시각 |
+
+append-only(규칙 26). 인덱스 `(user_id, terms_version_id, created_at desc)`, `(terms_version_id)`, CHECK channel. FK user_id → users·terms_version_id → terms_versions(RESTRICT).
+
+### 4.19 audit_logs — 감사 로그 (S1)
+
+| 컬럼 | 타입 | NULL | 설명 |
+|------|------|:---:|------|
+| id | bigint(bigserial) | N | 식별자 — Prisma가 identity 열을 만들지 못해 bigserial이다 |
+| actor_user_id | text | Y | 행동한 회원. 회원을 모르는 로그인 실패는 비운다 |
+| actor_role | text | Y | 행동 당시 가장 높은 역할 |
+| action | text | N | S1: SIGNUP · LOGIN · LOGIN_FAILED · LOGIN_LOCKED · LOGOUT · TOKEN_REUSE · PASSWORD_RESET_REQUESTED · PASSWORD_RESET · PROFILE_UPDATED. 관리자 행동은 관리자 인증 PR에서 더한다 |
+| target_type, target_id | text | Y | 대상(예 `user`·회원 id) |
+| changes | jsonb | Y | 바뀐 항목 이름. 비밀번호·토큰·개인정보 값은 넣지 않는다 |
+| ip | inet | Y | 요청 IP |
+| user_agent | text | Y | 요청 User-Agent |
+| request_id | text | Y | 요청 식별자 |
+| created_at | timestamptz | N | 기록 시각 |
+
+append-only(규칙 26). actor_user_id는 FK를 걸지 않는다 — 회원 행은 지우지 않고, FK의 동작이 append-only와 부딪히지 않게(초안 §5.9). 인덱스 `(actor_user_id, created_at desc)`, `(action, created_at desc)`. 없는 이메일로 실패한 로그인은 입력한 이메일을 남기지 않는다(아무 문자열이나 개인정보가 쌓이지 않게) — IP만 남긴다. 보존 기간과 파티션은 미결 17.
+
+### 4.20 S1 API와의 대응
+
+| API·필드 | 원천 |
+|---|---|
+| API-001 `name`·`email`·`password`·`phone`·`agreements` | users.name_enc·email·password_hash·phone_enc·phone_hash, user_roles(CITIZEN), user_agreements(EMAIL_SIGNUP) |
+| API-002·005 `accessToken`·`refreshToken`, API-004 | JWT(회원 id·역할·로그인 묶음 id), refresh_tokens |
+| API-003(카카오)·가입 완료(신규) | social_accounts(kakao, 카카오 회원번호). 카카오 닉네임 → nickname, 프로필 사진 → avatar_url, 이메일 → social_accounts.email(인증된 이메일이고 다른 회원이 쓰지 않으면 users.email에도), user_agreements(KAKAO_SIGNUP) |
+| API-008 `user`·`roles` | users, user_roles |
+| API-090·091 `name`·`email`·`phone`·`verified`·닉네임·자기소개·관심 분야·사진 | users(`verified` = phone_verified_at이 있음). `notifications{}`는 알림 설정(S2, 초안 D7) |
+| 비밀번호 재설정 요청·확정(API-006 바뀜) | password_reset_tokens |
+
 ---
 
 ## 5. 저장 규칙
@@ -603,6 +840,13 @@ web 화면 모델(/zipboda-web/src/entities/subscription/model/types.ts) 기준�
     - **같은 공고**: 신혼희망타운 여부(공고명의 '신혼희망')가 같고, 어느 한쪽 공고명에서 뽑은 '지구|블록' 열쇠가 다른 쪽의 공고명·단지 이름·주소 열쇠와 겹친다 — 단지 주소끼리만 겹치는 것은 여러 블록을 모은 예비입주자 공고가 우연히 겹칠 수 있어 보지 않는다. 블록 앞 낱말 중 지구가 아닌 말(단지 번호 '4단지', 공급 유형 '영구임대'·'국민임대', 사업 이름 '도시개발사업', '공동', 여러 곳에 있는 '테크노밸리'·'신혼희망타운' — '…단지·…임대·…주택·…사업'으로 끝나는 말)은 열쇠로 쓰지 않는다(개발 DB의 LH 단지에서 '단지|A3'를 두 공고가 나눠 갖는 것을 확인). 지구는 블록 앞의 한 낱말(주소 앞의 동 이름과 섞이지 않게)에서 붙여 쓴 '지구'·'공공주택지구'·'내'를 뗀 이름이고, 블록은 앞 0과 '-'를 뗀다('고양창릉 공공주택지구 내 S-01블록' → '고양창릉\|S1'). 블록만으로는 다른 지구가 함께 걸리고(안산신길2 A-6·시흥거모 A-6), 같은 날·같은 블록에 공공분양과 신혼희망타운(과천주암 C1)·6년 공공임대(구리갈매 A-4)가 따로 올라와 분류·신혼희망 여부도 본다. 공고명에 블록이 없으면(창릉 우미 린) 주소의 블록으로 맞춘다.
     - **결과**: 같은 공고가 하나이고 이 원천이 이미 이어진 같은 현장 공고가 없으면 그 공고에 원천 참조를 더한다. 어느 원천이 값을 정할지는 규칙 12대로다 — 청약홈이 나중에 오면 참조만 더하고, 청약홈으로 먼저 만든 공고에 LH가 오면 LH가 우선 원천이 되어 공고 값·칸을 다시 쓴다(칸은 LH의 단지로 바뀐다). 둘 이상이면 어느 공고인지 몰라 새 공고로 두고 WARNING(MATCH, CROSS_SOURCE_AMBIGUOUS). 이 원천의 다른 공고가 이미 이어진 같은 현장 공고가 있으면 받는 순서에 따라 엉뚱한 쪽이 차지하지 않게 잇지 않고 WARNING(MATCH, CROSS_SOURCE_TAKEN). 없으면 새 공고다(LH API에 없는 LH 민간참여형·GH·SH·iH 공고). LH가 넘겨받은 공고의 청약홈 단지는 칸 없이 남는다 — 지도에 나오지 않아 지오코딩하지 않지만(규칙 17), 청약홈 별칭이 그 단지를 가리켜 같은 현장의 다음 청약홈 공고(무순위 등)는 그 단지에 붙는다. 수집 순서상 LH가 먼저 받아 드물고, 생기면 관리자가 별칭을 옮긴다.
     - **실데이터 확인**(2026-11-10): 개발 DB의 LH 원천(509건)을 테스트 DB에 다시 저장한 뒤 청약홈 1년치를 이어 저장하면, 청약홈 공공 4기관 공고 66건 중 36건이 LH 공고에 참조로 이어지고(손으로 대조한 짝과 같다) 후보가 여럿이거나 이미 이어진 공고와 겹치는 경고는 없으며, 나머지 30건은 LH API에 없는 LH 공고 10건과 GH·SH·iH 공고 20건이다. 신청 인원은 25칸에 채워진다.
+20. **이메일·비밀번호**(S1): 이메일은 앞뒤 공백을 버리고 소문자로 바꿔 저장·비교한다. 이미 쓰는 이메일이면 가입을 ERR-004로 막는다. 비밀번호는 8자 이상이고 영문·숫자·특수문자를 모두 담아야 한다(REQ-GU-007, web 가입 안내). 64자 상한은 이 문서가 더했다(아주 긴 입력으로 해시 계산을 오래 붙잡지 못하게). 어기면 ERR-005. argon2id로 해시하고 원문은 어디에도 남기지 않는다.
+21. **개인정보 암호화**(S1): 이름·휴대폰 번호는 AES-256-GCM으로 암호화하고 암호문 앞에 키 버전을 붙인다(키를 바꿔도 옛 행을 읽게). 휴대폰은 숫자만 남긴 뒤 암호화하고, 같은 번호 찾기용 phone_hash는 다른 키의 HMAC-SHA256이다. 키는 저장소 밖 환경 변수에 둔다. 원문은 본인 응답(API-008·090)에만 싣고 로그·감사 로그에는 넣지 않는다.
+22. **로그인과 잠금**(S1): 없는 이메일·비밀번호 없는 회원(카카오 전용)·틀린 비밀번호는 모두 같은 ERR-002로 답한다(가입 여부를 드러내지 않는다). 비밀번호가 틀리면 failed_login_count를 올리고, 5회가 되면 locked_until = 지금 + 30분으로 잠근다. 잠긴 동안은 비밀번호가 맞아도 ERR-012로 막는다. 성공하면 횟수를 0으로, last_login_at을 지금으로 바꾼다. 비밀번호를 재설정하면 잠금도 푼다. 성공·실패·잠금은 audit_logs에 남긴다.
+23. **토큰**(S1): access는 HS256 JWT(15분, 회원 id·역할·로그인 묶음 id(family_id))이고 서버에 저장하지 않는다. refresh는 32바이트 난수이고 DB에는 SHA-256만 둔다. 로그인하면 새 family로 발급한다. 재발급(API-005)은 토큰에 used_at을 찍고 같은 family로 새 refresh와 access를 준다. used_at이 찍힌 지 30초가 안 된 토큰이 다시 오면 여러 탭·동시 요청으로 보고 같은 family로 새 토큰을 한 번 더 준다(web 서버가 동시 재발급을 하나로 묶을 수 없다). 그보다 늦게 다시 오거나 revoked_at이 있는 토큰이 오면 그 family를 모두 폐기하고 ERR-006으로 답하며 TOKEN_REUSE를 남긴다. 만료된 토큰도 ERR-006. 로그아웃(API-004)은 본문 없이 access의 로그인 묶음 id로 그 family를 폐기한다 — 이미 낸 access는 만료(15분)까지 남는다. 만료·폐기 뒤 30일이 지난 행은 정리 배치가 지운다.
+24. **카카오 로그인**(S1): web이 받은 인가 코드와 redirectUri로 API가 카카오 토큰을 받고 사용자 정보(회원번호·닉네임·프로필 사진·이메일과 그 인증 여부)를 읽는다. social_accounts에 (kakao, 회원번호)가 있으면 그 회원으로 로그인한다(규칙 23, 잠금은 이메일 로그인에만). 없으면 계정을 만들지 않고 `isNew: true`와 가입 토큰(HS256 JWT 10분, 카카오 회원번호·닉네임·사진·이메일·인증 여부)을 준다. 가입 완료는 가입 토큰과 약관 동의(규칙 26)를 받아 users·social_accounts·user_roles(CITIZEN)·user_agreements(KAKAO_SIGNUP)를 한 트랜잭션으로 만들고 토큰을 준다. 이미 이어진 카카오 회원번호면 새로 만들지 않고 그 회원으로 로그인한다(두 번 누름). 동시에 두 번 와서 한쪽이 UNIQUE(이메일이나 제공자·회원번호)에 걸리면 (kakao, 회원번호)를 다시 찾아 있으면 그 회원으로 로그인한다. 카카오 이메일이 인증된 이메일이고 쓰는 회원이 없으면 users.email에 넣고, 다른 회원이 쓰면 ERR-004로 막는다(§2.2 S1-9). 인증되지 않은 이메일은 social_accounts.email에만 둔다.
+25. **비밀번호 재설정**(S1): 요청은 이메일을 받아 비밀번호가 있는 회원이면 32바이트 토큰(DB에는 SHA-256)으로 30분짜리 링크를 메일로 보낸다(지금은 개발용 발송, §2.2 S1-1). 회원이 없거나 카카오 전용이어도 같은 성공 응답을 준다. 같은 회원에게 1분 안에 다시 요청하면 보내지 않고, 1시간에 5번을 넘으면 ERR-012. 확정은 토큰과 새 비밀번호(규칙 20)를 받아 토큰에 used_at을 찍고, 그 회원의 쓰지 않은 다른 재설정 토큰에도 used_at을 찍어 못 쓰게 하고, refresh 토큰을 모두 폐기(revoked_at)하고 잠금을 푼다. 없거나 쓴·만료된 토큰은 ERR-005.
+26. **약관 동의와 append-only**(S1): 가입(이메일·카카오)은 필수 3종(AGE14·TERMS·PRIVACY)이 모두 true여야 한다 — 아니면 ERR-005. 마케팅은 받은 값 그대로 남긴다. 동의는 종류마다 effective_at ≤ 오늘(한국 날짜)인 버전 가운데 effective_at이 가장 늦은 버전에 남긴다(종류마다 하루에 하나라 하나로 정해진다). user_agreements·audit_logs는 UPDATE·DELETE를 막는 트리거(`reject_append_only_change`, 오류 코드 P0001)를 둔다(초안 §6 규칙 6). 행 트리거라 TRUNCATE는 막지 않는다 — 테스트 정리와 관리 작업만 쓴다. 보존 기간이 지난 행은 미결 17이 정해진 뒤 테이블 소유자가 관리 작업에서 지운다(트리거를 잠시 끄거나 audit_logs 월 파티션을 떼어 낸다). 초안 §6 규칙 6의 '앱 DB 계정의 UPDATE·DELETE 권한 회수'는 지금 앱과 마이그레이션이 같은 DB 계정(테이블 소유자)을 써서 미룬다 — 배포 때 앱 전용 계정을 나누면 함께 한다(미결 17).
 
 ---
 
@@ -638,6 +882,10 @@ web 화면 모델(/zipboda-web/src/entities/subscription/model/types.ts) 기준�
 | 13 | ~~수집 분류 확인~~ **해결(v0.3.9)** | ① 051 공가세대 — 공고명이 '공가세대 일반공급·일반매각'이라 분양(SALE)이 맞다(v0.3.4 확인, 임대보증금 칸은 '공고문 참조'로만 온다). ② 든든전세(공급정보 유형 144, LH가 매입한 주택의 전세형 공급) — 매입임대로 수집한다(사용자 결정 2026-11-11). 사용자 결정의 '전세임대 제외'(13-17, 집주인 주택을 LH가 빌려 다시 빌려주는 유형)와 다른 유형이다 | — |
 | 14 | 이름만 같은 다른 건물 | 주소 없이 이름으로 이은 칸(NAME)은 같은 이름의 다른 건물일 수 있다. 평면도를 숨겨 잘못된 3D 노출은 막았지만, 목록에서 같은 단지로 묶이는 문제는 남는다. 수집 후 호별 주소가 있는 공고로 이름 재사용이 같은 건물인지 표본을 확인한다 | PR 2 |
 | 15 | ~~면적 정보 없는 주택형만 있는 칸~~ **해결(v0.3.16)** | §5 규칙 11 ④를 '면적을 아는 주택형(전용면적이나 면적 구간이 있는 행)이 없을 때'로 넓혔다. 실데이터(2026-11-24, 2,870칸): 면적 모르는 주택형만 있는 칸 69개, 그중 단지 면적 범위가 있는 칸 0개 — 지금 결과는 바뀌지 않고, 이후 그런 칸이 들어오면 단지 범위로 걸린다(PR 1 독립 리뷰 지적) | — |
+| 16 | 개인정보처리방침 개정 | web /privacy가 '회원가입 없이 이용하는 서비스'라고 안내한다. 회원 기능을 공개하기 전에 수집 항목(이름·이메일·휴대폰·카카오 정보)·보관 기간·처리 위탁(메일 발송 업체)을 반영해 고친다. 가입 동의의 '개인정보 수집·이용 동의' 본문도 아직 없다(/privacy는 처리방침이다) — 함께 쓰고, 본문을 고치면 그 시행일로 terms_versions에 새 버전을 더한다(§4.17). 화면 문구라 사용자 요청으로 한다(초안 §9) | 회원 기능 공개 전 |
+| 17 | 회원 정보 보존 기간 | audit_logs·user_agreements·refresh_tokens·탈퇴 회원 정보의 보존 기간(초안 D13). 정해지면 정리 배치와 audit_logs 월 파티션을 둔다. 앱 전용 DB 계정을 나눠 append-only 테이블의 UPDATE·DELETE 권한을 회수하는 일(§5 규칙 26)도 함께 | 법무 확인 후·배포 때 |
+| 18 | 카카오 가입 약관 화면 | §5 규칙 24의 두 단계 가입은 web에 가입 토큰을 받은 뒤 약관에 동의하는 단계가 필요하다. 지금 그 화면이 없다 — 가입 화면의 약관 동의(TermsAgreement)를 다시 쓰는 화면을 web 카카오 연결 PR에서 사용자와 정한다(화면 1차 고정 결정) | web 카카오 연결 전 |
+| 19 | 관리자 인증 | API-100(관리자 로그인·OTP)·API-199(역할·권한)와 admin_mfa·role_permissions·user_permissions, sync_runs.triggered_by(§4.9)는 관리자 인증 PR에서 이 문서에 더한다 | S1 관리자 인증 착수 시 |
 
 ---
 
@@ -653,3 +901,18 @@ web 화면 모델(/zipboda-web/src/entities/subscription/model/types.ts) 기준�
 6. 목록·검색·지도·필터 선택지 쿼리를 새 조인으로 옮기고 '평면도 있는 공고만' 조건을 지운다. 필터 선택지의 면적 확인은 목록 조건과 조인한다 — 칸이 없는 단지의 평면도 때문에 눌러도 0건인 선택지가 생기지 않게.
 7. /docs/ZIPBODA_api-contract-delta.md를 고친다: `noticeTitle` 추가, `units[].size` null 허용, `supplyType` 의미(공급 유형), '평면도 있는 공고만' 규칙 폐지, 검색 대상 열.
 8. /test/perf로 목록·지도 응답 시간을 다시 잰다(미결 5).
+
+---
+
+## 9. S1 구현 순서 (회원·인증)
+
+API를 먼저 만들고 web을 잇는다. API PR마다 정의서와 다른 점을 계약 차이 문서에 적는다.
+
+| PR | 내용 | 저장소 | 먼저 필요한 것 |
+|----|------|--------|----------------|
+| S1-a | 스키마 — §4.12~4.19 마이그레이션 `20261127000000_s1_auth`(CHECK·append-only 트리거·첫 약관 버전 4행), floorplans 시각을 timestamptz로(§4 머리말) | api | 이 문서 승인(v0.4.1) |
+| S1-b | 이메일 가입·로그인·토큰 재발급·로그아웃·내 정보(API-001·002·004·005·008), 인증 가드와 역할 검사, 개인정보 암호화(규칙 20~23·26) | api | 암호화·JWT 키(개발용 .env) |
+| S1-c | 비밀번호 재설정 요청·확정(개발용 메일 발송), 프로필 조회·수정(API-090·091)(규칙 25) | api | — |
+| S1-d | 카카오 로그인·가입 완료(API-003 + 신규)(규칙 24) | api | 카카오 앱 로그인 켜기·동의 항목·리다이렉트 주소 등록(사용자) |
+| S1-e | web 연결 — 로그인·가입·비밀번호 찾기·재설정, 헤더 로그인 상태, 마이·프로필. 토큰은 web 서버가 httpOnly 쿠키로 들고 API를 부른다 | web | 미결 18(카카오 약관 화면) |
+| S1-f | 관리자 인증(API-100·199, OTP) | api·admin | 미결 19 |
