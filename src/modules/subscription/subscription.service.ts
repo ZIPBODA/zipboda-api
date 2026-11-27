@@ -29,7 +29,7 @@ import { toFloorplanDetailResponse } from './mappers/floorplan.mapper.js';
 import { toSubscriptionDetailResponse } from './mappers/subscription-detail.mapper.js';
 import { agencyCodeOf, regionCodeOf } from './mappers/subscription-fields.js';
 import { toListItemResponse, toMapMarkerResponse, toSearchCandidate } from './mappers/subscription-list.mapper.js';
-import { serviceDateOf } from './schedule.js';
+import { serviceDateOf } from '@/common/time/service-date.js';
 import { SubscriptionRepository, type SubscriptionListFilter } from './subscription.repository.js';
 
 const uniqueSorted = <T extends number>(values: readonly T[]): T[] => [...new Set(values)].sort((a, b) => a - b);

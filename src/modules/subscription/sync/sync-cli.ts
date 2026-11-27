@@ -1,7 +1,7 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@/database/generated/client.js';
 import { SyncStatus, SyncTrigger } from '../constants.js';
-import { serviceDateOf } from '../schedule.js';
+import { serviceDateOf } from '@/common/time/service-date.js';
 import { KakaoGeocoder } from './geocode/kakao-geocoder.js';
 import { NoticeWriter } from './notice-writer.js';
 import { SyncAlreadyRunningError, SyncRunRecorder } from './sync-run-recorder.js';

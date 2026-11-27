@@ -6,7 +6,7 @@ import {
   SyncStage,
   SyncStatus,
 } from '../../constants.js';
-import { serviceDateOf } from '../../schedule.js';
+import { serviceDateOf } from '@/common/time/service-date.js';
 import type { NormalizationWarning } from '../normalized-notice.js';
 import { parseDate } from '../normalize-text.js';
 import {

@@ -55,3 +55,25 @@ export const isStoredRegionCode = (value: number): value is StoredRegionCode => 
 export const STORED_REGION_CODES: readonly StoredRegionCode[] = Object.keys(REGION_NAME)
   .map(Number)
   .filter(isStoredRegionCode);
+
+/** ITF-012 사용자 역할. 비회원(GUEST)은 저장하지 않는다(ERD §4.13) */
+export enum UserRole {
+  CITIZEN = 'CITIZEN',
+  OPERATOR = 'OPERATOR',
+  ADMIN = 'ADMIN',
+}
+
+const USER_ROLE_RANK: Readonly<Record<UserRole, number>> = {
+  [UserRole.CITIZEN]: 0,
+  [UserRole.OPERATOR]: 1,
+  [UserRole.ADMIN]: 2,
+};
+
+export const isUserRole = (value: string): value is UserRole => Object.hasOwn(USER_ROLE_RANK, value);
+
+/** 감사 로그는 행동 당시 가장 높은 역할을 남긴다(ERD §4.19) */
+export const highestRoleOf = (roles: readonly UserRole[]): UserRole | null =>
+  roles.reduce<UserRole | null>(
+    (highest, role) => (highest === null || USER_ROLE_RANK[role] > USER_ROLE_RANK[highest] ? role : highest),
+    null,
+  );

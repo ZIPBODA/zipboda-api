@@ -1,16 +1,10 @@
 import { SubscriptionStatusCode } from '@/common/constants/interface-codes.js';
-import { daysBetween, ddayOf, serviceDateOf, statusCodeOf } from './schedule.js';
+import { daysBetween, ddayOf, statusCodeOf } from './schedule.js';
 import { sizeTypeOf } from './size-type.js';
 
 const schedule = { applyStartDate: '2026-09-07', applyEndDate: '2026-09-11', cancelled: false };
 
 describe('공고 일정 계산', () => {
-  it('UTC로 전날 밤이어도 한국 날짜로 센다', () => {
-    // UTC 9월 10일 15:30 = 한국 9월 11일 00:30
-    expect(serviceDateOf(new Date('2026-09-10T15:30:00Z'))).toBe('2026-09-11');
-    expect(serviceDateOf(new Date('2026-09-10T14:59:59Z'))).toBe('2026-09-10');
-  });
-
   it('남은 날은 같은 날 0, 지나면 음수다', () => {
     expect(daysBetween('2026-09-11', '2026-09-11')).toBe(0);
     expect(daysBetween('2026-09-08', '2026-09-11')).toBe(3);

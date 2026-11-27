@@ -32,6 +32,10 @@ jobs:
       # CI 전용 일회용 DB라 비밀값이 아니다
       DATABASE_URL: postgresql://zipboda:zipboda@localhost:5432/zipboda_test?schema=public
       TEST_DATABASE_URL: postgresql://zipboda:zipboda@localhost:5432/zipboda_test?schema=public
+      # CI 전용 키 — 일회용 DB의 테스트 회원만 암호화·서명하므로 비밀값이 아니다(운영 키는 배포 환경에만 둔다)
+      JWT_ACCESS_SECRET: zipboda-ci-only-access-token-signing-secret
+      PII_ENCRYPTION_KEY: HCHK0ag/ePTiKkTQHkncryWbkznhFBmzwppp9dHsM2k=
+      PII_HASH_KEY: 3mfujTK9RH/nFoR+ot2pSf+eh3e1S4HfhWc+36vXTsg=
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
